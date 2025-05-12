@@ -194,6 +194,7 @@ def create_weekly_test(student,week_number,subject_id,mcqsection,codingsections)
     try:
         subject = course_subjects.objects.get(subject_id__subject_id = subject_id,\
                                               course_id = student.course_id,\
+                                              batch_id = student.batch_id,\
                                               del_row = False)
         # print('subject',subject)
         test_count = test_details.objects.annotate(
@@ -230,6 +231,7 @@ def create_weekly_test(student,week_number,subject_id,mcqsection,codingsections)
                                                     subject_id = subject.subject_id,\
                                                     track_id = subject.subject_id.track_id,\
                                                     course_id = subject.course_id,\
+                                                    batch_id = student.batch_id,\
                                                     test_type = 'Weekly Test',\
                                                     test_created_by = "Auto generated",\
                                                     del_row=False,\
@@ -242,7 +244,8 @@ def create_weekly_test(student,week_number,subject_id,mcqsection,codingsections)
                                                         'test_date_and_time': timezone.now().__add__(timedelta(hours=5,minutes=30)),
                                                         'course_id':subject.course_id,
                                                         'subject_id':subject.subject_id,
-                                                        'track_id':subject.subject_id.track_id
+                                                        'track_id':subject.subject_id.track_id,
+                                                        'batch_id':student.batch_id
                                                     } )
         # print('weekly_test',created)
         Questons_objs = questions.objects.filter(question_id__in=all_sections_Qns\

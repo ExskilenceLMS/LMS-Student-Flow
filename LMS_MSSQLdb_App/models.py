@@ -235,6 +235,7 @@ class test_details(models.Model):
     track_id                = models.ForeignKey(tracks, on_delete=models.SET_NULL, null=True)
     course_id               = models.ForeignKey(courses, on_delete=models.SET_NULL, null=True)
     subject_id              = models.ForeignKey(subjects, on_delete=models.SET_NULL, null=True)
+    batch_id                = models.ForeignKey(batches,  on_delete=models.SET_NULL, null=True,default=None)
     topic_id                = models.JSONField(default=list, blank=True)
     level                   = models.CharField(max_length=20)
     tags                    = models.JSONField(default=list, blank=True)

@@ -488,8 +488,15 @@ def update_day_status(request):
                                                 ).get('week_'+str(data.get('week_number'))
                                                       ).get('day_'+str(data.get('day_number'))
                                                             ).get('sub_topic_status').get(data.get('sub_topic'))
+        list_of_sub_topics = [i for i in student.student_question_details.get(student_info.course_id.course_id+'_'+data.get('subject_id')
+                                             ).get('week_'+str(data.get('week_number'))
+                                                   ).get('day_'+str(data.get('day_number'))
+                                                         ).get('sub_topic_status')]
         if current_status == 2 :
             update_app_usage(data.get('student_id'))
+            if list_of_sub_topics != []:
+                if list_of_sub_topics[-1] == data.get('sub_topic'):
+                    return JsonResponse({'message':'Day Completed','message2':message},safe=False,status=200) 
             return JsonResponse({'message':'Already Completed'},safe=False,status=200)
         if current_status == 1 and data.get('status') == False:
             update_app_usage(data.get('student_id'))
@@ -528,11 +535,11 @@ def update_day_status(request):
                                                          ).get('sub_topic_status').update({data.get('sub_topic'): 1})
                 student.save()
         update_app_usage(data.get('student_id'))
-        list_of_sub_topics = [i for i in student.student_question_details.get(student_info.course_id.course_id+'_'+data.get('subject_id')
-                                             ).get('week_'+str(data.get('week_number'))
-                                                   ).get('day_'+str(data.get('day_number'))
-                                                         ).get('sub_topic_status')]
-        print(list_of_sub_topics)
+        # list_of_sub_topics = [i for i in student.student_question_details.get(student_info.course_id.course_id+'_'+data.get('subject_id')
+        #                                      ).get('week_'+str(data.get('week_number'))
+        #                                            ).get('day_'+str(data.get('day_number'))
+        #                                                  ).get('sub_topic_status')]
+        # print(list_of_sub_topics)
         if list_of_sub_topics != []:
             if list_of_sub_topics[-1] == data.get('sub_topic'):
                 return JsonResponse({'message':'Day Completed','message2':message},safe=False,status=200)    
