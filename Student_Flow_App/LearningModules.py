@@ -496,7 +496,7 @@ def update_day_status(request):
             update_app_usage(data.get('student_id'))
             if list_of_sub_topics != []:
                 if list_of_sub_topics[-1] == data.get('sub_topic'):
-                    return JsonResponse({'message':'Day Completed','message2':message},safe=False,status=200) 
+                    return JsonResponse({'message':'Day Completed'},safe=False,status=200) 
             return JsonResponse({'message':'Already Completed'},safe=False,status=200)
         if current_status == 1 and data.get('status') == False:
             update_app_usage(data.get('student_id'))
