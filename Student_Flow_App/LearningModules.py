@@ -19,17 +19,21 @@ from .sqlrun import get_all_tables
 # FETCH STUDENT LEARNING MODULEs
 
 @api_view(['GET'])
-def fetch_learning_modules(request,student_id,subject,subject_id,day_number):
+def fetch_learning_modules(request,student_id,subject,subject_id,day_number,week_number):
     try:
         blob_path = f'https://{AZURE_ACCOUNT_NAME}.blob.core.windows.net/{AZURE_CONTAINER}/'
         student = students_info.objects.get(student_id = student_id,del_row = False)
         student_details = students_details.objects.using('mongodb').get(student_id = student_id,del_row = 'False')
+        print(1)
         if student_details.student_question_details.get(student.course_id.course_id+'_'+subject_id) == None:
             student_details.student_question_details.update({student.course_id.course_id+'_'+subject_id:add_day_to_student(student_id,subject_id,subject,1,day_number).get('data')})                                                              
+        print(2)
+
         # print(f'lms_daywise/{student.course_id.course_id}/{student.course_id.course_id}_{student.batch_id.batch_id}.json')
         # print('student_details',student_details.student_question_details.get(subject).get('week_'+str(1)).get('day_'+str(day_number)).get('sub_topic_status'))
         # blob_data = json.loads(get_blob('LMS_DayWise/'+student.course_id.course_id+'.json'))
         blob_data = json.loads(get_blob(f'lms_daywise/{student.course_id.course_id}/{student.course_id.course_id}_{student.batch_id.batch_id}.json'))
+        print(3)
         day_data = [day  for day in blob_data.get(subject) if day.get('day') == 'Day '+str(day_number)][0] 
         response_data =[]
         for i in day_data.get('subtopicids'):
@@ -41,17 +45,24 @@ def fetch_learning_modules(request,student_id,subject,subject_id,day_number):
                 'mcqQuestions':sum([ day_data.get('mcq').get(i.get('subtopic_id')).get(qn,0) for qn in day_data.get('mcq').get(i.get('subtopic_id'),{}) ]),
                 'codingQuestions':sum([day_data.get('coding').get(i.get('subtopic_id')).get(qn,0) for qn in day_data.get('coding').get(i.get('subtopic_id'),{} )])
             })
+        print(4)
         status ={'current_id': ""}
         if student_details.student_question_details.get(student.course_id.course_id+'_'+subject_id,None) == None \
               or student_details.student_question_details.get(student.course_id.course_id+'_'+subject_id).get('week_'+str(1))== None\
                   or student_details.student_question_details.get(student.course_id.course_id+'_'+subject_id).get('week_'+str(1)).get('day_'+str(day_number)) == None \
                     or student_details.student_question_details.get(student.course_id.course_id+'_'+subject_id).get('week_'+str(1)).get('day_'+str(day_number)).get('sub_topic_status')==None:
+            print(5)
             pass
+            
         else:
             [status.update({'current_id':i}) for i in student_details.student_question_details.get(student.course_id.course_id+'_'+subject_id).get('week_'+str(1)).get('day_'+str(day_number)).get('sub_topic_status')
                     if student_details.student_question_details.get(student.course_id.course_id+'_'+subject_id).get('week_'+str(1)).get('day_'+str(day_number)).get('sub_topic_status').get(i) == 1\
                         or student_details.student_question_details.get(student.course_id.course_id+'_'+subject_id).get('week_'+str(1)).get('day_'+str(day_number)).get('sub_topic_status').get(i) == 2]   
-        if status.get('current_id') == '': status.update({'current_id':[i for i in student_details.student_question_details.get(student.course_id.course_id+'_'+subject_id).get('week_'+str(1)).get('day_'+str(day_number)).get('sub_topic_status').keys()][0]})
+        print(6)
+        if status.get('current_id') == '': 
+            print(7)
+            status.update({'current_id':[i for i in student_details.student_question_details.get(student.course_id.course_id+'_'+subject_id).get('week_'+str(week_number)).get('day_'+str(day_number)).get('sub_topic_status').keys()][0]})
+            print(8)
         response =  [
         {
             'Day': day_data.get('day'),
@@ -60,6 +71,7 @@ def fetch_learning_modules(request,student_id,subject,subject_id,day_number):
             'user_subtopic_id': status.get('current_id'),
             'sub_topic_data':response_data
         }]
+        print(9)
         update_app_usage(student_id)
         return JsonResponse(response,safe=False,status=200)
     except Exception as e:
@@ -516,6 +528,14 @@ def update_day_status(request):
                                                          ).get('sub_topic_status').update({data.get('sub_topic'): 1})
                 student.save()
         update_app_usage(data.get('student_id'))
+        list_of_sub_topics = [i.get('sub_topic') for i in student.student_question_details.get(student_info.course_id.course_id+'_'+data.get('subject_id')
+                                             ).get('week_'+str(data.get('week_number'))
+                                                   ).get('day_'+str(data.get('day_number'))
+                                                         ).get('sub_topic_status')]
+        print(list_of_sub_topics)
+        if list_of_sub_topics != []:
+            if list_of_sub_topics[-1] == data.get('sub_topic'):
+                return JsonResponse({'message':'Day Completed','message2':message},safe=False,status=200)    
         return JsonResponse({'message':'Updated','message2':message},safe=False,status=200)    
     except Exception as e:
         print(e)

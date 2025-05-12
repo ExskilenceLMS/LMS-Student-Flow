@@ -40,7 +40,7 @@ urlpatterns = [
     path('api/roadmap/<str:student_id>/<str:course_id>/<str:subject_id>/',       roadmap.fetch_roadmap),
 
     # learning modules URLs
-    path('api/student/learningmodules/<str:student_id>/<str:subject>/<str:subject_id>/<str:day_number>/',       learning_modules.fetch_learning_modules),
+    path('api/student/learningmodules/<str:student_id>/<str:subject>/<str:subject_id>/<str:day_number>/<str:week_number>/',       learning_modules.fetch_learning_modules),
     path('api/student/lessonoverview/<str:student_id>/<str:subject>/<str:day_number>/',       learning_modules.fetch_overview_modules),
     path('api/student/practice<str:type>/<str:student_id>/<str:subject>/<str:subject_id>/<str:day_number>/<str:week_number>/<str:subTopic>/',       learning_modules.fetch_questions),
     path('api/student/add/days/', learning_modules.add_days_to_student),

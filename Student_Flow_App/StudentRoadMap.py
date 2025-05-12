@@ -72,6 +72,15 @@ def fetch_roadmap(request,student_id,course_id,subject_id):
         final = []
         daynumber=0
         last_day_data = {}
+        current_date = timezone.now().__add__(timedelta(days=0,hours=5,minutes=30))
+        max_date = timezone.now().__add__(timedelta(hours=5, minutes=30))
+        for week in course_details:
+            if week.get('startDate').date() <= current_date.date() and \
+                    timezone.now().__add__(timedelta(hours=5, minutes=30)).date() <= week.get('endDate').date():
+                current_week = week.get('week')
+                max_date = week.get('endDate')
+                break
+        print('current_week',current_week)
         for i in course_details:
             week_data = sub_data.get('week_'+str(i.get('week')),{})
             if i.get('week') > 1:
@@ -112,7 +121,7 @@ def fetch_roadmap(request,student_id,course_id,subject_id):
                         if sum(prev_day_status) == len(prev_day_status)*2 and len(prev_day_status) != 0:
                             # if d.get('topic') == 'Weekly Test':
                             #     status = 'Start'
-                            if timezone.now().__add__(timedelta(days=0,hours=5,minutes=30)).date() >= i.get('startDate').date() and timezone.now().__add__(timedelta(days=0,hours=5,minutes=30)).date() <= i.get('endDate').date():
+                            if current_date.date() >= i.get('startDate').date() and current_date.date() <= i.get('endDate').date():
                                 test_data = student_assessments.get('Week '+str(int(i.get('week')-1))+' Test')
                                 if test_data == None:
                                     test_data = students_assessments(
@@ -120,13 +129,16 @@ def fetch_roadmap(request,student_id,course_id,subject_id):
                                         assessment_score_secured = 0,
                                         assessment_max_score = 0
                                     )
-                                if ([i for i in days if i.get('status') == 'Start'].__len__() == 0 and test_data.assessment_status == 'Completed') or \
-                                      ([i for i in days if i.get('status') == 'Start'].__len__() == 0):
+                                if ([i for i in days if i.get('status') == 'Start'].__len__() == 0 and test_data.assessment_status == 'Completed') :#or \
+                                    #   ([i for i in days if i.get('status') == 'Start'].__len__() == 0):
+                                    status = 'Start'
+                            if (current_date.date() >= i.get('startDate').date() and current_date.date() <= max_date.date()) and \
+                                i.get('week') ==1 : 
                                     status = 'Start'
                         last_weeks_last_day_data = prev_week_data.get('day_'+str(week_first_day-1),{})
                         last_weeks_last_day_status = [ last_weeks_last_day_data.get('sub_topic_status',{}).get(day_stat) for day_stat in last_weeks_last_day_data.get('sub_topic_status',{}) ]
                         if (status == '' and daynumber == 0 ):# or (sum(last_weeks_last_day_status) == len(last_weeks_last_day_status)*2 and len(last_weeks_last_day_status) != 0):
-                            # if timezone.now().__add__(timedelta(days=0,hours=5,minutes=30)).date() >= i.get('startDate').date() and timezone.now().__add__(timedelta(days=0,hours=5,minutes=30)).date() <= i.get('endDate').date():
+                            # if current_date.date() >= i.get('startDate').date() and current_date.date() <= i.get('endDate').date():
                                 status = 'Start'
                         # test_data = student_assessments.get('Week '+str(int(i.get('week')-1))+' Test')
                         # if test_data == None:
