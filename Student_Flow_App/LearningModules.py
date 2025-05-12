@@ -528,7 +528,7 @@ def update_day_status(request):
                                                          ).get('sub_topic_status').update({data.get('sub_topic'): 1})
                 student.save()
         update_app_usage(data.get('student_id'))
-        list_of_sub_topics = [i.get('sub_topic') for i in student.student_question_details.get(student_info.course_id.course_id+'_'+data.get('subject_id')
+        list_of_sub_topics = [i for i in student.student_question_details.get(student_info.course_id.course_id+'_'+data.get('subject_id')
                                              ).get('week_'+str(data.get('week_number'))
                                                    ).get('day_'+str(data.get('day_number'))
                                                          ).get('sub_topic_status')]
