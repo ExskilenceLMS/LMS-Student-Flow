@@ -54,30 +54,30 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsMiddleware',
 ]
+from urllib.parse import quote_plus
+uname = 'lmsuser'
+pwd = 'EuUpskil@25'
+escaped_username = quote_plus(uname)
+escaped_password = quote_plus(pwd)
+uri = f"mongodb+srv://{escaped_username}:{escaped_password}@lmsmongo.mongocluster.cosmos.azure.com/?tls=true&authMechanism=SCRAM-SHA-256&retrywrites=false&maxIdleTimeMS=120000"
 DATABASES = {
     'mongodb': {
         'ENGINE': 'djongo',
-        'NAME': 'LMSmongodb',
+        'NAME': 'eumodb',
+        'ENFORCE_SCHEMA': False,  
         'CLIENT': {
-            'host': 'mongodb+srv://kecoview:FVy5fqqCtQy3KIt6@cluster0.b9wmlid.mongodb.net/',
-            'username': 'kecoview',
-            'password': 'FVy5fqqCtQy3KIt6',
-            'authMechanism': 'SCRAM-SHA-1',
+            'host': uri,
+            'username': uname,
+            'password': pwd,
+            'authMechanism': 'SCRAM-SHA-256',
         }
     },
     'default': {
         'ENGINE': 'mssql',
-        
-        # 'NAME': 'LMSdb',
-        # 'USER': 'sa',
-        # 'PASSWORD': 'sql2014!',
-        # 'HOST': 'localhost',
-
         'NAME': 'eussdb',
-        'USER': 'eudbuser',#'eudev',#
-        'PASSWORD': 'EU@TPS2025',#'Devlop99@#',#
+        'USER': 'eudbuser', 
+        'PASSWORD': 'EU@TPS2025', 
         'HOST': 'slnsgdhutmtbs.database.windows.net', 
-        # 'HOST': 'Rudresh\\SQLEXPRESS',
         'PORT': '1433',
         'OPTIONS': {
             'driver': 'ODBC Driver 17 for SQL Server',
@@ -85,6 +85,37 @@ DATABASES = {
         },
     }
 }
+# DATABASES = {
+#     'mongodb': {
+#         'ENGINE': 'djongo',
+#         'NAME': 'LMSmongodb',
+#         'CLIENT': {
+#             'host': 'mongodb+srv://kecoview:FVy5fqqCtQy3KIt6@cluster0.b9wmlid.mongodb.net/',
+#             'username': 'kecoview',
+#             'password': 'FVy5fqqCtQy3KIt6',
+#             'authMechanism': 'SCRAM-SHA-1',
+#         }
+#     },
+#     'default': {
+#         'ENGINE': 'mssql',
+        
+#         # 'NAME': 'LMSdb',
+#         # 'USER': 'sa',
+#         # 'PASSWORD': 'sql2014!',
+#         # 'HOST': 'localhost',
+
+#         'NAME': 'eussdb',
+#         'USER': 'eudbuser',#'eudev',#
+#         'PASSWORD': 'EU@TPS2025',#'Devlop99@#',#
+#         'HOST': 'slnsgdhutmtbs.database.windows.net', 
+#         # 'HOST': 'Rudresh\\SQLEXPRESS',
+#         'PORT': '1433',
+#         'OPTIONS': {
+#             'driver': 'ODBC Driver 17 for SQL Server',
+#             'trustServerCertificate': 'yes',  # Add this to avoid SSL errors
+#         },
+#     }
+# }
 
 
 CORS_ALLOWED_ORIGINS = [
