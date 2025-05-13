@@ -166,7 +166,10 @@ def fetch_roadmap(request,student_id,course_id,subject_id):
                             # all_practiced_Questions.extend(day.get('coding_questions',[]))
                             # all_sub_topics.extend([sub for sub in day.get('sub_topic_status',{})])
                         if week_status.count(True) == len(week_status):
-                            status = 'Start'
+                            if (current_date.date() >= i.get('startDate').date() and current_date.date() <= max_date.date()) and \
+                                i.get('week') ==1 : 
+                                    status = 'Start'
+                            # status = 'Stgart'
                         days.append({'day':daynumber+1,'day_key':d.get('day').split(' ')[-1],
                             "date":getdays(the_date),#+" "+the_date.strftime("%Y")[2:],
                             'week':i.get('week'),
