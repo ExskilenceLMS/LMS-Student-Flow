@@ -18,7 +18,7 @@ from django.urls import path
 from Student_Flow_App import views ,tests ,coding_validation as cv ,AppUsage,StudentProfile as profile
 from Student_Flow_App import StudentDashBoard as dashboard ,StudentLiveSessions as live_session ,LearningModules as learning_modules
 from Student_Flow_App import Student_Tickets as tickets , StudentRoadMap as roadmap , StudentTestDetails as test_details
-from Student_Flow_App import FinalTest as final_test, Weekly_test as weekly_test
+from Student_Flow_App import FinalTest as final_test, Weekly_test as weekly_test,SQL_TESTING
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.home),
@@ -108,5 +108,6 @@ urlpatterns = [
     # path('addtestdetails/',   tests.add_test_sction),
     # path('ids/',   views.generate_ids),
     # path('upvideo/',   views    .upload_video),
+    path('mcqtesting/',   SQL_TESTING.get_mcqs),
 ]
 
