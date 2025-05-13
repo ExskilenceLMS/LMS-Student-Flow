@@ -24,16 +24,16 @@ def fetch_learning_modules(request,student_id,subject,subject_id,day_number,week
         blob_path = f'https://{AZURE_ACCOUNT_NAME}.blob.core.windows.net/{AZURE_CONTAINER}/'
         student = students_info.objects.get(student_id = student_id,del_row = False)
         student_details = students_details.objects.using('mongodb').get(student_id = student_id,del_row = 'False')
-        print(1)
+        # print(1)
         if student_details.student_question_details.get(student.course_id.course_id+'_'+subject_id) == None:
             student_details.student_question_details.update({student.course_id.course_id+'_'+subject_id:add_day_to_student(student_id,subject_id,subject,1,day_number).get('data')})                                                              
-        print(2)
+        # print(2)
 
         # print(f'lms_daywise/{student.course_id.course_id}/{student.course_id.course_id}_{student.batch_id.batch_id}.json')
         # print('student_details',student_details.student_question_details.get(subject).get('week_'+str(1)).get('day_'+str(day_number)).get('sub_topic_status'))
         # blob_data = json.loads(get_blob('LMS_DayWise/'+student.course_id.course_id+'.json'))
         blob_data = json.loads(get_blob(f'lms_daywise/{student.course_id.course_id}/{student.course_id.course_id}_{student.batch_id.batch_id}.json'))
-        print(3)
+        # print(3)
         day_data = [day  for day in blob_data.get(subject) if day.get('day') == 'Day '+str(day_number)][0] 
         response_data =[]
         for i in day_data.get('subtopicids'):
@@ -45,24 +45,24 @@ def fetch_learning_modules(request,student_id,subject,subject_id,day_number,week
                 'mcqQuestions':sum([ day_data.get('mcq').get(i.get('subtopic_id')).get(qn,0) for qn in day_data.get('mcq').get(i.get('subtopic_id'),{}) ]),
                 'codingQuestions':sum([day_data.get('coding').get(i.get('subtopic_id')).get(qn,0) for qn in day_data.get('coding').get(i.get('subtopic_id'),{} )])
             })
-        print(4)
+        # print(4)
         status ={'current_id': ""}
         if student_details.student_question_details.get(student.course_id.course_id+'_'+subject_id,None) == None \
               or student_details.student_question_details.get(student.course_id.course_id+'_'+subject_id).get('week_'+str(1))== None\
                   or student_details.student_question_details.get(student.course_id.course_id+'_'+subject_id).get('week_'+str(1)).get('day_'+str(day_number)) == None \
                     or student_details.student_question_details.get(student.course_id.course_id+'_'+subject_id).get('week_'+str(1)).get('day_'+str(day_number)).get('sub_topic_status')==None:
-            print(5)
+            # print(5)
             pass
             
         else:
             [status.update({'current_id':i}) for i in student_details.student_question_details.get(student.course_id.course_id+'_'+subject_id).get('week_'+str(1)).get('day_'+str(day_number)).get('sub_topic_status')
                     if student_details.student_question_details.get(student.course_id.course_id+'_'+subject_id).get('week_'+str(1)).get('day_'+str(day_number)).get('sub_topic_status').get(i) == 1\
                         or student_details.student_question_details.get(student.course_id.course_id+'_'+subject_id).get('week_'+str(1)).get('day_'+str(day_number)).get('sub_topic_status').get(i) == 2]   
-        print(6)
+        # print(6)
         if status.get('current_id') == '': 
-            print(7)
+            # print(7)
             status.update({'current_id':[i for i in student_details.student_question_details.get(student.course_id.course_id+'_'+subject_id).get('week_'+str(week_number)).get('day_'+str(day_number)).get('sub_topic_status').keys()][0]})
-            print(8)
+            # print(8)
         response =  [
         {
             'Day': day_data.get('day'),
@@ -71,7 +71,7 @@ def fetch_learning_modules(request,student_id,subject,subject_id,day_number,week
             'user_subtopic_id': status.get('current_id'),
             'sub_topic_data':response_data
         }]
-        print(9)
+        # print(9)
         update_app_usage(student_id)
         return JsonResponse(response,safe=False,status=200)
     except Exception as e:
