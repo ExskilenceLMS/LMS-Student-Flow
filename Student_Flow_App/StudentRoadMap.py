@@ -133,22 +133,13 @@ def fetch_roadmap(request,student_id,course_id,subject_id):
                                     #   ([i for i in days if i.get('status') == 'Start'].__len__() == 0):
                                     status = 'Start'
                             if (current_date.date() >= i.get('startDate').date() and current_date.date() <= max_date.date()) and \
-                                i.get('week') ==1 : 
+                                i.get('week') ==1  and ([i for i in days if i.get('status') == 'Start'].__len__() == 0): 
                                     status = 'Start'
                         last_weeks_last_day_data = prev_week_data.get('day_'+str(week_first_day-1),{})
                         last_weeks_last_day_status = [ last_weeks_last_day_data.get('sub_topic_status',{}).get(day_stat) for day_stat in last_weeks_last_day_data.get('sub_topic_status',{}) ]
                         if (status == '' and daynumber == 0 ):# or (sum(last_weeks_last_day_status) == len(last_weeks_last_day_status)*2 and len(last_weeks_last_day_status) != 0):
                             # if current_date.date() >= i.get('startDate').date() and current_date.date() <= i.get('endDate').date():
-                                status = '' if [i for i in days if i.get('status') == 'Start'].__len__() != 0 else 'Start'
-                        # test_data = student_assessments.get('Week '+str(int(i.get('week')-1))+' Test')
-                        # if test_data == None:
-                        #     test_data = students_assessments(
-                        #         assessment_status = '',
-                        #         assessment_score_secured = 0,
-                        #         assessment_max_score = 0
-                        #     )
-                        # if test_data.assessment_status == 'Completed':
-                        #     status = 'Start'
+                                status = 'Start'
                     
                     if d.get('topic') == 'Weekly Test':# or d.get('topic') == 'Onsite Workshop' or d.get('topic') == 'Internship':
                         test_data = student_assessments.get('Week '+str(i.get('week'))+' Test')
