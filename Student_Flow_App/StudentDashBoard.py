@@ -359,6 +359,7 @@ def get_weekly_progress(request,student_id):
         filters_subject_week ={}
         mcqScores ={}
         codingScore ={}
+        # delays ={}
         student_info = students_info.objects.get( student_id = student_id,del_row = False)
         PracticeQNs_score = students_details.objects.using('mongodb').get( student_id = student_id,\
                                                                 del_row = "False"\

@@ -63,12 +63,17 @@ def fetch_learning_modules(request,student_id,subject,subject_id,day_number,week
             # print(7)
             status.update({'current_id':[i for i in student_details.student_question_details.get(student.course_id.course_id+'_'+subject_id).get('week_'+str(week_number)).get('day_'+str(day_number)).get('sub_topic_status').keys()][0]})
             # print(8)
+        if status.get('current_id') == [sb for sb in student_details.student_question_details.get(student.course_id.course_id+'_'+subject_id).get('week_'+str(week_number)).get('day_'+str(day_number)).get('sub_topic_status').keys()][-1]:
+            daycompleted = True
+        else:
+            daycompleted = False
         response =  [
         {
             'Day': day_data.get('day'),
             'title':  day_data.get('topic'),
             'duration':  day_data.get('duration'),
             'user_subtopic_id': status.get('current_id'),
+            'day_completed': daycompleted,
             'sub_topic_data':response_data
         }]
         # print(9)

@@ -59,7 +59,7 @@ class topics(models.Model):
 class sub_topics(models.Model):
     sub_topic_id            = models.CharField(max_length=20, unique=True)
     topic_id                = models.ForeignKey(topics, on_delete=models.CASCADE)
-    sub_topic_name          = models.CharField(max_length=50)
+    sub_topic_name          = models.CharField(max_length=100)
     sub_topic_description   = models.TextField()
     sub_topic_alt_name      = models.CharField(max_length=50, null=True, blank=True)
     notes                   = models.IntegerField(null=True, blank=True)
