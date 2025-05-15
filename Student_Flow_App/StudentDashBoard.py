@@ -354,12 +354,16 @@ def get_weekly_progress(request,student_id):
             'Practice MCQs':'0/0',
             'Practice Codings':'0/0'
         }
-        filters_subject =[]
+        filters_subject =['All']
         filters_weeks =[]        
-        filters_subject_week ={}
+        filters_subject_week ={
+            'All':["Weekly Test","Practice MCQs","Practice Codings"]
+        }
         mcqScores ={}
         codingScore ={}
-        # delays ={}
+        delays ={
+            'All':0
+        }
         student_info = students_info.objects.get( student_id = student_id,del_row = False)
         PracticeQNs_score = students_details.objects.using('mongodb').get( student_id = student_id,\
                                                                 del_row = "False"\
@@ -367,45 +371,56 @@ def get_weekly_progress(request,student_id):
         assessments = students_assessments.objects.filter(
                                     student_id=student_id,
                                     del_row=False
-                                ).values('assessment_type','subject_id__subject_id','assessment_week_number').annotate(
-                                    count=Count('id'),
-                                    max_score=Sum('assessment_max_score'),
-                                    total_secured_score=Sum('assessment_score_secured')
-                                )
-        print (assessments)
+                                    ).values('assessment_type','subject_id__subject_id','subject_id__subject_name','course_id__course_id','assessment_week_number',
+                                         'assessment_status','assessment_completion_time','assessment_max_score','assessment_score_secured',
+                                         'student_test_completion_time')
+                                # ).values('assessment_type','subject_id__subject_name','assessment_week_number').annotate(
+                                #     count=Count('id'),
+                                #     max_score=Sum('assessment_max_score'),
+                                #     total_secured_score=Sum('assessment_score_secured')
+                                # )
+        # print (assessments)
         subject_names = {student_info.course_id.course_id+'_'+sub.subject_id:sub.subject_name for sub in subjects.objects.filter(del_row =False).all()}
-        print(subject_names)          
+        subject_names_with_id = {sub.subject_id:sub.subject_name for sub in subjects.objects.filter(del_row =False).all()}
+        print(subject_names)
+        # print("subject_names_with_id\n",subject_names_with_id)          
         for i in PracticeQNs_score.student_question_details:
             filters_subject.append(subject_names.get(i))
-            for j in PracticeQNs_score.student_question_details.get(i):
-                filters_weeks.append(j)
+            for week in PracticeQNs_score.student_question_details.get(i):
+                filters_weeks.append(week.replace('_',' '))
                 if filters_subject_week.get(subject_names.get(i)) == None:
                     filters_subject_week.update({subject_names.get(i):[]})
-                filters_subject_week.get(subject_names.get(i)).append(j)
+                filters_subject_week.get(subject_names.get(i)).append(week.replace('_',' '))
                 week_mcq_scores =0
                 week_coding_scores =0
                 week_mcq_total_scores =0
                 week_coding_total_scores =0
-                for k in PracticeQNs_score.student_question_details.get(i).get(j):
-                    k = PracticeQNs_score.student_question_details.get(i).get(j).get(k)
-                    week_mcq_scores = week_mcq_scores + float(k.get('mcq_score','0/0').split('/')[0])
-                    week_mcq_total_scores = week_mcq_total_scores + float(k.get('mcq_score','0/0').split('/')[1])
-                    week_coding_scores = week_coding_scores + float(k.get('coding_score','0/0').split('/')[0])
-                    week_coding_total_scores = week_coding_total_scores + float(k.get('coding_score','0/0').split('/')[1])
+                for day in PracticeQNs_score.student_question_details.get(i).get(week):
+                    day = PracticeQNs_score.student_question_details.get(i).get(week).get(day)
+                    week_mcq_scores = week_mcq_scores + float(day.get('mcq_score','0/0').split('/')[0])
+                    week_mcq_total_scores = week_mcq_total_scores + float(day.get('mcq_score','0/0').split('/')[1])
+                    week_coding_scores = week_coding_scores + float(day.get('coding_score','0/0').split('/')[0])
+                    week_coding_total_scores = week_coding_total_scores + float(day.get('coding_score','0/0').split('/')[1])
                 if mcqScores.get(subject_names.get(i)) == None:
-                    mcqScores.update({subject_names.get(i):{}})
+                    mcqScores.update({subject_names.get(i):{
+                        'All':'0/0'
+                    }})
                 if codingScore.get(subject_names.get(i)) == None:
-                    codingScore.update({subject_names.get(i):{}})
-                if mcqScores.get(subject_names.get(i)).get(j) == None:
-                    mcqScores.get(subject_names.get(i)).update({j:'0/0'})
-                if codingScore.get(subject_names.get(i)).get(j) == None:
-                    codingScore.get(subject_names.get(i)).update({j:'0/0'})
-                # oldmcqScores = mcqScores.get(i).get(j).split('/')[0]
-                # oldcodingScore = codingScore.get(i).get(j).split('/')[0]
-                # oldtotalmcqScores = mcqScores.get(i).get(j).split('/')[1]
-                # oldtotalcodingScore = codingScore.get(i).get(j).split('/')[1]
-                mcqScores.get(subject_names.get(i)).update({j:(str(week_mcq_scores)+'/'+str(week_mcq_total_scores))})
-                codingScore.get(subject_names.get(i)).update({j:(str(week_coding_scores)+'/'+str(week_coding_total_scores))})
+                    codingScore.update({subject_names.get(i):{
+                        'All':'0/0'
+                    }})
+                if mcqScores.get(subject_names.get(i)).get(week.replace('_',' ')) == None:
+                    mcqScores.get(subject_names.get(i)).update({week.replace('_',' '):'0/0'})
+                if codingScore.get(subject_names.get(i)).get(week.replace('_',' ')) == None:
+                    codingScore.get(subject_names.get(i)).update({week.replace('_',' '):'0/0'})
+                oldmcqScores = mcqScores.get(subject_names.get(i)).get('All').split('/')[0]
+                oldcodingScore = codingScore.get(subject_names.get(i)).get('All').split('/')[0]
+                oldtotalmcqScores = mcqScores.get(subject_names.get(i)).get('All').split('/')[1]
+                oldtotalcodingScore = codingScore.get(subject_names.get(i)).get('All').split('/')[1]
+                mcqScores.get(subject_names.get(i)).update({'All':str(float(week_mcq_scores)+float(oldmcqScores))+'/'+str(float(week_mcq_total_scores)+float(oldtotalmcqScores))})
+                codingScore.get(subject_names.get(i)).update({'All':str(float(week_coding_scores)+float(oldcodingScore))+'/'+str(float(week_coding_total_scores)+float(oldtotalcodingScore))})
+                mcqScores.get(subject_names.get(i)).update({week.replace('_',' '):(str(week_mcq_scores)+'/'+str(week_mcq_total_scores))})
+                codingScore.get(subject_names.get(i)).update({week.replace('_',' '):(str(week_coding_scores)+'/'+str(week_coding_total_scores))})
                 oldmcqcore = float(str(All_scores.get('Practice MCQs')).split('/')[0])
                 oldmcqoutoff =float(str(All_scores.get('Practice MCQs')).split('/')[1])
                 All_scores.update({'Practice MCQs':str(float(week_mcq_scores)+oldmcqcore)+'/'+str(float(week_mcq_total_scores)+oldmcqoutoff)})
@@ -417,22 +432,51 @@ def get_weekly_progress(request,student_id):
             if i.get('assessment_type') == 'Weekly Test':
                 oldscore = float(str(All_scores.get(i.get('assessment_type'))).split('/')[0])
                 oldoutoff =float(str(All_scores.get(i.get('assessment_type'))).split('/')[1])
-                All_scores.update({i.get('assessment_type'):str(float(i.get('total_secured_score','0'))+oldscore)+'/'+str(float(i.get('max_score'))+oldoutoff)})
-            if filters_subject_week.get(subject_names.get(i.get('subject_id__subject_id'))) == None:
-                filters_subject_week.update({subject_names.get(i.get('subject_id__subject_id')):[]})
-            filters_subject_week.get(subject_names.get(i.get('subject_id__subject_id'))).append(i.get('assessment_type'))
-            if tests_scores.get(subject_names.get(i.get('subject_id__subject_id')))== None:
-                tests_scores.update({subject_names.get(i.get('subject_id__subject_id')):{}})
-            tests_scores.get(subject_names.get(i.get('subject_id__subject_id'))).update({
-                'week_'+str(i.get('assessment_week_number')) if i.get('assessment_type') == 'Weekly Test' else i.get('assessment_type') :str(i.get('total_secured_score','0'))+'/'+str(i.get('max_score'))})
+                All_scores.update({i.get('assessment_type'):str(float(i.get('assessment_score_secured','0'))+oldscore)+'/'+str(float(i.get('assessment_max_score'))+oldoutoff)})
+                # tests_scores.update({i.get('subject_id__subject_name'):{
+                #     'week_'+str(i.get('assessment_week_number')):str(i.get('assessment_score_secured','0'))+'/'+str(i.get('assessment_max_score'))
+                # }})
+            print(i.get('assessment_type'))
+            if filters_subject_week.get(subject_names_with_id.get(i.get('subject_id__subject_id'))) == None:
+                filters_subject_week.update({subject_names_with_id.get(i.get('subject_id__subject_id')):[]})
+            if i.get('assessment_type') != 'Weekly Test':
+                filters_subject_week.get(subject_names_with_id.get(i.get('subject_id__subject_id'))).append(i.get('assessment_type')) 
+            else:
+                if tests_scores.get(subject_names_with_id.get(i.get('subject_id__subject_id'))).get('All') == None:
+                    tests_scores.get(subject_names_with_id.get(i.get('subject_id__subject_id'))).update({
+                        'All':'0/0'})
+                oldtestscore = float(str(tests_scores.get(subject_names_with_id.get(i.get('subject_id__subject_id'))).get('All')).split('/')[0])
+                oldtestoutoff =float(str(tests_scores.get(subject_names_with_id.get(i.get('subject_id__subject_id'))).get('All')).split('/')[1])
+                tests_scores.get(subject_names_with_id.get(i.get('subject_id__subject_id'))).update({
+                    'All':str(float(i.get('assessment_score_secured','0'))+oldtestscore)+'/'+str(float(i.get('assessment_max_score'))+oldtestoutoff)
+                })
+                if delays.get(subject_names_with_id.get(i.get('subject_id__subject_id')))== None:
+                    delays.update({subject_names_with_id.get(i.get('subject_id__subject_id')):0})
+                delay = (i.get('student_test_completion_time') if i.get('student_test_completion_time') != None else timezone.now().__add__(timedelta(hours=5,minutes=30))) - (i.get('assessment_completion_time') if i.get('assessment_completion_time') != None else timezone.now().__add__(timedelta(hours=5,minutes=30)))
+                delay = delay.days
+                old_delay = delays.get('All')
+                delays.update({'All':delay if delay > old_delay else old_delay})
+                delays.update({subject_names_with_id.get(i.get('subject_id__subject_id')):delay if delay > old_delay else old_delay})
+
+            if tests_scores.get(subject_names_with_id.get(i.get('subject_id__subject_id')))== None:
+                tests_scores.update({subject_names_with_id.get(i.get('subject_id__subject_id')):{}})
+            tests_scores.get(subject_names_with_id.get(i.get('subject_id__subject_id'))).update({
+                'week_'+str(i.get('assessment_week_number')) if i.get('assessment_type') == 'Weekly Test' else i.get('assessment_type') :str(i.get('assessment_score_secured','0'))+'/'+str(i.get('assessment_max_score'))})
+        # all_scores_data ={}
+        # all_scores_data.update({'All':All_scores})
+        # All_scores.update(all_scores_data)
         response ={
             "filters_subject":list(filters_subject),
             "filters_subject_week":filters_subject_week,
             "mcqScores":mcqScores,
             "codingScore":codingScore,
             'tests': tests_scores,
-            "all":All_scores,
-            'delay':0
+            "All":{
+                'Practice MCQs':str(All_scores.get('Practice MCQs','0/0')),'Practice Codings':str(All_scores.get('Practice Codings','0/0')),
+                'Weekly Tests':str(All_scores.get('Weekly Tests','0/0')),
+                'All':All_scores
+            },
+            'delay':delays
         }
         return JsonResponse(response,safe=False,status=200)
     except Exception as e:
