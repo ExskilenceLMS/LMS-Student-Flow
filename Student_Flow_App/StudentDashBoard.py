@@ -350,14 +350,14 @@ def fetch_student_summary(request,student_id):
 def get_weekly_progress(request,student_id):
     try:
         All_scores ={
-            'Weekly Test' : '0/0',
+            'Weekly Tests' : '0/0',
             'Practice MCQs':'0/0',
             'Practice Codings':'0/0'
         }
         filters_subject =['All']
         filters_weeks =[]        
         filters_subject_week ={
-            'All':["Weekly Test","Practice MCQs","Practice Codings"]
+            'All':["Weekly Tests","Practice MCQs","Practice Codings"]
         }
         mcqScores ={}
         codingScore ={}
@@ -382,7 +382,7 @@ def get_weekly_progress(request,student_id):
         # print (assessments)
         subject_names = {student_info.course_id.course_id+'_'+sub.subject_id:sub.subject_name for sub in subjects.objects.filter(del_row =False).all()}
         subject_names_with_id = {sub.subject_id:sub.subject_name for sub in subjects.objects.filter(del_row =False).all()}
-        print(subject_names)
+        # print(subject_names)
         # print("subject_names_with_id\n",subject_names_with_id)          
         for i in PracticeQNs_score.student_question_details:
             filters_subject.append(subject_names.get(i))
@@ -430,13 +430,13 @@ def get_weekly_progress(request,student_id):
         tests_scores = {}
         for i in assessments:
             if i.get('assessment_type') == 'Weekly Test':
-                oldscore = float(str(All_scores.get(i.get('assessment_type'))).split('/')[0])
-                oldoutoff =float(str(All_scores.get(i.get('assessment_type'))).split('/')[1])
-                All_scores.update({i.get('assessment_type'):str(float(i.get('assessment_score_secured','0'))+oldscore)+'/'+str(float(i.get('assessment_max_score'))+oldoutoff)})
+                oldscore = float(str(All_scores.get(i.get('assessment_type')+'s')).split('/')[0])
+                oldoutoff =float(str(All_scores.get(i.get('assessment_type')+'s')).split('/')[1])
+                All_scores.update({str(i.get('assessment_type'))+'s':str(float(i.get('assessment_score_secured','0'))+oldscore)+'/'+str(float(i.get('assessment_max_score'))+oldoutoff)})
                 # tests_scores.update({i.get('subject_id__subject_name'):{
                 #     'week_'+str(i.get('assessment_week_number')):str(i.get('assessment_score_secured','0'))+'/'+str(i.get('assessment_max_score'))
                 # }})
-            print(i.get('assessment_type'))
+            # print(i.get('assessment_type'))
             if filters_subject_week.get(subject_names_with_id.get(i.get('subject_id__subject_id'))) == None:
                 filters_subject_week.update({subject_names_with_id.get(i.get('subject_id__subject_id')):[]})
             if i.get('assessment_type') != 'Weekly Test':
