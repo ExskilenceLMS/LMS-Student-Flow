@@ -74,7 +74,8 @@ DATABASES = {
     },
     'default': {
         'ENGINE': 'mssql',
-        'NAME': 'eussdb',
+        # 'NAME': 'eussdb',
+        'NAME': 'staging',
         'USER': 'eudbuser', 
         'PASSWORD': 'EU@TPS2025', 
         'HOST': 'slnsgdhutmtbs.database.windows.net', 
