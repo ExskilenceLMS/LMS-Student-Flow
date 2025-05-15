@@ -409,7 +409,7 @@ def get_weekly_progress(request,student_id):
                 oldmcqcore = float(str(All_scores.get('Practice MCQs')).split('/')[0])
                 oldmcqoutoff =float(str(All_scores.get('Practice MCQs')).split('/')[1])
                 All_scores.update({'Practice MCQs':str(float(week_mcq_scores)+oldmcqcore)+'/'+str(float(week_mcq_total_scores)+oldmcqoutoff)})
-                oldcodingcore = float(str(All_scores.get('Practice MCQs')).split('/')[0])
+                oldcodingcore = float(str(All_scores.get('Practice Codings')).split('/')[0])
                 oldcodingoutoff =float(str(All_scores.get('Practice Codings')).split('/')[1])
                 All_scores.update({'Practice Codings':str(float(week_coding_scores)+oldcodingcore)+'/'+str(float(week_coding_total_scores)+oldcodingoutoff)})
         tests_scores = {}
