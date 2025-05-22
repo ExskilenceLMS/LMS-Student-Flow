@@ -95,7 +95,7 @@ def test_insturction(request,student_id,test_id):
             'duration'      :0,
             'section_count' :{}
         }
-        [test_detaile.update({'duration'    :item.get('test_id__test_duration')}) for item in test_detaile_queryset]
+        [test_detaile.update({'duration'    :float(item.get('test_id__test_duration'))*60}) for item in test_detaile_queryset]
         test_detaile.update({'section_count': {'section_'+str(item.get('section_number')): item.get('section_count') for item in test_detaile_queryset} })
         return JsonResponse(test_detaile,safe=False,status=200)
     except Exception as e:
@@ -574,7 +574,7 @@ def student_test_report(request,student_id,test_id):
             # 'time_taken_for_completion':round((student_assessment.student_test_start_time - student_assessment.student_test_completion_time ).total_seconds()/60,2),
             'time_taken_for_completion':str(test_time_taken)+' min' if test_time_taken < 60 else str(int(test_time_taken/60))+' hrs '+str(test_time_taken%60)+' min',
             'total_time'            :str(Total_time_given)+' min' if Total_time_given < 60 else str(int(Total_time_given/60))+' hrs '+str(Total_time_given%60)+' min',
-            'score_secured'         :student_assessment.assessment_score_secured,
+            'score_secured'         :sum([score.get('score_secured') for score in answers_status]),
             'max_score'             :student_assessment.assessment_max_score,
             'percentage'            :round((student_assessment.assessment_score_secured/student_assessment.assessment_max_score)*100,2),
             'status'                :student_assessment.assessment_status,

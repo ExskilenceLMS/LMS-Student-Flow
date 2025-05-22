@@ -72,7 +72,8 @@ def fetch_roadmap(request,student_id,course_id,subject_id):
         final = []
         daynumber=0
         last_day_data = {}
-        current_date = timezone.now().__add__(timedelta(days=0,hours=5,minutes=30))
+        current_date = timezone.now().__add__(timedelta(days=2,hours=5,minutes=30))
+        print('current_date',current_date)
         max_date = timezone.now().__add__(timedelta(hours=5, minutes=30))
         for week in course_details:
             if week.get('startDate').date() <= current_date.date() and \

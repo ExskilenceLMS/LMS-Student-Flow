@@ -211,3 +211,14 @@ class issue_details(models.Model):
     class Meta:
         db_table = 'issue_details'
     
+class ErrorLogs(models.Model):
+    Error_id        = models.AutoField(primary_key=True)
+    student_id       = models.CharField(max_length=15)
+    Email           = models.EmailField()
+    Name            = models.CharField(max_length=25)
+    Occurred_time   = models.DateTimeField()####################
+    URL_and_Body    = models.TextField()
+    Error_msg       = models.TextField()
+    Stack_trace     = models.TextField()
+    User_agent      = models.TextField()
+    Operating_sys   = models.TextField()
