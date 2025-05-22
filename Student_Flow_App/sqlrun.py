@@ -219,6 +219,16 @@ def mysqlToSql(query):
         query = query.split('ENGINE')[0]
         query = query.split('engine')[0]
         # query = query +"COLLATE Latin1_General_CI_AS;"
+    if str(query).lower().__contains__("insert") and str(query).lower().__contains__("set") :
+        set_clause = query.split('SET')[1].split('WHERE')[0]  # isolate the SET clause
+        column_value_pairs = [col.strip() for col in set_clause.split(',') if col.strip() != '']
+        columns = [col.split('=')[0].strip() for col in column_value_pairs]
+        values = [col.split('=')[1].strip() if col.split('=')[1].strip()[-1]!=';' else col.split('=')[1].strip()[:-1] for col in column_value_pairs]
+        if str(query).lower().__contains__("where") :
+            query = query.split('SET')[0]+ " ("+",".join(columns)+")"+" VALUES ("+",".join(values)+")"+query.split('WHERE')[1]
+        else:
+            query = query.split('SET')[0]+ " ("+",".join(columns)+")"+" VALUES ("+",".join(values)+")"+";"
+       
     return query
 
 
