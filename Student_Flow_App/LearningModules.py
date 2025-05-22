@@ -227,8 +227,8 @@ def fetch_questions(request,type,student_id,subject,subject_id,day_number,week_n
                                                                                                    question_id__in = questions_ids,
                                                                                                    del_row = 'False').values('question_id','score','entered_ans'))
         student_answers = {
-            ans.get('question_id'):{'entered_ans':ans.get('entered_ans'),'score':ans.get('score') if int(str(ans.get('score')).split('.')[1]) > 0 else int(str(ans.get('score')).split('.')[0])}
-            for ans in student_answers}
+            ans.get('question_id'):{'entered_ans':ans.get('entered_ans'),'score':ans.get('score') if int(str(ans.get('score') if '.' in str(ans.get('score')) else str(ans.get('score'))+'.0' ).split('.')[1]) > 0 else int(str(ans.get('score')).split('.')[0])}
+            for ans in student_answers }
         container_client =  get_blob_container_client()
         qn_data = []
         # blob_path = 'LMSData/'
