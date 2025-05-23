@@ -7,7 +7,7 @@ import traceback
 from django.utils import timezone
 from rest_framework.decorators import api_view
 from cryptography.fernet import Fernet
-
+import ast, json
 
 # key = Fernet.generate_key()
 key = b'kOt0aprdFA1-Zj-w6fENiZOf7IVfgnPjv_-usgnBA5s='
@@ -56,19 +56,15 @@ def Upload_ErrorLog(req):
     try:
         data = json.loads(req.body)
         enc_data = data.get('error')
-        decrypted_data = enc_data
-        # enc_bytes = enc_data.encode()
-        # print(enc_bytes)
-        # decrypted_data = cipher_suite.decrypt(enc_bytes).decode()
-        # print(decrypted_data)
+        if isinstance(enc_data, str) and enc_data.startswith("b'"):
+            enc_data = eval(enc_data) 
+        raw = cipher_suite.decrypt(enc_data).decode()
+        decrypted_data = json.loads(raw) if raw.strip().startswith('{"') else ast.literal_eval(raw)
         u_agent = str(req.META.get('HTTP_USER_AGENT'))
-        # print('u_agent',u_agent)
-        Time  = timezone.now().__add__(timedelta(hours=5,minutes=30))
         ErrorLog = ErrorLogs.objects.using('mongodb').create(
             student_id  =data.get('student_id'),
             Email       =data.get('Email'),
             Name        = data.get('Name'),
-            Occurred_time = Time,
             URL_and_Body = data.get('URL_and_Body'),
             Error_msg = decrypted_data.get('Error_msg'),
             Stack_trace =  decrypted_data.get('Stack_trace'),

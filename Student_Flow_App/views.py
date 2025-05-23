@@ -37,11 +37,11 @@ def  LogIn (request,email):
                              'course_id':user.course_id.course_id},safe=False,status=200)
     except Exception as e:
         print(e)
-        # print(ErrorLog(request ,e) )
-        return JsonResponse({"message": "Failed","error":{
-            "Error_msg": str(e),
-            'Stack_trace':str(traceback.format_exc())
-            }},safe=False,status=400)
+        return JsonResponse({"message": "Failed",
+                             "error":str(encrypt_message(str({
+                                    "Error_msg": str(e),
+                                    'Stack_trace':str(traceback.format_exc())
+                                    })))},safe=False,status=400)
 @api_view(['GET'])
 def LogOut (request, student_id):
     try:
