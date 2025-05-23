@@ -228,11 +228,22 @@ def mysqlToSql(query):
             query = query.split('SET')[0]+ " ("+",".join(columns)+")"+" VALUES ("+",".join(values)+")"+query.split('WHERE')[1]
         else:
             query = query.split('SET')[0]+ " ("+",".join(columns)+")"+" VALUES ("+",".join(values)+")"+";"
-       
+    if str(query).lower().__contains__("round") :
+        round_clause = query.split('ROUND(')[1].split(')')[0]
+        query = query.split('ROUND(')[0] + "ROUND(" + (round_clause if round_clause.__contains__(',') else round_clause+',0') + ")"+query.split('ROUND(')[1].split(')')[1]
+    if str(query).lower().__contains__("mod") :
+        query = remove_spaces_from_query_for_selected_part(query, "MOD")
+        mod_clause = query.split('MOD(')[1].split(')')[0]
+        if mod_clause.__contains__(',') == False:
+            mod_clause = mod_clause + ',0'
+        query = query.split('MOD(')[0] + mod_clause.split(',')[0] + " % " + mod_clause.split(',')[1] + query.split('MOD(')[1].split(')')[1]
     return query
 
-
-    
+def remove_spaces_from_query_for_selected_part(query, selected_part):
+    if str(query).lower().__contains__(selected_part.lower()):
+        query = query.split(selected_part)[0]+selected_part+query.split(selected_part)[1].strip()
+    return query
+   
 def dateFormat(query):
     query = str(query).replace('%Y', 'yyyy')
     query = query.replace('%y', 'yy')
