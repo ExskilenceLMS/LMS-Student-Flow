@@ -8,6 +8,7 @@ from rest_framework.decorators import api_view
 import re
 from LMS_Project.settings import *
 from .sqlrun import *
+from .ErrorLog import *
 def addAttempt (studentId,Subject,Qn,user_ans,data):
     try :
         student_info = students_info.objects.get(student_id = studentId,del_row = False)
@@ -138,7 +139,11 @@ def run_python(request):
             return JsonResponse(Output,safe=False,status=200)
         except Exception as e:
             print(e)
-            return JsonResponse({"message": "Failed"},safe=False,status=400)
+            return JsonResponse({"message": "Failed",
+                             "error":str(encrypt_message(str({
+                                    "Error_msg": str(e),
+                                    "Stack_trace":str(traceback.format_exc())+'\nUrl:-'+str(request.build_absolute_uri())+'\nBody:-' + (str(json.loads(request.body)) if request.body else "{}")
+                                    })))},safe=False,status=400)
 
 @api_view(['POST'])
 def run_pythonDSA(request):
@@ -225,7 +230,11 @@ def run_pythonDSA(request):
             return JsonResponse(Output,safe=False,status=200)
         except Exception as e:
             print(e)
-            return JsonResponse({"message": "Failed"},safe=False,status=400)
+            return JsonResponse({"message": "Failed",
+                             "error":str(encrypt_message(str({
+                                    "Error_msg": str(e),
+                                    "Stack_trace":str(traceback.format_exc())+'\nUrl:-'+str(request.build_absolute_uri())+'\nBody:-' + (str(json.loads(request.body)) if request.body else "{}")
+                                    })))},safe=False,status=400)
 
 @api_view(['POST'])
 def sql_query(req):
@@ -252,7 +261,11 @@ def sql_query(req):
             return JsonResponse(main,safe=False,status=200)
         except Exception as e:
             print(e)
-            return JsonResponse({"message": "Failed"},safe=False,status=400)
+            return JsonResponse({"message": "Failed",
+                             "error":str(encrypt_message(str({
+                                    "Error_msg": str(e),
+                                    "Stack_trace":str(traceback.format_exc())+'\nUrl:-'+str(req.build_absolute_uri())+'\nBody:-' + (str(json.loads(req.body)) if req.body else "{}")
+                                    })))},safe=False,status=400)
         
 def removespace(query_list):
     sl=re.compile(r'[*=,]')

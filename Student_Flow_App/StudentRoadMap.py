@@ -14,7 +14,7 @@ from django.db.models.functions import TruncDate
 from LMS_Project.Blobstorage import *
 from .AppUsage import update_app_usage
 from django.core.cache import cache
-
+from .ErrorLog import *
 from .StudentDashBoard import getdays
 
 
@@ -36,7 +36,11 @@ def fetch_top_navigation(request,student_id):
         return JsonResponse(response,safe=False,status=200)
     except Exception as e:
         print(e)
-        return JsonResponse({"message": "Failed","error":str(e)},safe=False,status=400)
+        return JsonResponse({"message": "Failed",
+                             "error":str(encrypt_message(str({
+                                    "Error_msg": str(e),
+                                    "Stack_trace":str(traceback.format_exc())+'\nUrl:-'+str(request.build_absolute_uri())+'\nBody:-' + (str(json.loads(request.body)) if request.body else "{}")
+                                    })))},safe=False,status=400)
 
 @api_view(['GET'])
 def fetch_roadmap(request,student_id,course_id,subject_id):
@@ -256,13 +260,17 @@ def fetch_roadmap(request,student_id,course_id,subject_id):
     except Exception as e:
         print(e)
         update_app_usage(student_id)
-        return JsonResponse({"message": "Failed","error":str(e)},safe=False,status=400)
+        return JsonResponse({"message": "Failed",
+                             "error":str(encrypt_message(str({
+                                    "Error_msg": str(e),
+                                    "Stack_trace":str(traceback.format_exc())+'\nUrl:-'+str(request.build_absolute_uri())+'\nBody:-' + (str(json.loads(request.body)) if request.body else "{}")
+                                    })))},safe=False,status=400)
 
 
                                                            
 
-# @api_view(['GET'])
-def fetch_roadmap_old(request,student_id,course_id,subject_id):
+# # @api_view(['GET'])
+# def fetch_roadmap_old(request,student_id,course_id,subject_id):
     try:
         student = students_info.objects.get(student_id = student_id,del_row = False)
         course = student.course_id

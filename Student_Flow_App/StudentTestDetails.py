@@ -16,6 +16,7 @@ from .AppUsage import update_app_usage
 from django.core.cache import cache
 from LMS_Project.Blobstorage import *
 from .sqlrun import get_all_tables
+from .ErrorLog import *
 
 
 @api_view(['GET'])
@@ -68,7 +69,11 @@ def fetch_all_test_details(request,student_id):
     except Exception as e:
         print(e)
         update_app_usage(student_id)
-        return JsonResponse({"message": "Failed","error":str(e)},safe=False,status=400)
+        return JsonResponse({"message": "Failed",
+                             "error":str(encrypt_message(str({
+                                    "Error_msg": str(e),
+                                    "Stack_trace":str(traceback.format_exc())+'\nUrl:-'+str(request.build_absolute_uri())+'\nBody:-' + (str(json.loads(request.body)) if request.body else "{}")
+                                    })))},safe=False,status=400)
 def date_formater(date_time):
     return str(date_time.day)+'-'+str(date_time.month)+'-'+str(date_time.year)[-2:]+' '+str(date_time.strftime('%I:%M %p'))
 @api_view(['GET'])
@@ -100,7 +105,11 @@ def test_insturction(request,student_id,test_id):
         return JsonResponse(test_detaile,safe=False,status=200)
     except Exception as e:
         print(e)
-        return JsonResponse({"message": "Failed","error":str(e)},safe=False,status=400)
+        return JsonResponse({"message": "Failed",
+                             "error":str(encrypt_message(str({
+                                    "Error_msg": str(e),
+                                    "Stack_trace":str(traceback.format_exc())+'\nUrl:-'+str(request.build_absolute_uri())+'\nBody:-' + (str(json.loads(request.body)) if request.body else "{}")
+                                    })))},safe=False,status=400)
 
 @api_view(['GET'])
 def section_details(request,student_id,test_id):
@@ -189,16 +198,23 @@ def section_details(request,student_id,test_id):
     except Exception as e:
         print(e)
         update_app_usage(student_id)
-        return JsonResponse({"message": "Failed","error":str(e)},safe=False,status=400)
+        return JsonResponse({"message": "Failed",
+                             "error":str(encrypt_message(str({
+                                    "Error_msg": str(e),
+                                    "Stack_trace":str(traceback.format_exc())+'\nUrl:-'+str(request.build_absolute_uri())+'\nBody:-' + (str(json.loads(request.body)) if request.body else "{}")
+                                    })))},safe=False,status=400)
 
 @api_view(['GET'])
-def Test_duration(req,student_id,test_id):
+def Test_duration(request,student_id,test_id):
     try:
         return JsonResponse(Test_duration_update(student_id,test_id),safe=False,status=200) #Test_duration_update(student_id,test_id)
     except Exception as e:
         print(e)
-        return JsonResponse({"message": "Failed","error":str(e)},safe=False,status=400)
-
+        return JsonResponse({"message": "Failed",
+                             "error":str(encrypt_message(str({
+                                    "Error_msg": str(e),
+                                    "Stack_trace":str(traceback.format_exc())+'\nUrl:-'+str(request.build_absolute_uri())+'\nBody:-' + (str(json.loads(request.body)) if request.body else "{}")
+                                    })))},safe=False,status=400)
 def Test_duration_update(student_id,test_id):
     try:
         student = students_assessments.objects.get(
@@ -282,7 +298,11 @@ def submit_test(request,student_id,test_id):
         return JsonResponse({"message": "Test Successfully Completed"},safe=False,status=200)
     except Exception as e:
         print(e)
-        return JsonResponse({"message": "Failed","error":str(e)},safe=False,status=400)
+        return JsonResponse({"message": "Failed",
+                             "error":str(encrypt_message(str({
+                                    "Error_msg": str(e),
+                                    "Stack_trace":str(traceback.format_exc())+'\nUrl:-'+str(request.build_absolute_uri())+'\nBody:-' + (str(json.loads(request.body)) if request.body else "{}")
+                                    })))},safe=False,status=400)
 def Update_CollegeRank_and_OverallRank(course_id,College):
     try:
         all_students_objs = students_info.objects.filter(course_id=course_id,del_row=False).order_by('-student_score')
@@ -357,7 +377,11 @@ def get_test_Qns(request,student_id,test_id,section_name):
         print(e)
         # update_app_usage(student_id)
         Test_duration_update(student_id,test_id)
-        return JsonResponse({"message": "Failed","error":str(e)},safe=False,status=400)
+        return JsonResponse({"message": "Failed",
+                             "error":str(encrypt_message(str({
+                                    "Error_msg": str(e),
+                                    "Stack_trace":str(traceback.format_exc())+'\nUrl:-'+str(request.build_absolute_uri())+'\nBody:-' + (str(json.loads(request.body)) if request.body else "{}")
+                                    })))},safe=False,status=400)
     
 @api_view(['PUT'])
 def submit_test_mcq_questions(request):
@@ -449,7 +473,11 @@ def submit_test_mcq_questions(request):
         except Exception as e:
             print(e)
             # update_app_usage( json.loads(request.body).get('student_id') )
-            return JsonResponse({"message": "Failed","error":str(e)},safe=False,status=400)
+            return JsonResponse({"message": "Failed",
+                             "error":str(encrypt_message(str({
+                                    "Error_msg": str(e),
+                                    "Stack_trace":str(traceback.format_exc())+'\nUrl:-'+str(request.build_absolute_uri())+'\nBody:-' + (str(json.loads(request.body)) if request.body else "{}")
+                                    })))},safe=False,status=400)
 @api_view(['PUT'])
 def submit_test_coding_questions(request):
     try:
@@ -545,7 +573,11 @@ def submit_test_coding_questions(request):
     except Exception as e:
         print(e)
         # update_app_usage(json.loads(request.body).get('student_id'))
-        return JsonResponse({"message": "Failed","error":str(e)},safe=False,status=400)
+        return JsonResponse({"message": "Failed",
+                             "error":str(encrypt_message(str({
+                                    "Error_msg": str(e),
+                                    "Stack_trace":str(traceback.format_exc())+'\nUrl:-'+str(request.build_absolute_uri())+'\nBody:-' + (str(json.loads(request.body)) if request.body else "{}")
+                                    })))},safe=False,status=400)
 
 def format_time_with_zone(date):
     if date == None:
@@ -701,4 +733,8 @@ def student_test_report(request,student_id,test_id):
         return JsonResponse(response,safe=False,status=200)
     except Exception as e:
         print(e)
-        return JsonResponse({"message": "Failed","error":str(e)},safe=False,status=400)
+        return JsonResponse({"message": "Failed",
+                             "error":str(encrypt_message(str({
+                                    "Error_msg": str(e),
+                                    "Stack_trace":str(traceback.format_exc())+'\nUrl:-'+str(request.build_absolute_uri())+'\nBody:-' + (str(json.loads(request.body)) if request.body else "{}")
+                                    })))},safe=False,status=400)

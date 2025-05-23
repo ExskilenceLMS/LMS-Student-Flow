@@ -15,7 +15,7 @@ from LMS_Project.Blobstorage import *
 from .AppUsage import update_app_usage
 from django.core.cache import cache
 from .sqlrun import get_all_tables
-
+from .ErrorLog import *
 # FETCH STUDENT LEARNING MODULEs
 
 @api_view(['GET'])
@@ -82,7 +82,11 @@ def fetch_learning_modules(request,student_id,subject,subject_id,day_number,week
     except Exception as e:
         print(e)
         update_app_usage(student_id)
-        return JsonResponse({"message": "Failed","error":str(e)},safe=False,status=400)
+        return JsonResponse({"message": "Failed",
+                             "error":str(encrypt_message(str({
+                                    "Error_msg": str(e),
+                                    "Stack_trace":str(traceback.format_exc())+'\nUrl:-'+str(request.build_absolute_uri())+'\nBody:-' + (str(json.loads(request.body)) if request.body else "{}")
+                                    })))},safe=False,status=400)
     
 # ADD DAILY QUESTIONS 
 
@@ -99,7 +103,11 @@ def add_days_to_student(request):
         return JsonResponse(response,safe=False,status=200)
     except Exception as e:
         print(e)
-        return JsonResponse({"message": "Failed","error":str(e)},safe=False,status=400)
+        return JsonResponse({"message": "Failed",
+                             "error":str(encrypt_message(str({
+                                    "Error_msg": str(e),
+                                    "Stack_trace":str(traceback.format_exc())+'\nUrl:-'+str(request.build_absolute_uri())+'\nBody:-' + (str(json.loads(request.body)) if request.body else "{}")
+                                    })))},safe=False,status=400)
     
 def add_day_to_student(student_id,subject,subject_name,week_number,day_number):
     try:
@@ -198,7 +206,11 @@ def fetch_overview_modules(request,student_id,subject,day_number):
     except Exception as e:
         print(e)
         update_app_usage(student_id)
-        return JsonResponse({"message": "Failed","error":str(e)},safe=False,status=400)
+        return JsonResponse({"message": "Failed",
+                             "error":str(encrypt_message(str({
+                                    "Error_msg": str(e),
+                                    "Stack_trace":str(traceback.format_exc())+'\nUrl:-'+str(request.build_absolute_uri())+'\nBody:-' + (str(json.loads(request.body)) if request.body else "{}")
+                                    })))},safe=False,status=400)
     
 # FETCH QUESTIONS
 
@@ -290,7 +302,11 @@ def fetch_questions(request,type,student_id,subject,subject_id,day_number,week_n
     except Exception as e:
         print(e)
         update_app_usage(student_id)
-        return JsonResponse({"message": "Failed","error":str(e)},safe=False,status=400)
+        return JsonResponse({"message": "Failed",
+                             "error":str(encrypt_message(str({
+                                    "Error_msg": str(e),
+                                    "Stack_trace":str(traceback.format_exc())+'\nUrl:-'+str(request.build_absolute_uri())+'\nBody:-' + (str(json.loads(request.body)) if request.body else "{}")
+                                    })))},safe=False,status=400)
 
 # SUBMIT MCQ QUESTION  
 
@@ -373,7 +389,11 @@ def submit_MCQ_Question(request):
     except Exception as e:
         print(e)
         update_app_usage( json.loads(request.body).get('student_id') )
-        return JsonResponse({"message": "Failed","error":str(e)},safe=False,status=400)
+        return JsonResponse({"message": "Failed",
+                             "error":str(encrypt_message(str({
+                                    "Error_msg": str(e),
+                                    "Stack_trace":str(traceback.format_exc())+'\nUrl:-'+str(request.build_absolute_uri())+'\nBody:-' + (str(json.loads(request.body)) if request.body else "{}")
+                                    })))},safe=False,status=400)
     
 # SUBMIT CODING QUESTION
 
@@ -469,14 +489,22 @@ def submition_coding_question(request):
     except Exception as e:
         print(e)
         update_app_usage(json.loads(request.body).get('student_id'))
-        return JsonResponse({"message": "Failed","error":str(e)},safe=False,status=400)
+        return JsonResponse({"message": "Failed",
+                             "error":str(encrypt_message(str({
+                                    "Error_msg": str(e),
+                                    "Stack_trace":str(traceback.format_exc())+'\nUrl:-'+str(request.build_absolute_uri())+'\nBody:-' + (str(json.loads(request.body)) if request.body else "{}")
+                                    })))},safe=False,status=400)
 @api_view(['GET'])
 def get_SQL_tables (request):
     try:
         return JsonResponse(get_all_tables(),safe=False,status=200)
     except Exception as e:
         print(e)
-        return JsonResponse({"message": "Failed","error":str(e)},safe=False,status=400)
+        return JsonResponse({"message": "Failed",
+                             "error":str(encrypt_message(str({
+                                    "Error_msg": str(e),
+                                    "Stack_trace":str(traceback.format_exc())+'\nUrl:-'+str(request.build_absolute_uri())+'\nBody:-' + (str(json.loads(request.body)) if request.body else "{}")
+                                    })))},safe=False,status=400)
 @api_view(['PUT']) 
 def update_day_status(request):
     try:
@@ -552,7 +580,11 @@ def update_day_status(request):
     except Exception as e:
         print(e)
         update_app_usage(json.loads(request.body).get('student_id'))
-        return JsonResponse({"message": "Failed","error":str(e)},safe=False,status=400)
+        return JsonResponse({"message": "Failed",
+                             "error":str(encrypt_message(str({
+                                    "Error_msg": str(e),
+                                    "Stack_trace":str(traceback.format_exc())+'\nUrl:-'+str(request.build_absolute_uri())+'\nBody:-' + (str(json.loads(request.body)) if request.body else "{}")
+                                    })))},safe=False,status=400)
 
 def start_learning_activity(student_id,sub_topic_id,week_number,day_number):
     try :  

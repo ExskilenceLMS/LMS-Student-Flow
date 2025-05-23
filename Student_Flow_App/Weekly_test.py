@@ -12,7 +12,7 @@ from django.db.models import IntegerField
 # from django.contrib.postgres.aggregates import ArrayAgg
 import json
 from django.db.models.functions import TruncDate    
-
+from .ErrorLog import *
 rule_for_weekly_test = {
     'MCQ':10,'Coding':3
     # 'MCQ':7,'Coding':3
@@ -188,7 +188,11 @@ def Automated_weekly_test(request,student_id,week_number,subject_id):
             return JsonResponse({"message": "Not Unlocked yet"},safe=False,status=400)
     except Exception as e:
         # print(e)
-        return JsonResponse({"message": "Failed","error":str(e)},safe=False,status=400)
+        return JsonResponse({"message": "Failed",
+                             "error":str(encrypt_message(str({
+                                    "Error_msg": str(e),
+                                    "Stack_trace":str(traceback.format_exc())+'\nUrl:-'+str(request.build_absolute_uri())+'\nBody:-' + (str(json.loads(request.body)) if request.body else "{}")
+                                    })))},safe=False,status=400)
     
 def create_weekly_test(student,week_number,subject_id,mcqsection,codingsections):
     try:

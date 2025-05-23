@@ -14,7 +14,7 @@ from django.db.models.functions import TruncDate
 from LMS_Project.Blobstorage import *
 from .AppUsage import update_app_usage
 from django.core.cache import cache
-
+from.ErrorLog import *
 # FETCH STUDENT ONLINE SESSION FOR ENROLLED SUBJECTS
 
 @api_view(['GET'])
@@ -61,4 +61,8 @@ def fetch_all_live_session(request,student_id):
     except Exception as e:
         print(e)
         update_app_usage(student_id)
-        return JsonResponse({"message": "Failed","error":str(e)},safe=False,status=400)
+        return JsonResponse({"message": "Failed",
+                             "error":str(encrypt_message(str({
+                                    "Error_msg": str(e),
+                                    "Stack_trace":str(traceback.format_exc())+'\nUrl:-'+str(request.build_absolute_uri())+'\nBody:-' + (str(json.loads(request.body)) if request.body else "{}")
+                                    })))},safe=False,status=400)

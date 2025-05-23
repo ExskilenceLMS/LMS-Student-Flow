@@ -70,12 +70,12 @@ urlpatterns = [
     path('api/student/test/questions/submit/coding/', test_details.submit_test_coding_questions),
     path('api/student/test/submit/<str:student_id>/<str:test_id>/', test_details.submit_test),
     path('api/student/duration/<str:student_id>/<str:test_id>/', test_details.Test_duration),
-            # Final Test URLs
-    path('api/student/final/test/instuction/<str:student_id>/<str:test_id>/', final_test.final_test_insturction),
-    path('api/student/final/test/questions/<str:student_id>/<str:test_id>/<str:section_name>/', final_test.get_final_test_Qns),
-    path('api/student/final/test/questions/submit/mcq/', final_test.submit_final_test_mcq_questions),
-    path('api/student/final/test/questions/submit/coding/', final_test.submit_final_test_coding_questions),
-    path('api/student/final/test/submit/<str:student_id>/<str:test_id>/', final_test.submit_final_test),
+    #         # Final Test URLs
+    # path('api/student/final/test/instuction/<str:student_id>/<str:test_id>/', final_test.final_test_insturction),
+    # path('api/student/final/test/questions/<str:student_id>/<str:test_id>/<str:section_name>/', final_test.get_final_test_Qns),
+    # path('api/student/final/test/questions/submit/mcq/', final_test.submit_final_test_mcq_questions),
+    # path('api/student/final/test/questions/submit/coding/', final_test.submit_final_test_coding_questions),
+    # path('api/student/final/test/submit/<str:student_id>/<str:test_id>/', final_test.submit_final_test),
 
             # Test report URLs
     path('api/student/test/report/<str:student_id>/<str:test_id>/', test_details.student_test_report),

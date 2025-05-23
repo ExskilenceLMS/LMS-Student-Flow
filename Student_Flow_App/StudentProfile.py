@@ -6,7 +6,7 @@ from LMS_Mongodb_App.models import *
 from datetime import datetime, timedelta
 from django.core.serializers import serialize
 from .AppUsage import update_app_usage
-
+from .ErrorLog import *
 
 @api_view(['GET'])
 def fetch_student_Profile(request,student_id):
@@ -44,7 +44,11 @@ def fetch_student_Profile(request,student_id):
     except Exception as e:
         print(e)
         update_app_usage(student_id)
-        return JsonResponse({"message": "Failed","error":str(e)},safe=False,status=400)  
+        return JsonResponse({"message": "Failed",
+                             "error":str(encrypt_message(str({
+                                    "Error_msg": str(e),
+                                    "Stack_trace":str(traceback.format_exc())+'\nUrl:-'+str(request.build_absolute_uri())+'\nBody:-' + (str(json.loads(request.body)) if request.body else "{}")
+                                    })))},safe=False,status=400)
 @api_view(['PUT'])
 def update_social_media(request):
     try:
@@ -74,7 +78,11 @@ def update_social_media(request):
         return JsonResponse(response,safe=False,status=200)
     except Exception as e:
         print(e)
-        return JsonResponse({"message": "Failed","error":str(e)},safe=False,status=400)  
+        return JsonResponse({"message": "Failed",
+                             "error":str(encrypt_message(str({
+                                    "Error_msg": str(e),
+                                    "Stack_trace":str(traceback.format_exc())+'\nUrl:-'+str(request.build_absolute_uri())+'\nBody:-' + (str(json.loads(request.body)) if request.body else "{}")
+                                    })))},safe=False,status=400)
 @api_view(['PUT'])
 def update_profile(request):
     try:
@@ -99,7 +107,11 @@ def update_profile(request):
     except Exception as e:
         print(e)
         update_app_usage(json.loads(request.body).get('student_id'))
-        return JsonResponse({"message": "Failed","error":str(e)},safe=False,status=400)  
+        return JsonResponse({"message": "Failed",
+                             "error":str(encrypt_message(str({
+                                    "Error_msg": str(e),
+                                    "Stack_trace":str(traceback.format_exc())+'\nUrl:-'+str(request.build_absolute_uri())+'\nBody:-' + (str(json.loads(request.body)) if request.body else "{}")
+                                    })))},safe=False,status=400)
     
 @api_view(['GET'])
 def college_and_branch_list(request):
@@ -122,5 +134,9 @@ def college_and_branch_list(request):
         return JsonResponse(response,safe=False,status=200)
     except Exception as e:
         print(e)
-        return JsonResponse({"message": "Failed","error":str(e)},safe=False,status=400)
+        return JsonResponse({"message": "Failed",
+                             "error":str(encrypt_message(str({
+                                    "Error_msg": str(e),
+                                    "Stack_trace":str(traceback.format_exc())+'\nUrl:-'+str(request.build_absolute_uri())+'\nBody:-' + (str(json.loads(request.body)) if request.body else "{}")
+                                    })))},safe=False,status=400)
     
