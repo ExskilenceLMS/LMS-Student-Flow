@@ -18,7 +18,7 @@ from LMS_Project.Blobstorage import *
 from LMS_Project.settings import * 
 from .AppUsage import update_app_usage, create_app_usage
 from django.core.cache import cache
-from .ErrorLog import ErrorLog
+from .ErrorLog import *
 ONTIME = datetime.utcnow().__add__(timedelta(hours=5,minutes=30))
 CONTAINER ="internship"
 @api_view(['GET'])   
@@ -37,9 +37,11 @@ def  LogIn (request,email):
                              'course_id':user.course_id.course_id},safe=False,status=200)
     except Exception as e:
         print(e)
-        
-        print(ErrorLog(request ,e) )
-        return JsonResponse({"message": "Failed","error":str(e)},safe=False,status=400)
+        # print(ErrorLog(request ,e) )
+        return JsonResponse({"message": "Failed","error":{
+            "Error_msg": str(e),
+            'Stack_trace':str(traceback.format_exc())
+            }},safe=False,status=400)
 @api_view(['GET'])
 def LogOut (request, student_id):
     try:

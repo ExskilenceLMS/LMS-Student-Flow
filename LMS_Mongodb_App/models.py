@@ -222,3 +222,6 @@ class ErrorLogs(models.Model):
     Stack_trace     = models.TextField()
     User_agent      = models.TextField()
     Operating_sys   = models.TextField()
+
+    class Meta:
+        db_table = 'ErrorLogs'
