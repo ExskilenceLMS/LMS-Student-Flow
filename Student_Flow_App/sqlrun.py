@@ -230,12 +230,12 @@ def mysqlToSql(query):
             query = query.split('SET')[0]+ " ("+",".join(columns)+")"+" VALUES ("+",".join(values)+")"+";"
     if str(query).lower().__contains__("round") :
         if str(query).__contains__('round(') :
-            query.replace("round(", "ROUND(")
+            query = query.replace("round(", "ROUND(")
         round_clause = query.split('ROUND(')[1].split(')')[0]
         query = query.split('ROUND(')[0] + "ROUND(" + (round_clause if round_clause.__contains__(',') else round_clause+',0') + ")"+query.split('ROUND(')[1].split(')')[1]
     if str(query).lower().__contains__("mod") :
         if str(query).__contains__('mod(') :
-            query.replace("mod(", "MOD(")
+            query = query.replace("mod(", "MOD(")
         query = remove_spaces_from_query_for_selected_part(query, "MOD")
         mod_clause = query.split('MOD(')[1].split(')')[0]
         if mod_clause.__contains__(',') == False:
