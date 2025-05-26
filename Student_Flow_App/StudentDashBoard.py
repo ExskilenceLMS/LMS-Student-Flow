@@ -211,30 +211,32 @@ def extract_events(blob_data,current_time):
 def fetch_study_hours(request,student_id,week):
     try:
         student = students_info.objects.get(student_id = student_id,del_row = False)
-        today =timezone.now() + timedelta(hours=5, minutes=30)
+        today =timezone.now() + timedelta(days=0,hours=5, minutes=30)
         start_of_week = (today - timedelta(days=today.weekday())).replace(hour=0, minute=0, second=0, microsecond=0)
         if timezone.is_naive(today):
             today = timezone.make_aware(today, timezone.get_current_timezone())
         if week.isdigit():
             current_week = int(week)
         else:
-            current_week = course_plan_details.objects.filter(course_id = student.course_id,
+            current_weeks = course_plan_details.objects.filter(course_id = student.course_id,
                                                            batch_id = student.batch_id,
                                                             day_date__date__lte=today.date(),
                                                             del_row =False).values('week','day_date').order_by('-week')
-            if current_week is None or len(current_week) == 0 :
+            if current_weeks is None or len(current_weeks) == 0 :
                 current_week = 1
             else:
-                if current_week[0].get('day_date').date() < today.date():
-                    current_week = current_week[0].get('week')+1
+                if current_weeks[0].get('day_date').date() < today.date():
+                    diff = today.date() - current_weeks[0].get('day_date').date()
+                    diff_in_weeks = diff.days // 7
+                    current_week = current_weeks[0].get('week') + diff_in_weeks
                 else:
-                    current_week=current_week[0].get('week')
+                    current_week=current_weeks[0].get('week')
         course_details = list(course_plan_details.objects.filter(course_id=student.course_id,
                                                                 batch_id = student.batch_id,
-                                                            week=current_week).values('duration_in_hours','day_date'))
+                                                            week=current_week).values('duration_in_hours','week','day_date').order_by('-week'))
         if len(course_details) == 0:
             course_details = list(course_plan_details.objects.filter(course_id=student.course_id,
-                                                                batch_id = student.batch_id).values('duration_in_hours','day_date').order_by('-week'))
+                                                                batch_id = student.batch_id).values('duration_in_hours','week','day_date').order_by('-week'))
             start_of_week = today.replace(hour=0, minute=0, second=0, microsecond=0) - timedelta(days=today.weekday())
         else:
             if week.isdigit():
@@ -250,7 +252,7 @@ def fetch_study_hours(request,student_id,week):
                                                             total_study_hours=Sum(F('logged_out') - F('logged_in'))).order_by('date')       
         list_of_duration = [i.get("duration_in_hours")  for i in  course_details]
         response = {'daily_limit':round(sum(list_of_duration)/len(list_of_duration)) if list_of_duration else 0,
-                    'weekly_limit':current_week,
+                    'weekly_limit':course_details[0].get('week')+(today.date() - course_details[0].get('day_date').date()).days//7,
                     'hours':[]}
         hour_spent ={ i.get('date'):i.get('total_study_hours') for i in student_app_usages}
         hour_spent2 ={ i.get('date'):round(i.get('duration_in_hours').total_seconds()/3600,2) for i in student_app_usages}
