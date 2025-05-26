@@ -11,7 +11,7 @@ import ast, json
 
 # key = Fernet.generate_key()
 key = b'kOt0aprdFA1-Zj-w6fENiZOf7IVfgnPjv_-usgnBA5s='
-print("key:", key, len(key.split()))
+# print("key:", key, len(key.split()))
 cipher_suite = Fernet(key)
 
 def encrypt_message(message: str) -> bytes:
