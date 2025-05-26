@@ -1,6 +1,6 @@
-import json
-from django.test import TestCase
-from LMS_Project.Blobstorage import *
+# import json
+# from django.test import TestCase
+# from LMS_Project.Blobstorage import *
 # from LMS_MSSQLdb_App.models import *
 # def UPDATE_Counts():
 #     try:
@@ -49,15 +49,15 @@ from LMS_Project.Blobstorage import *
 #         for qn in qns:
 #             if qn.sub_topic_id.startswith('sq'):
 #                 if count.get(qn.sub_topic_id,None) is not None:
-#                     # print(qn.sub_topic_id,count.get(qn.sub_topic_id,None))
-#                     qn.mcq = count.get(qn.sub_topic_id,None).get('mcq')
-#                     qn.coding = count.get(qn.sub_topic_id,None).get('coding')
-#                     qn.videos = count.get(qn.sub_topic_id,None).get('videos')
-#                     qn.notes = count.get(qn.sub_topic_id,None).get('notes')
-#                     qn.save()
+#                     print(qn.sub_topic_id,count.get(qn.sub_topic_id,None))
+#                     # qn.mcq = count.get(qn.sub_topic_id,None).get('mcq')
+#                     # qn.coding = count.get(qn.sub_topic_id,None).get('coding')
+#                     # qn.videos = count.get(qn.sub_topic_id,None).get('videos')
+#                     # qn.notes = count.get(qn.sub_topic_id,None).get('notes')
+#                     # qn.save()
 #         print('test',test) 
         
 #     except Exception as e:
 #         print(e)
 #         pass
-# UPDATE_Counts()
+# # UPDATE_Counts()

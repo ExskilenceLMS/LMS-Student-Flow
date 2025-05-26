@@ -228,7 +228,7 @@ def mysqlToSql(query):
             query = query.split('SET')[0]+ " ("+",".join(columns)+")"+" VALUES ("+",".join(values)+")"+query.split('WHERE')[1]
         else:
             query = query.split('SET')[0]+ " ("+",".join(columns)+")"+" VALUES ("+",".join(values)+")"+";"
-    if str(query).lower().__contains__("round") :
+    if str(query).lower().__contains__("round(") :
         if str(query).__contains__('round(') :
             query = query.replace("round(", "ROUND(")
         round_clause = query.split('ROUND(')[1].split(')')[0]
