@@ -25,67 +25,6 @@ def fetch_enrolled_subjects(request,student_id):
         sub_days_count = {}
         [sub_days_count.update({activity['subject_id__subject_name']:{'day':activity['latest_day']}})for activity in latest_activities]
         
-        demo = [
-             {
-        "title": "Python",
-        "subject": "Python",
-        "subject_id": "sr",
-        "image": "https://images.unsplash.com/photo-1515879218367-8466d910aaa4?q=80&w=2069&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-        "duration": "25th Apr 25 - 15th May 25",
-        "progress": {
-            "student_progress": 0,
-            "progress": 100
-        },
-        'status': 'Closed'
-    },
-      {
-        "title": "Web Application",
-        "subject": "Web Application",
-        "subject_id": "sr",
-        "image": "https://images.unsplash.com/photo-1515879218367-8466d910aaa4?q=80&w=2069&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-        "duration": "15th May 25 - 15th June 25",
-        "progress": {
-            "student_progress": 0,
-            "progress": 100
-        },
-        'status': 'Closed'
-    },
-      {
-        "title": "480hrs Internship",
-        "subject": "480hrs Internship",
-        "subject_id": "sr",
-        "image": "https://images.unsplash.com/photo-1515879218367-8466d910aaa4?q=80&w=2069&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-        "duration": "15th June 25 - 15th Sept 25",
-        "progress": {
-            "student_progress": 0,
-            "progress": 100
-        },
-        'status': 'Closed'
-    },{
-        "title": "DSA ",
-        "subject": "DSA ",
-        "subject_id": "sr",
-        "image": "https://images.unsplash.com/photo-1515879218367-8466d910aaa4?q=80&w=2069&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-        "duration": "15th Sept 25 - 15th Oct 25",
-        "progress": {
-            "student_progress": 0,
-            "progress": 100
-        },
-        'status': 'Closed'
-    },
-    {
-        "title": "Placement Preparation",
-        "subject": "Placement Preparation",
-        "subject_id": "sr", 
-        "image": "https://images.unsplash.com/photo-1515879218367-8466d910aaa4?q=80&w=2069&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-        "duration": "15th Oct 25 - 15th Nov 25",
-        "progress": {
-            "student_progress": 0,
-            "progress": 100
-        },
-        'status': 'Closed'
-    }
-        ]
         response = []
         current_time = timezone.now() + timedelta(hours=5, minutes=30)
         if timezone.is_naive(current_time):

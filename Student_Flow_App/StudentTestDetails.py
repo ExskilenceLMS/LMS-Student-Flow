@@ -77,7 +77,7 @@ def fetch_all_test_details(request,student_id):
 def date_formater(date_time):
     return str(date_time.day)+'-'+str(date_time.month)+'-'+str(date_time.year)[-2:]+' '+str(date_time.strftime('%I:%M %p'))
 @api_view(['GET'])
-def test_insturction(request,student_id,test_id):
+def test_instruction(request,student_id,test_id):
     try:
         student = students_assessments.objects.get(
             student_id = student_id,

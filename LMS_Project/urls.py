@@ -17,15 +17,15 @@ from django.contrib import admin
 from django.urls import path
 from Student_Flow_App import views ,tests ,coding_validation as cv ,AppUsage,StudentProfile as profile
 from Student_Flow_App import StudentDashBoard as dashboard ,StudentLiveSessions as live_session ,LearningModules as learning_modules
-from Student_Flow_App import Student_Tickets as tickets , StudentRoadMap as roadmap , StudentTestDetails as test_details
-from Student_Flow_App import FinalTest as final_test, Weekly_test as weekly_test,SQL_TESTING,ErrorLog as error_log
+from Student_Flow_App import Student_Tickets as tickets , StudentRoadMap as roadmap , StudentTestDetails as tests_details
+from Student_Flow_App import FinalTest as final_test, Weekly_test as weekly_test,SQL_TESTING,ErrorLog as error_log,Student_Final_test as test_details
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.home),
     path('api/clearcache/', AppUsage.clear_blob_ceche),
     # Login URLs
-    path('api/login/<str:email>/', views.LogIn),
-    path('api/logout/<str:student_id>/', views.LogOut),
+    path('api/login/<str:email>/', views.login),
+    path('api/logout/<str:student_id>/', views.logout),
     # Dashboard URLs
     path('api/studentdashboard/mycourses/<str:student_id>/',       dashboard.fetch_enrolled_subjects),
     path('api/studentdashboard/upcomming/sessions/<str:student_id>/',      dashboard.fetch_live_session),
@@ -63,9 +63,11 @@ urlpatterns = [
     path('api/student/test/weekly/<str:student_id>/<str:week_number>/<str:subject_id>/', weekly_test.Automated_weekly_test),
 
             # Test URLs
-    path('api/student/test/instuction/<str:student_id>/<str:test_id>/', test_details.test_insturction),
+    path('api/student/test/instuction/<str:student_id>/<str:test_id>/', test_details.test_instruction),
     path('api/student/test/section/<str:student_id>/<str:test_id>/', test_details.section_details),
-    path('api/student/test/questions/<str:student_id>/<str:test_id>/<str:section_name>/', test_details.get_test_Qns),
+    path('api/student/test/start/<str:student_id>/<str:test_id>/', test_details.Start_TEST),
+    path('api/student/test/questions/status/<str:student_id>/<str:test_id>/', test_details.Qns_status_update),
+    # path('api/student/test/questions/<str:student_id>/<str:test_id>/<str:section_name>/', test_details.get_test_Qns),
     path('api/student/test/questions/submit/mcq/', test_details.submit_test_mcq_questions),
     path('api/student/test/questions/submit/coding/', test_details.submit_test_coding_questions),
     path('api/student/test/submit/<str:student_id>/<str:test_id>/', test_details.submit_test),
@@ -94,7 +96,8 @@ urlpatterns = [
     path('api/colleges/', profile.college_and_branch_list),
 
     # Media URLs
-    path('media/', views.get_media),
+    path('media2/', views.get_media),
+    path('media/', views.generate_secure_blob_url),
 
     # Error_log URLs
     path('api/errorlog/', error_log.Upload_ErrorLog),
@@ -112,5 +115,7 @@ urlpatterns = [
     # path('ids/',   views.generate_ids),
     # path('upvideo/',   views    .upload_video),
     path('mcqtesting/',   SQL_TESTING.get_mcqs),
+    # path('testing/<str:student_id>/', student_final_test.fetch_all_test_details),
+
 ]
 

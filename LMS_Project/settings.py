@@ -129,12 +129,14 @@ DATABASES = {
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000',
     'https://staging-exskilence.azurewebsites.net',
+    'https://live-exskilence.azurewebsites.net',
  
 ]
 
 CSRF_TRUSTED_ORIGINS=[ 
     'http://localhost:3000',
      'https://staging-exskilence.azurewebsites.net',
+     'https://live-exskilence.azurewebsites.net',
     ]
 
 ROOT_URLCONF = 'LMS_Project.urls'
