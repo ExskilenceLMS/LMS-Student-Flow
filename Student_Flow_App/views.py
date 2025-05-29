@@ -80,7 +80,7 @@ def get_media(request):
         if content_type is None:
             content_type = 'application/octet-stream'
         return StreamingHttpResponse(
-            response.iter_content(chunk_size=1024*1024),  # 1MB chunks
+            response.iter_content(chunk_size=10*10),  # 1MB chunks
             content_type=content_type
         )
     except requests.RequestException as err:
