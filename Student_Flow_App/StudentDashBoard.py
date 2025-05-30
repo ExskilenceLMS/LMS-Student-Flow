@@ -58,7 +58,7 @@ def fetch_enrolled_subjects(request, student_id):
                     sub_days_count.get(subject_name, {'day': 0}),
                     subject.duration_in_days
                 ),
-                "status": "Open" if subject.start_date < now < subject.end_date else "Closed"
+                'status': 'Open' if (subject.end_date > now and subject.start_date < now) or (subject.end_date < now ) else 'Closed'
             }
             response.append(subject_data)
 
