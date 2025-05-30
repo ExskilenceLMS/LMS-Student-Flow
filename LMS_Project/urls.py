@@ -3,7 +3,7 @@ from django.urls import path
 from Student_Flow_App import views ,tests ,coding_validation as cv ,AppUsage,StudentProfile as profile
 from Student_Flow_App import StudentDashBoard as dashboard ,StudentLiveSessions as live_session ,LearningModules as learning_modules
 from Student_Flow_App import Student_Tickets as tickets , StudentRoadMap as roadmap , StudentTestDetails as test_details
-from Student_Flow_App import FinalTest as final_test, Weekly_test as weekly_test,SQL_TESTING,ErrorLog as error_log #Student_Final_test as test_details
+from Student_Flow_App import Weekly_test as weekly_test,SQL_TESTING,ErrorLog as error_log #Student_Final_test as test_details
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.home),
