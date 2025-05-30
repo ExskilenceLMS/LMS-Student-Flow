@@ -495,6 +495,7 @@ class students_details(djongo_models.Model):
     student_notification        = djongo_models.JSONField(default=dict)
     student_announcements       = djongo_models.JSONField(default=dict)
     student_education_details   = djongo_models.JSONField(default=list)
+    student_score_details       = djongo_models.JSONField(default=dict)
     del_row                     = djongo_models.CharField(default='False',max_length=5)
     
     class Meta:

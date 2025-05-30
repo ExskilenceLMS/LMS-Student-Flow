@@ -23,16 +23,9 @@ def fetch_learning_modules(request,student_id,subject,subject_id,day_number,week
         blob_path = f'https://{AZURE_ACCOUNT_NAME}.blob.core.windows.net/{AZURE_CONTAINER}/'
         student = students_info.objects.get(student_id = student_id,del_row = False)
         student_details = students_details.objects.using('mongodb').get(student_id = student_id,del_row = 'False')
-        # print(1)
         if student_details.student_question_details.get(student.course_id.course_id+'_'+subject_id) == None:
             student_details.student_question_details.update({student.course_id.course_id+'_'+subject_id:add_day_to_student(student_id,subject_id,subject,1,day_number).get('data')})                                                              
-        # print(2)
-
-        # print(f'lms_daywise/{student.course_id.course_id}/{student.course_id.course_id}_{student.batch_id.batch_id}.json')
-        # print('student_details',student_details.student_question_details.get(subject).get('week_'+str(1)).get('day_'+str(day_number)).get('sub_topic_status'))
-        # blob_data = json.loads(get_blob('LMS_DayWise/'+student.course_id.course_id+'.json'))
         blob_data = json.loads(get_blob(f'lms_daywise/{student.course_id.course_id}/{student.course_id.course_id}_{student.batch_id.batch_id}.json'))
-        # print(3)
         day_data = [day  for day in blob_data.get(subject) if day.get('day') == 'Day '+str(day_number)][0] 
         response_data =[]
         for i in day_data.get('subtopicids'):
@@ -44,24 +37,19 @@ def fetch_learning_modules(request,student_id,subject,subject_id,day_number,week
                 'mcqQuestions':sum([ day_data.get('mcq').get(i.get('subtopic_id')).get(qn,0) for qn in day_data.get('mcq').get(i.get('subtopic_id'),{}) ]),
                 'codingQuestions':sum([day_data.get('coding').get(i.get('subtopic_id')).get(qn,0) for qn in day_data.get('coding').get(i.get('subtopic_id'),{} )])
             })
-        # print(4)
         status ={'current_id': ""}
         if student_details.student_question_details.get(student.course_id.course_id+'_'+subject_id,None) == None \
               or student_details.student_question_details.get(student.course_id.course_id+'_'+subject_id).get('week_'+str(1))== None\
                   or student_details.student_question_details.get(student.course_id.course_id+'_'+subject_id).get('week_'+str(1)).get('day_'+str(day_number)) == None \
                     or student_details.student_question_details.get(student.course_id.course_id+'_'+subject_id).get('week_'+str(1)).get('day_'+str(day_number)).get('sub_topic_status')==None:
-            # print(5)
             pass
             
         else:
             [status.update({'current_id':i}) for i in student_details.student_question_details.get(student.course_id.course_id+'_'+subject_id).get('week_'+str(1)).get('day_'+str(day_number)).get('sub_topic_status')
                     if student_details.student_question_details.get(student.course_id.course_id+'_'+subject_id).get('week_'+str(1)).get('day_'+str(day_number)).get('sub_topic_status').get(i) == 1\
                         or student_details.student_question_details.get(student.course_id.course_id+'_'+subject_id).get('week_'+str(1)).get('day_'+str(day_number)).get('sub_topic_status').get(i) == 2]   
-        # print(6)
         if status.get('current_id') == '': 
-            # print(7)
             status.update({'current_id':[i for i in student_details.student_question_details.get(student.course_id.course_id+'_'+subject_id).get('week_'+str(week_number)).get('day_'+str(day_number)).get('sub_topic_status').keys()][0]})
-            # print(8)
         if status.get('current_id') == [sb for sb in student_details.student_question_details.get(student.course_id.course_id+'_'+subject_id).get('week_'+str(week_number)).get('day_'+str(day_number)).get('sub_topic_status').keys()][-1]:
             daycompleted = True
         else:
@@ -93,11 +81,11 @@ def fetch_learning_modules(request,student_id,subject,subject_id,day_number,week
 def add_days_to_student(request):
     try:
         data = json.loads(request.body)
-        subject = data.get('subject')
-        subject_id = data.get('subject_id')
-        week_number = data.get('week_number')
-        student_id = data.get('student_id')
-        day_number = data.get('day_number')
+        subject = data['subject']
+        subject_id = data['subject_id']
+        week_number = data['week_number']
+        student_id = data['student_id']
+        day_number = data['day_number']
         response  = add_day_to_student(student_id,subject_id,subject,week_number,day_number)
         return JsonResponse(response,safe=False,status=200)
     except Exception as e:
@@ -114,21 +102,22 @@ def add_day_to_student(student_id,subject,subject_name,week_number,day_number):
         student = students_details.objects.using('mongodb').get(student_id = student_id,
                                                                 del_row = 'False')
         needTOsave = False
-        if student.student_question_details.get(student_info.course_id.course_id+'_'+subject) == None:
+        courseID = student_info.course_id.course_id
+        if student.student_question_details.get(courseID+'_'+subject) == None:
             student.student_question_details.update({
-                student_info.course_id.course_id+'_'+subject:{
+                courseID+'_'+subject:{
                     'week_'+str(week_number):{}
             }})
             needTOsave = True
-        if student.student_question_details.get(student_info.course_id.course_id+'_'+subject).get('week_'+str(week_number)) == None:
-            student.student_question_details.get(student_info.course_id.course_id+'_'+subject).update({
+        if student.student_question_details.get(courseID+'_'+subject).get('week_'+str(week_number)) == None:
+            student.student_question_details.get(courseID+'_'+subject).update({
                 'week_'+str(week_number):{
                         'day_'+str(day_number):{}
                     }
             })
             needTOsave = True
-        if student.student_question_details.get(student_info.course_id.course_id+'_'+subject).get('week_'+str(week_number)).get('day_'+str(day_number)) == None:
-            student.student_question_details.get(student_info.course_id.course_id+'_'+subject).get('week_'+str(week_number)).update({
+        if student.student_question_details.get(courseID+'_'+subject).get('week_'+str(week_number)).get('day_'+str(day_number)) == None:
+            student.student_question_details.get(courseID+'_'+subject).get('week_'+str(week_number)).update({
                 'day_'+str(day_number):{}
             })
             needTOsave = True
@@ -136,17 +125,17 @@ def add_day_to_student(student_id,subject,subject_name,week_number,day_number):
         response = {'message':'not updated'}
         if needTOsave == True :
             # student_info = students_info.objects.get(student_id = student_id,del_row = False)
-            # cache_data = cache.get('LMS_DayWise/'+student_info.course_id.course_id+'.json')
-            cache_data = json.loads(get_blob(f'lms_daywise/{student_info.course_id.course_id}/{student_info.course_id.course_id}_{student_info.batch_id.batch_id}.json'))
+            # cache_data = cache.get('LMS_DayWise/'+courseID+'.json')
+            cache_data = json.loads(get_blob(f'lms_daywise/{courseID}/{courseID}_{student_info.batch_id.batch_id}.json'))
             if cache_data :
-                # cache.set('LMS_DayWise/'+student_info.course_id.course_id+'.json',cache_data)
-                cache.set(f'lms_daywise/{student_info.course_id.course_id}/{student_info.course_id.course_id}_{student_info.batch_id.batch_id}.json',cache_data)
+                # cache.set('LMS_DayWise/'+courseID+'.json',cache_data)
+                cache.set(f'lms_daywise/{courseID}/{courseID}_{student_info.batch_id.batch_id}.json',cache_data)
                 blob_data = cache_data
             else:
-                # blob_data = json.loads(get_blob('LMS_DayWise/'+student_info.course_id.course_id+'.json'))
-                blob_data = json.loads(get_blob(f'lms_daywise/{student_info.course_id.course_id}/{student_info.course_id.course_id}_{student_info.batch_id.batch_id}.json'))
-                # cache.set('LMS_DayWise/'+student_info.course_id.course_id+'.json',blob_data)
-                cache.set(f'lms_daywise/{student_info.course_id.course_id}/{student_info.course_id.course_id}_{student_info.batch_id.batch_id}.json',blob_data)
+                # blob_data = json.loads(get_blob('LMS_DayWise/'+courseID+'.json'))
+                blob_data = json.loads(get_blob(f'lms_daywise/{courseID}/{courseID}_{student_info.batch_id.batch_id}.json'))
+                # cache.set('LMS_DayWise/'+courseID+'.json',blob_data)
+                cache.set(f'lms_daywise/{courseID}/{courseID}_{student_info.batch_id.batch_id}.json',blob_data)
             # print('blob_data',blob_data.get(subject_name),subject_name)
             day_data = [day  for day in blob_data.get(subject_name) if day.get('day') == 'Day '+str(day_number)][0]
             # print('day_data',day_data)
@@ -159,24 +148,24 @@ def add_day_to_student(student_id,subject,subject_name,week_number,day_number):
                 types.append('Coding')
                 levels.update({'Coding':day_data.get('coding')})
             qnslist = get_random_questions(types,[st.get('subtopic_id') for st in day_data.get('subtopicids')],levels)
-            student.student_question_details.get(student_info.course_id.course_id+'_'+subject).get('week_'+str(week_number)).get('day_'+str(day_number)).update({
+            student.student_question_details.get(courseID+'_'+subject).get('week_'+str(week_number)).get('day_'+str(day_number)).update({
                 "sub_topic_status": {st.get('subtopic_id'):0 for st in day_data.get('subtopicids')},
             })
             if qnslist.get('MCQ') is not None:
-                student.student_question_details.get(student_info.course_id.course_id+'_'+subject).get('week_'+str(week_number)).get('day_'+str(day_number)).update({
+                student.student_question_details.get(courseID+'_'+subject).get('week_'+str(week_number)).get('day_'+str(day_number)).update({
                 "mcq_questions": qnslist.get('MCQ',[]),
                 "mcq_questions_status": {i:0 for i in qnslist.get('MCQ',[])},
                 "mcq_score": "0/"+str(qnslist.get('MCQ_score',0))
             })
             if qnslist.get('Coding') is not None:
-                student.student_question_details.get(student_info.course_id.course_id+'_'+subject).get('week_'+str(week_number)).get('day_'+str(day_number)).update({
+                student.student_question_details.get(courseID+'_'+subject).get('week_'+str(week_number)).get('day_'+str(day_number)).update({
                 "coding_questions": qnslist.get('Coding',[]),
                 "coding_questions_status": {i:0 for i in qnslist.get('Coding',[])},
                 "coding_score": "0/"+str(qnslist.get('Coding_score',0))
             })
             student.save()
             response.update({'message':'updated',
-                             'data':student.student_question_details.get(student_info.course_id.course_id+'_'+subject)})
+                             'data':student.student_question_details.get(courseID+'_'+subject)})
         # else:
         #     day_Qna_data =student.student_question_details.get(subject).get('week_'+str(week_number)).get('day_'+str(day_number))
         #     sub_topics  = [ i[1:-5]  for i in day_Qna_data.get('mcq_questions_status')]
@@ -217,14 +206,15 @@ def fetch_overview_modules(request,student_id,subject,day_number):
 def fetch_questions(request,type,student_id,subject,subject_id,day_number,week_number,subTopic):
     try:
         student_info = students_info.objects.get(student_id = student_id,del_row = False)
+        courseID = student_info.course_id.course_id
         student = students_details.objects.using('mongodb').get(student_id = student_id,del_row = 'False')
-        if student.student_question_details.get(student_info.course_id.course_id+'_'+subject_id) == None:
-            student.student_question_details.update({student_info.course_id.course_id+'_'+subject_id:add_day_to_student(student_id,subject_id,subject,week_number,day_number).get('data')})
-        if student.student_question_details.get(student_info.course_id.course_id+'_'+subject_id).get('week_'+week_number) == None:
-            student.student_question_details.update({student_info.course_id.course_id+'_'+subject_id:add_day_to_student(student_id,subject_id,subject,week_number,day_number).get('data')})
-        if student.student_question_details.get(student_info.course_id.course_id+'_'+subject_id).get('week_'+week_number).get('day_'+day_number) == None:
-            student.student_question_details.update({student_info.course_id.course_id+'_'+subject_id:add_day_to_student(student_id,subject_id,subject,week_number,day_number).get('data')})
-        questions_ids = (student.student_question_details.get(student_info.course_id.course_id+'_'+subject_id).get('week_'+week_number).get('day_'+day_number).get('mcq_questions' if type.lower() =='mcq' else 'coding_questions',[]))
+        if student.student_question_details.get(courseID+'_'+subject_id) == None:
+            student.student_question_details.update({courseID+'_'+subject_id:add_day_to_student(student_id,subject_id,subject,week_number,day_number).get('data')})
+        if student.student_question_details.get(courseID+'_'+subject_id).get('week_'+week_number) == None:
+            student.student_question_details.update({courseID+'_'+subject_id:add_day_to_student(student_id,subject_id,subject,week_number,day_number).get('data')})
+        if student.student_question_details.get(courseID+'_'+subject_id).get('week_'+week_number).get('day_'+day_number) == None:
+            student.student_question_details.update({courseID+'_'+subject_id:add_day_to_student(student_id,subject_id,subject,week_number,day_number).get('data')})
+        questions_ids = (student.student_question_details.get(courseID+'_'+subject_id).get('week_'+week_number).get('day_'+day_number).get('mcq_questions' if type.lower() =='mcq' else 'coding_questions',[]))
         if type .lower() == 'mcq':
             student_answers = list(student_practiceMCQ_answers.objects.using('mongodb').filter(student_id = student_id,
                                                                                                 subject_id = subject_id,
@@ -246,7 +236,7 @@ def fetch_questions(request,type,student_id,subject,subject_id,day_number,week_n
         blob_path = 'subjects/'
         list_of_qns = [qn for qn in questions_ids if qn[1:-5] == subTopic]
         if list_of_qns == []:
-            student.student_question_details.update({student_info.course_id.course_id+'_'+subject_id:add_day_to_student(student_id,subject_id,subject,week_number,day_number).get('data')})
+            student.student_question_details.update({courseID+'_'+subject_id:add_day_to_student(student_id,subject_id,subject,week_number,day_number).get('data')})
             list_of_qns = [qn for qn in questions_ids if qn[1:-5] == subTopic]
         cacheresponse = cache.get('lms_rules/rules.json')
         if cacheresponse:
@@ -273,7 +263,7 @@ def fetch_questions(request,type,student_id,subject,subject_id,day_number,week_n
             blob_data.update({'Qn_name':Qn,
                               'entered_ans':student_answers.get(Qn,{'entered_ans':'','score':0}).get('entered_ans'),
                               'score':str(student_answers.get(Qn,{'entered_ans':'','score':0}).get('score'))+'/'+''.join([str(i.get('score')) for i in Rules.get(type.lower(),[]) if i.get('level').lower() == level.lower()]),
-                              'status': True if student.student_question_details.get(student_info.course_id.course_id+'_'+subject_id).get('week_'+week_number).get('day_'+day_number).get(type.lower()+'_questions_status').get(Qn) == 2 else False
+                              'status': True if student.student_question_details.get(courseID+'_'+subject_id).get('week_'+week_number).get('day_'+day_number).get(type.lower()+'_questions_status').get(Qn) == 2 else False
                               })
             qn_data.append(blob_data)
         # elif type.lower() == 'coding':
@@ -313,11 +303,17 @@ def fetch_questions(request,type,student_id,subject,subject_id,day_number,week_n
 def submit_MCQ_Question(request):
     try:
         data = json.loads(request.body)
-        student_id = data.get('student_id')
-        question_id = data.get('question_id')
+        student_id = data['student_id']
+        question_id = data['question_id']
+        correct_ans = data['correct_ans']
+        entered_ans = data['entered_ans']
+        subject_id = data['subject_id']
+        week_number = data['week_number']
+        day_number = data['day_number']
+        
         # blob_rules_data = json.loads(get_blob('LMS_Rules/Rules.json'))
         blob_rules_data = json.loads(get_blob('lms_rules/rules.json'))
-        blob_rules_data = blob_rules_data.get('mcq')
+        blob_rules_data = blob_rules_data['mcq']
         score = 0
         outoff = 0
         if question_id[-4]=='e':
@@ -327,8 +323,9 @@ def submit_MCQ_Question(request):
         elif question_id[-4]=='h':
             outoff = [i.get('score') for i in blob_rules_data if i.get('level').lower() == 'level3'][0]
         
-        if data.get('correct_ans') == data.get('entered_ans'):
+        if correct_ans == entered_ans:
                 score = int(outoff)
+        outoff = int(outoff)
         student_practiceMCQ_answer ,created= student_practiceMCQ_answers.objects.using('mongodb'
                                                             ).get_or_create(student_id = student_id,
                                                                  question_id = question_id,
@@ -338,9 +335,9 @@ def submit_MCQ_Question(request):
                                                                      'student_id':student_id,
                                                                      'question_id':question_id,
                                                                      'question_done_at' :'practice',
-                                                                     'correct_ans': data.get('correct_ans'),
-                                                                     'entered_ans': data.get('entered_ans'),
-                                                                     'subject_id':data.get('subject_id'),
+                                                                     'correct_ans': correct_ans,
+                                                                     'entered_ans': entered_ans,
+                                                                     'subject_id':subject_id,
                                                                      'score':int(score),
                                                                      'answered_time':timezone.now() + timedelta(hours=5, minutes=30)
                                                                  })
@@ -349,44 +346,53 @@ def submit_MCQ_Question(request):
             student = students_details.objects.using('mongodb').get(student_id = student_id,
                                                                     del_row = 'False')
             student_info = students_info.objects.get(student_id = student_id,del_row = False)   
-            if student.student_question_details.get(student_info.course_id.course_id+'_'+data.get('subject_id')) == None:
+            courseID= student_info.course_id.course_id
+            if student.student_question_details.get(courseID+'_'+subject_id) == None:
                 student.student_question_details.update({
-                    student_info.course_id.course_id+'_'+data.get('subject_id'):{
-                        'week_'+str(data.get('week_number')):{}
+                    courseID+'_'+subject_id:{
+                        'week_'+str(week_number):{}
                 }})
-            if student.student_question_details.get(student_info.course_id.course_id+'_'+data.get('subject_id')).get('week_'+str(data.get('week_number'))) == None:
-                student.student_question_details.get(student_info.course_id.course_id+'_'+data.get('subject_id')).update({
-                    'week_'+str(data.get('week_number')):{
-                            'day_'+str(data.get('day_number')):{}
+            if student.student_question_details.get(courseID+'_'+subject_id).get('week_'+str(week_number)) == None:
+                student.student_question_details.get(courseID+'_'+subject_id).update({
+                    'week_'+str(week_number):{
+                            'day_'+str(day_number):{}
                         }
                 })
-            if student.student_question_details.get(student_info.course_id.course_id+'_'+data.get('subject_id')).get('week_'+str(data.get('week_number'))).get('day_'+str(data.get('day_number'))) == None:
-                student.student_question_details.get(student_info.course_id.course_id+'_'+data.get('subject_id')).get('week_'+str(data.get('week_number'))).update({
-                    'day_'+str(data.get('day_number')):{
+            if student.student_question_details.get(courseID+'_'+subject_id).get('week_'+str(week_number)).get('day_'+str(day_number)) == None:
+                student.student_question_details.get(courseID+'_'+subject_id).get('week_'+str(week_number)).update({
+                    'day_'+str(day_number):{
                             'mcq_questions_status':{},
                             'mcq_score':'0/0'
                     }
                 })
-            old_score = student.student_question_details.get(student_info.course_id.course_id+'_'+data.get('subject_id')).get('week_'+str(data.get('week_number'))).get('day_'+str(data.get('day_number'))).get('mcq_score','0/0').split('/')
+            old_score = student.student_question_details.get(courseID+'_'+subject_id).get('week_'+str(week_number)).get('day_'+str(day_number)).get('mcq_score','0/0').split('/')
             newscore = str(int(old_score[0]) + int(score)) + '/' + old_score[1]
-            student.student_question_details.get(student_info.course_id.course_id+'_'+data.get('subject_id')
-                                                 ).get('week_'+str(data.get('week_number'))
-                                                       ).get('day_'+str(data.get('day_number'))
+            student.student_question_details.get(courseID+'_'+subject_id
+                                                 ).get('week_'+str(week_number)
+                                                       ).get('day_'+str(day_number)
                                                              ).get('mcq_questions_status'
                                                                    ).update({question_id:2}) 
-            student.student_question_details.get(student_info.course_id.course_id+'_'+data.get('subject_id')
-                                                 ).get('week_'+str(data.get('week_number'))
-                                                       ).get('day_'+str(data.get('day_number'))
+            student.student_question_details.get(courseID+'_'+subject_id
+                                                 ).get('week_'+str(week_number)
+                                                       ).get('day_'+str(day_number)
                                                              ).update({'mcq_score':newscore})
+            student.student_score_details.update({
+                f'{courseID}_{subject_id}_{week_number}_{day_number}_mcq':str(float(student.student_score_details.get(\
+                    f'{courseID}_{subject_id}_{week_number}_{day_number}_mcq','0/0').split('/')[0])+score)+'/'+\
+                    str(float(student.student_score_details.get(f'{courseID}_{subject_id}_{week_number}_{day_number}_mcq','0/0').split('/')[1])+outoff),
+                    'total_practice_mcq':str(float(student.student_score_details.get('total_practice_mcq','0/0').split('/')[0])+score)+'/'+\
+                    str(float(student.student_score_details.get('total_practice_mcq','0/0').split('/')[1])+outoff)
+                    })
             student.save()
-            student_info.student_score = int(student_info.student_score) + int(score)
-            student_info.student_total_score = int(student_info.student_total_score) + int(outoff)
+            student_info.student_score = int(student_info.student_score) + outoff
+            student_info.student_total_score = int(student_info.student_total_score) + outoff
             student_info.save()
             response ={'message':'Submited','score':str(student_practiceMCQ_answer.score)+'/'+str(outoff)}
         update_app_usage(student_id)
         return JsonResponse(response,safe=False,status=200)
     except Exception as e:
         print(e)
+        print(traceback.format_exc())
         update_app_usage( json.loads(request.body).get('student_id') )
         return JsonResponse({"message": "Failed",
                              "error":str(encrypt_message(str({
@@ -400,12 +406,19 @@ def submit_MCQ_Question(request):
 def submition_coding_question(request):
     try:
         data = json.loads(request.body)
-        student_id = data.get('student_id')
-        question_id = data.get('Qn')
+        student_id = data['student_id']
+        question_id = data['Qn']
+        subject_id = data['subject_id']
+        week_number = data['week_number']
+        day_number = data['day_number']
+        final_score = data.get('final_score','0/0')
+        subject = data['subject']
+        result_data = data['Result']
         student_info = students_info.objects.get(student_id = student_id,del_row = False)
         student = students_details.objects.using('mongodb').get(student_id = student_id,
                                                                 del_row = 'False')
-        if student.student_question_details.get(student_info.course_id.course_id+'_'+data.get('subject_id')).get('week_'+str(data.get('week_number'))).get('day_'+str(data.get('day_number'))).get('coding_questions_status').get(question_id) ==2:
+        courseID= student_info.course_id.course_id
+        if student.student_question_details.get(courseID+'_'+subject_id).get('week_'+str(week_number)).get('day_'+str(day_number)).get('coding_questions_status').get(question_id) ==2:
             update_app_usage(student_id)
             return JsonResponse({ "message": "Already Submited","status":True},safe=False,status=200)
         # blob_rules_data = json.loads(get_blob('LMS_Rules/Rules.json')).get('coding')
@@ -424,12 +437,14 @@ def submition_coding_question(request):
         i = 0
         passedcases = 0
         totalcases = 0
-        if data.get("subject") == 'HTML' or data.get("subject") == 'HTML CSS' or data.get("subject") == 'CSS' or data.get("subject") == 'Java Script':
-                passedcases = float(str(data.get("final_score")).split('/')[0])
-                totalcases = float(str(data.get("final_score")).split('/')[1])
-                result = { 'TestCases':data.get("final_score")}
+        # if subject == 'HTML' or subject == 'HTML CSS' or subject == 'CSS' or subject == 'Java Script':
+        if subject in ('HTML','HTML CSS','CSS','Java Script'):
+                passedcases = float(str(final_score).split('/')[0])
+                totalcases = float(str(final_score).split('/')[1])
+                result = { 'TestCases':final_score}
         else:
-            for r in data.get('Result'):
+            print('result')
+            for r in result_data:
                 i += 1
                 if r.get("TestCase" + str(i)) == 'Passed' or r.get("TestCase" + str(i)) == 'Failed':
                     totalcases += 1
@@ -440,15 +455,16 @@ def submition_coding_question(request):
                     result.update(r)
             if passedcases == totalcases and passedcases ==0:
                 score = 0
+        print(score,passedcases,totalcases)
         score = round(score*(passedcases/totalcases),2)
-        user , created = student_practice_coding_answers.objects.using('mongodb').get_or_create(student_id=data.get('student_id'),
-                                                                                          subject_id=data.get('subject_id'),
+        user , created = student_practice_coding_answers.objects.using('mongodb').get_or_create(student_id=student_id,
+                                                                                          subject_id=subject_id,
                                                                                           question_id=data.get('Qn'),
                                                                                           question_done_at='practice',
                                                                                           del_row='False',
                                                                                           defaults={
-                                                                                              'student_id':data.get('student_id'),
-                                                                                              'subject_id':data.get('subject_id'),
+                                                                                              'student_id':student_id,
+                                                                                              'subject_id':subject_id,
                                                                                               'question_done_at':'practice',
                                                                                               'question_id':data.get('Qn'),
                                                                                               'entered_ans':data.get('Ans'),
@@ -468,17 +484,24 @@ def submition_coding_question(request):
             user.save()
             # return JsonResponse({'message':'Already Submited'},safe=False,status=200)
         # student_info = students_info.objects.get(student_id = student_id,del_row = False)
-        old_score = student.student_question_details.get(student_info.course_id.course_id+'_'+data.get('subject_id')).get('week_'+str(data.get('week_number'))).get('day_'+str(data.get('day_number'))).get('coding_score').split('/')
+        old_score = student.student_question_details.get(courseID+'_'+subject_id).get('week_'+str(week_number)).get('day_'+str(day_number)).get('coding_score').split('/')
         newscore = str(int(old_score[0]) + int(score)) + '/' + old_score[1]
-        student.student_question_details.get(student_info.course_id.course_id+'_'+data.get('subject_id')
-                                             ).get('week_'+str(data.get('week_number'))
-                                                   ).get('day_'+str(data.get('day_number'))
+        student.student_question_details.get(courseID+'_'+subject_id
+                                             ).get('week_'+str(week_number)
+                                                   ).get('day_'+str(day_number)
                                                          ).get('coding_questions_status'
                                                                ).update({question_id:2})   
-        student.student_question_details.get(student_info.course_id.course_id+'_'+data.get('subject_id')
-                                             ).get('week_'+str(data.get('week_number'))
-                                                   ).get('day_'+str(data.get('day_number'))
+        student.student_question_details.get(courseID+'_'+subject_id
+                                             ).get('week_'+str(week_number)
+                                                   ).get('day_'+str(day_number)
                                                          ).update({'coding_score':newscore})
+        student.student_score_details.update({
+                f'{courseID}_{subject_id}_{week_number}_{day_number}_coding':str(float(student.student_score_details.get(\
+                    f'{courseID}_{subject_id}_{week_number}_{day_number}_coding','0/0').split('/')[0])+score)+'/'+\
+                    str(float(student.student_score_details.get(f'{courseID}_{subject_id}_{week_number}_{day_number}_coding','0/0').split('/')[1])+outoff),
+                    'total_practice_coding':str(float(student.student_score_details.get('total_practice_coding','0/0').split('/')[0])+score)+'/'+\
+                    str(float(student.student_score_details.get('total_practice_coding','0/0').split('/')[1])+outoff)
+                    })
         student.save()
         student_info.student_score = int(student_info.student_score) + int(score)
         student_info.student_total_score = int(student_info.student_total_score) + int(outoff)
@@ -487,6 +510,7 @@ def submition_coding_question(request):
         return JsonResponse(response,safe=False,status=200)
     except Exception as e:
         print(e)
+        print(traceback.format_exc())
         update_app_usage(json.loads(request.body).get('student_id'))
         return JsonResponse({"message": "Failed",
                              "error":str(encrypt_message(str({
@@ -508,72 +532,77 @@ def get_SQL_tables (request):
 def update_day_status(request):
     try:
         data = json.loads(request.body)
-        student_info = students_info.objects.get(student_id = data.get('student_id'),del_row = False)
-        student = students_details.objects.using('mongodb').get(student_id = data.get('student_id'),del_row = False)
-        if student.student_question_details.get( student_info.course_id.course_id+'_'+data.get('subject_id')) == None:
-            student.student_question_details.update({student_info.course_id.course_id+'_'+data.get('subject_id'):add_day_to_student(data.get('student_id'),data.get('subject_id'),data.get('subject'),data.get('week_number'),data.get('day_number')).get('data')})
-        if student.student_question_details.get(student_info.course_id.course_id+'_'+data.get('subject_id')).get('week_'+data.get('week_number')) == None:
-            student.student_question_details.update({student_info.course_id.course_id+'_'+data.get('subject_id'):add_day_to_student(data.get('student_id'),data.get('subject_id'),data.get('subject'),data.get('week_number'),data.get('day_number')).get('data')})
-        if student.student_question_details.get(student_info.course_id.course_id+'_'+data.get('subject_id')).get('week_'+data.get('week_number')).get('day_'+data.get('day_number')) == None:
-            student.student_question_details.update({student_info.course_id.course_id+'_'+data.get('subject_id'):add_day_to_student(data.get('student_id'),data.get('subject_id'),data.get('subject'),data.get('week_number'),data.get('day_number')).get('data')})
-        current_status = student.student_question_details.get(student_info.course_id.course_id+'_'+data.get('subject_id')
-                                                ).get('week_'+str(data.get('week_number'))
-                                                      ).get('day_'+str(data.get('day_number'))
-                                                            ).get('sub_topic_status').get(data.get('sub_topic'))
-        list_of_sub_topics = [i for i in student.student_question_details.get(student_info.course_id.course_id+'_'+data.get('subject_id')
-                                             ).get('week_'+str(data.get('week_number'))
-                                                   ).get('day_'+str(data.get('day_number'))
+        subject_id = data['subject_id']
+        week_number = data['week_number']
+        day_number = data['day_number']
+        student_id = data['student_id']
+        student_info = students_info.objects.get(student_id = student_id,del_row = False)
+        courseID = student_info.course_id.course_id
+        student = students_details.objects.using('mongodb').get(student_id = student_id,del_row = False)
+        if student.student_question_details.get( courseID+'_'+subject_id) == None:
+            student.student_question_details.update({courseID+'_'+subject_id:add_day_to_student(student_id,subject_id,data['subject'],week_number,day_number).get('data')})
+        if student.student_question_details.get(courseID+'_'+subject_id).get('week_'+week_number) == None:
+            student.student_question_details.update({courseID+'_'+subject_id:add_day_to_student(student_id,subject_id,data['subject'],week_number,day_number).get('data')})
+        if student.student_question_details.get(courseID+'_'+subject_id).get('week_'+week_number).get('day_'+day_number) == None:
+            student.student_question_details.update({courseID+'_'+subject_id:add_day_to_student(student_id,subject_id,data['subject'],week_number,day_number).get('data')})
+        current_status = student.student_question_details.get(courseID+'_'+subject_id
+                                                ).get('week_'+str(week_number)
+                                                      ).get('day_'+str(day_number)
+                                                            ).get('sub_topic_status').get(data['sub_topic'])
+        list_of_sub_topics = [i for i in student.student_question_details.get(courseID+'_'+subject_id
+                                             ).get('week_'+str(week_number)
+                                                   ).get('day_'+str(day_number)
                                                          ).get('sub_topic_status')]
         if current_status == 2 :
-            update_app_usage(data.get('student_id'))
+            update_app_usage(student_id)
             if list_of_sub_topics != []:
-                if list_of_sub_topics[-1] == data.get('sub_topic'):
+                if list_of_sub_topics[-1] == data['sub_topic']:
                     return JsonResponse({'message':'Day Completed'},safe=False,status=200) 
             return JsonResponse({'message':'Already Completed'},safe=False,status=200)
-        if current_status == 1 and data.get('status') == False:
-            update_app_usage(data.get('student_id'))
+        if current_status == 1 and data['status'] == False:
+            update_app_usage(student_id)
             return JsonResponse({'message':'Already Started'},safe=False,status=200)
         message =''
-        if data.get('status') == True:
-            mcq_questions_ids = (student.student_question_details.get(student_info.course_id.course_id+'_'+data.get('subject_id')
-                                                                  ).get('week_'+str(data.get('week_number'))
-                                                                        ).get('day_'+str(data.get('day_number'))
+        if data['status'] == True:
+            mcq_questions_ids = (student.student_question_details.get(courseID+'_'+subject_id
+                                                                  ).get('week_'+str(week_number)
+                                                                        ).get('day_'+str(day_number)
                                                                               ).get('mcq_questions_status',[]))
-            coding_questons = (student.student_question_details.get(student_info.course_id.course_id+'_'+data.get('subject_id')
-                                                                  ).get('week_'+str(data.get('week_number'))
-                                                                        ).get('day_'+str(data.get('day_number'))
+            coding_questons = (student.student_question_details.get(courseID+'_'+subject_id
+                                                                  ).get('week_'+str(week_number)
+                                                                        ).get('day_'+str(day_number)
                                                                               ).get('coding_questions_status',[]))
 
-            status_of_qns = [{i:mcq_questions_ids.get(i)} for i in mcq_questions_ids if i[1:-5] == data.get('sub_topic')]
-            status_of_qns.extend([{i:coding_questons.get(i)} for i in coding_questons if i[1:-5] == data.get('sub_topic')])
+            status_of_qns = [{i:mcq_questions_ids.get(i)} for i in mcq_questions_ids if i[1:-5] == data['sub_topic']]
+            status_of_qns.extend([{i:coding_questons.get(i)} for i in coding_questons if i[1:-5] == data['sub_topic']])
             if len(status_of_qns) == len([i for i in status_of_qns if i.get(list(i.keys())[0])  == 2]):
-                student.student_question_details.get(student_info.course_id.course_id+'_'+data.get('subject_id')
-                                             ).get('week_'+str(data.get('week_number'))
-                                                   ).get('day_'+str(data.get('day_number'))
-                                                         ).get('sub_topic_status').update({data.get('sub_topic'):2})
-                message =   start_learning_activity(student.student_id,data.get('sub_topic'),data.get('week_number'),data.get('day_number'))
+                student.student_question_details.get(courseID+'_'+subject_id
+                                             ).get('week_'+str(week_number)
+                                                   ).get('day_'+str(day_number)
+                                                         ).get('sub_topic_status').update({data['sub_topic']:2})
+                message =   start_learning_activity(student.student_id,data['sub_topic'],week_number,day_number)
                 student.save()
             else:
-                update_app_usage(data.get('student_id'))
+                update_app_usage(student_id)
                 return JsonResponse({'message':'Not Completed','message2':message},safe=False,status=200)
         else:
-            if student.student_question_details.get(student_info.course_id.course_id+'_'+data.get('subject_id')
-                                             ).get('week_'+str(data.get('week_number'))
-                                                   ).get('day_'+str(data.get('day_number'))
-                                                         ).get('sub_topic_status').get(data.get('sub_topic')) < 2 :
-                student.student_question_details.get(student_info.course_id.course_id+'_'+data.get('subject_id')
-                                             ).get('week_'+str(data.get('week_number'))
-                                                   ).get('day_'+str(data.get('day_number'))
-                                                         ).get('sub_topic_status').update({data.get('sub_topic'): 1})
+            if student.student_question_details.get(courseID+'_'+subject_id
+                                             ).get('week_'+str(week_number)
+                                                   ).get('day_'+str(day_number)
+                                                         ).get('sub_topic_status').get(data['sub_topic']) < 2 :
+                student.student_question_details.get(courseID+'_'+subject_id
+                                             ).get('week_'+str(week_number)
+                                                   ).get('day_'+str(day_number)
+                                                         ).get('sub_topic_status').update({data['sub_topic']: 1})
                 student.save()
-        update_app_usage(data.get('student_id'))
-        # list_of_sub_topics = [i for i in student.student_question_details.get(student_info.course_id.course_id+'_'+data.get('subject_id')
-        #                                      ).get('week_'+str(data.get('week_number'))
-        #                                            ).get('day_'+str(data.get('day_number'))
+        update_app_usage(student_id)
+        # list_of_sub_topics = [i for i in student.student_question_details.get(courseID+'_'+subject_id
+        #                                      ).get('week_'+str(week_number)
+        #                                            ).get('day_'+str(day_number)
         #                                                  ).get('sub_topic_status')]
         # print(list_of_sub_topics)
         if list_of_sub_topics != []:
-            if list_of_sub_topics[-1] == data.get('sub_topic'):
+            if list_of_sub_topics[-1] == data['sub_topic']:
                 return JsonResponse({'message':'Day Completed','message2':message},safe=False,status=200)    
         return JsonResponse({'message':'Updated','message2':message},safe=False,status=200)    
     except Exception as e:

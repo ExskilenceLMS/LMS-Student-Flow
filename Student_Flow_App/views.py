@@ -139,6 +139,12 @@ def generate_secure_blob_url(request):
     try:
         data = json.loads(request.body)
         blob_name = data.get('file_url')
+        if blob_name == '':
+            return JsonResponse({"message": "Failed",
+                                 "error":str(encrypt_message(str({
+                                        "Error_msg": "file_url is empty",
+                                        "Stack_trace":str(traceback.format_exc())+'\nUrl:-'+str(request.build_absolute_uri())+'\nBody:-' + (str(json.loads(request.body)) if request.body else "{}")
+                                        })))},safe=False,status=400)
         sas_token = generate_blob_sas(
             account_name=AZURE_ACCOUNT_NAME,
             container_name=AZURE_CONTAINER,
