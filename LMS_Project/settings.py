@@ -63,26 +63,26 @@ uri = f"mongodb+srv://{escaped_username}:{escaped_password}@lmsmongo.mongocluste
 DATABASES = {
     'mongodb': {
         'ENGINE': 'djongo',
-        'NAME': 'LMSmongodb',
-        'CLIENT': {
-            'host': 'mongodb+srv://kecoview:FVy5fqqCtQy3KIt6@cluster0.b9wmlid.mongodb.net/',
-            'username': 'kecoview',
-            'password': 'FVy5fqqCtQy3KIt6',
-            'authMechanism': 'SCRAM-SHA-1',
-        }
-        # 'NAME': 'eumodb',
-        # 'ENFORCE_SCHEMA': False,  
+        # 'NAME': 'LMSmongodb',
         # 'CLIENT': {
-        #     'host': uri,
-        #     'username': uname,
-        #     'password': pwd,
-        #     'authMechanism': 'SCRAM-SHA-256',
+        #     'host': 'mongodb+srv://kecoview:FVy5fqqCtQy3KIt6@cluster0.b9wmlid.mongodb.net/',
+        #     'username': 'kecoview',
+        #     'password': 'FVy5fqqCtQy3KIt6',
+        #     'authMechanism': 'SCRAM-SHA-1',
         # }
+        'NAME': 'eumodb',
+        'ENFORCE_SCHEMA': False,  
+        'CLIENT': {
+            'host': uri,
+            'username': uname,
+            'password': pwd,
+            'authMechanism': 'SCRAM-SHA-256',
+        }
     },
     'default': {
         'ENGINE': 'mssql',
-        # 'NAME': 'eussdb',
-        'NAME': 'staging',
+        'NAME': 'eussdb',
+        # 'NAME': 'staging',
         'USER': 'euserblr', 
         'PASSWORD': '6han4Sy5#', 
         'HOST': 'slnsgdhutmtbs.database.windows.net', 
