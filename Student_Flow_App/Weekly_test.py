@@ -28,14 +28,14 @@ def Automated_weekly_test(request, student_id, week_number, subject_id):
 
         week_status = []
         all_sub_topics = set()
-        all_practiced_Questions = []
+        # all_practiced_Questions = []
 
         for day_data in week_data.values():
             sub_topic_status = day_data.get('sub_topic_status', {})
             week_status.extend(v == 2 for v in sub_topic_status.values())
             all_sub_topics.update(sub_topic_status.keys())
-            all_practiced_Questions.extend(day_data.get('mcq_questions', []))
-            all_practiced_Questions.extend(day_data.get('coding_questions', []))
+            # all_practiced_Questions.extend(day_data.get('mcq_questions', []))
+            # all_practiced_Questions.extend(day_data.get('coding_questions', []))
 
         if not week_status or week_status.count(True) != len(week_status):
             return JsonResponse({"message": "Not Unlocked yet"}, safe=False, status=400)
