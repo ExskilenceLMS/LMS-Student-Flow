@@ -33,7 +33,7 @@ def fetch_enrolled_subjects(request,student_id):
             if subject.subject_id.del_row :
                 continue
             subject_data = {}
-            # print(sub_days_count,subject.duration_in_days)
+            print(sub_days_count,subject.duration_in_days)
             subject_data.update({
                 "title": subject.subject_id.subject_name,
                 "subject": str(subject.subject_id.subject_name).replace(' ',''),
@@ -51,6 +51,7 @@ def fetch_enrolled_subjects(request,student_id):
         return JsonResponse(response,safe=False,status=200)
     except Exception as e:
         print(e)
+        print(str(traceback.format_exc()))
         # update_app_usage(student_id)
         return JsonResponse({"message": "Failed",
                              "error":str(encrypt_message(str({
@@ -63,13 +64,13 @@ def calculate_progress(start_date, end_date, student_progress,Total_days):
     response = {
         "student_progress": std_progress if std_progress <= 100 else 100
     }
-    current_date = datetime.utcnow().__add__(timedelta(days=17,hours=5,minutes=30))
+    current_date = datetime.utcnow().__add__(timedelta(days=0,hours=5,minutes=30))
     if current_date.date() < start_date.date() :
         response.update({"progress": 0})
         return response
     start_date = datetime.strptime(str(start_date).split('.')[0].split('+')[0], "%Y-%m-%d %H:%M:%S")
     end_date = datetime.strptime(str(end_date).split('.')[0].split('+')[0], "%Y-%m-%d %H:%M:%S")
-    progress =(((current_date - start_date).days / (end_date - start_date).days) * 100)
+    progress =(((current_date - start_date).days / (end_date - start_date).days) * 100) if (end_date - start_date).days != 0 else 100
     response.update({"progress": int(progress) if progress <= 100 else 100})
     return  response
 
