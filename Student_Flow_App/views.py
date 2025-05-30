@@ -121,7 +121,7 @@ def get_media(request):
         if content_type is None:
             content_type = 'application/octet-stream'
         return StreamingHttpResponse(
-            response.iter_content(chunk_size=10*10),  # 1MB chunks
+            response.iter_content(chunk_size=10*10),  # 10 KB chunks
             content_type=content_type
         )
     except requests.RequestException as err:
@@ -148,8 +148,20 @@ def generate_secure_blob_url(request):
             permission=BlobSasPermissions(read=True),
             expiry=datetime.utcnow() + timedelta(minutes=15)
         )
-        print(f"https://{AZURE_ACCOUNT_NAME}.blob.core.windows.net/{AZURE_CONTAINER}/{blob_name}?{sas_token}")
-        return JsonResponse({"message": "Successfully Logged Out","url":f"https://{AZURE_ACCOUNT_NAME}.blob.core.windows.net/{AZURE_CONTAINER}/{blob_name}?{sas_token}"}, safe=False, status=200)
+        blob_path =f"https://{AZURE_ACCOUNT_NAME}.blob.core.windows.net/{AZURE_CONTAINER}/{blob_name}?{sas_token}"
+        if  blob_name.split('.')[1] == 'pdf':
+            response = requests.get(blob_path, stream=True)
+            response.raise_for_status()
+            path = urlparse(blob_path).path
+            content_type, _ = mimetypes.guess_type(path)
+            if content_type is None:
+                content_type = 'application/octet-stream'
+            return StreamingHttpResponse(
+                response.iter_content(chunk_size=10*10),  # 10 KB chunks
+                content_type=content_type
+            )
+        return JsonResponse({"message": "Successfully Logged Out",
+                             "url":blob_path}, safe=False, status=200)
     
     except requests.RequestException as err:
         print(err)
