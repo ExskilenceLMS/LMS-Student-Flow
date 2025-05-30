@@ -2,8 +2,7 @@ from django.http import HttpResponse, JsonResponse
 import json
 from datetime import datetime, timedelta
 from django.utils import timezone
-from LMS_Mongodb_App.models import *
-from LMS_MSSQLdb_App.models import *
+from .models import *
 from rest_framework.decorators import api_view
 import re
 from LMS_Project.settings import *

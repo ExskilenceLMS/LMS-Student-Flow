@@ -3,8 +3,7 @@ from itertools import count
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse,StreamingHttpResponse
 from rest_framework.decorators import api_view
-from LMS_MSSQLdb_App.models import *
-from LMS_Mongodb_App.models import *
+from .models import *
 from datetime import datetime, timedelta
 from django.utils import timezone
 from django.db.models import Max, F ,Sum,Min,Count

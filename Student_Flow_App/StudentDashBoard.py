@@ -3,8 +3,7 @@ from itertools import count
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from rest_framework.decorators import api_view
-from LMS_MSSQLdb_App.models import *
-from LMS_Mongodb_App.models import *
+from .models import *
 from datetime import datetime, timedelta
 from django.utils import timezone
 from django.db.models import Max, F ,Sum,Min,Count
@@ -17,502 +16,544 @@ from django.core.cache import cache
 from .ErrorLog import *
 # FETCH STUDENT ENROLLED SUBJECTS
 @api_view(['GET'])
-def fetch_enrolled_subjects(request,student_id):
+def fetch_enrolled_subjects(request, student_id):
     try:
-        student_data = students_info.objects.get(student_id = student_id,del_row = False)
-        enrolled_subjects = course_subjects.objects.filter(course_id = student_data.course_id, batch_id = student_data.batch_id,del_row = False)
-        latest_activities = student_activities.objects.filter(student_id=student_id,del_row=False).values('subject_id__subject_name').annotate(latest_day=Max('activity_day'))
-        sub_days_count = {}
-        [sub_days_count.update({activity['subject_id__subject_name']:{'day':activity['latest_day']}})for activity in latest_activities]
-        
+        student = students_info.objects.get(student_id=student_id, del_row=False)
+        subjects = course_subjects.objects.filter(
+            course_id=student.course_id,
+            batch_id=student.batch_id,
+            del_row=False
+        )
+
+        latest_activities = (
+            student_activities.objects
+            .filter(student_id=student_id, del_row=False)
+            .values('subject_id__subject_name')
+            .annotate(latest_day=Max('activity_day'))
+        )
+
+        sub_days_count = {
+            activity['subject_id__subject_name']: {'day': activity['latest_day']}
+            for activity in latest_activities
+        }
+
+        # now = timezone.localtime() + timedelta(hours=5, minutes=30)
+        now = timezone.now() + timedelta(hours=5, minutes=30)
+
         response = []
-        current_time = timezone.now() + timedelta(hours=5, minutes=30)
-        if timezone.is_naive(current_time):
-            current_time = timezone.make_aware(current_time, timezone.get_current_timezone())
-        for subject in enrolled_subjects:
-            if subject.subject_id.del_row :
+        for subject in subjects:
+            if subject.subject_id.del_row:
                 continue
-            subject_data = {}
-            print(sub_days_count,subject.duration_in_days)
-            subject_data.update({
-                "title": subject.subject_id.subject_name,
-                "subject": str(subject.subject_id.subject_name).replace(' ',''),
+
+            subject_name = subject.subject_id.subject_name
+            subject_data = {
+                "title": subject_name,
+                "subject": subject_name.replace(' ', ''),
                 "subject_id": subject.subject_id.subject_id,
                 "image": subject.path,
                 "duration": f"{getdays(subject.start_date)} - {getdays(subject.end_date)}",
-                "progress": calculate_progress(subject.start_date,subject.end_date,sub_days_count.get(subject.subject_id.subject_name,{'day':0}),subject.duration_in_days),
-                'status': 'Open' if (subject.end_date > current_time and subject.start_date < current_time) or (subject.end_date < current_time ) else 'Closed'
-            })
+                "progress": calculate_progress(
+                    subject.start_date,
+                    subject.end_date,
+                    sub_days_count.get(subject_name, {'day': 0}),
+                    subject.duration_in_days
+                ),
+                "status": "Open" if subject.start_date < now < subject.end_date else "Closed"
+            }
             response.append(subject_data)
-        # if str(student_data.course_id) == 'DEMO15' :
-        #     if str(student_data.batch_id) == 'DEMOBatch1' :  
-        #        response.extend(demo)
-        # update_app_usage(student_id)
-        return JsonResponse(response,safe=False,status=200)
+
+        return JsonResponse(response, safe=False, status=200)
+
     except Exception as e:
-        print(e)
-        print(str(traceback.format_exc()))
-        # update_app_usage(student_id)
-        return JsonResponse({"message": "Failed",
-                             "error":str(encrypt_message(str({
-                                    "Error_msg": str(e),
-                                    "Stack_trace":str(traceback.format_exc())+'\nUrl:-'+str(request.build_absolute_uri())+'\nBody:-' + (str(json.loads(request.body)) if request.body else "{}")
-                                    })))},safe=False,status=400)
-def calculate_progress(start_date, end_date, student_progress,Total_days):
-    days = student_progress.get('day')
-    std_progress = int(days /int(Total_days) * 100)
-    response = {
-        "student_progress": std_progress if std_progress <= 100 else 100
-    }
-    current_date = datetime.utcnow().__add__(timedelta(days=0,hours=5,minutes=30))
-    if current_date.date() < start_date.date() :
-        response.update({"progress": 0})
+        payload = {
+            "Error_msg": str(e),
+            "Stack_trace": traceback.format_exc()+\
+                '\nUrl:-'+str(request.build_absolute_uri())+\
+                    '\nBody:-' + (str(json.loads(request.body)) if request.body else "{}"),
+            "Url": request.build_absolute_uri(),
+            "Body": "{}"
+        }
+        return JsonResponse({
+            "message": "Failed",
+            "error": str(encrypt_message(str(payload)))
+        }, safe=False, status=400)
+def calculate_progress(start_date, end_date, student_progress, total_days):
+    response = {}
+
+    days_completed = student_progress.get('day', 0)
+    student_pct = int((days_completed / int(total_days)) * 100) if total_days else 0
+    response["student_progress"] = min(student_pct, 100)
+
+    current_date = timezone.now() + timedelta(hours=5, minutes=30)
+
+    if current_date.date() < start_date.date():
+        response["progress"] = 0
         return response
-    start_date = datetime.strptime(str(start_date).split('.')[0].split('+')[0], "%Y-%m-%d %H:%M:%S")
-    end_date = datetime.strptime(str(end_date).split('.')[0].split('+')[0], "%Y-%m-%d %H:%M:%S")
-    progress =(((current_date - start_date).days / (end_date - start_date).days) * 100) if (end_date - start_date).days != 0 else 100
-    response.update({"progress": int(progress) if progress <= 100 else 100})
-    return  response
+
+    if isinstance(start_date, str):
+        start_date = datetime.strptime(start_date.split('.')[0].split('+')[0], "%Y-%m-%d %H:%M:%S")
+    if isinstance(end_date, str):
+        end_date = datetime.strptime(end_date.split('.')[0].split('+')[0], "%Y-%m-%d %H:%M:%S")
+
+    duration_days = (end_date - start_date).days or 1
+    time_progress = ((current_date - start_date).days / duration_days) * 100
+    response["progress"] = min(int(time_progress), 100)
+
+    return response
 
 def getdays(date):
-       date = datetime.strptime(str(date).split('.')[0].split('+')[0], "%Y-%m-%d %H:%M:%S")
-       day = int(date.strftime("%d"))
-       month = int(date.strftime("%m"))
-       if 4 <= day <= 20 or 24 <= day <= 30:
-           suffix = "th"
-       else:
-           suffix = ["st", "nd", "rd"][day % 10 - 1]
-       formatted_date =  (f"{day}{suffix} {calendar.month_abbr[month]} {date.strftime('%Y')[2:]}")
-       return formatted_date
+    if isinstance(date, str):
+        date = datetime.strptime(date.split('.')[0].split('+')[0], "%Y-%m-%d %H:%M:%S")
+
+    day = date.day
+    month = date.month
+
+    if 4 <= day <= 20 or 24 <= day <= 30:
+        suffix = "th"
+    else:
+        suffix = {1: "st", 2: "nd", 3: "rd"}.get(day % 10, "th")
+
+    formatted_date = f"{day}{suffix} {calendar.month_abbr[month]} {str(date.year)[2:]}"
+    return formatted_date
 
 # FETCH LIVE SESSION
 @api_view(['GET'])
-def fetch_live_session(request,student_id):
+def fetch_live_session(request, student_id):
     try:
-        print(student_id)
         current_time = timezone.now() + timedelta(hours=5, minutes=30)
-        if timezone.is_naive(current_time):
-            current_time = timezone.make_aware(current_time, timezone.get_current_timezone())
+
         live_session = live_sessions.objects.using('mongodb').filter(
             session_starttime__gte=current_time,
-            student_ids__contains = student_id,
-            del_row = "False"
-            ).order_by('-session_starttime').values_list('session_title','session_starttime')
+            student_ids__contains=student_id,  # Or use `__in=[student_id]` based on your schema
+            del_row="False"
+        ).order_by('-session_starttime').values_list('session_title', 'session_starttime')
+
         response = [{
-            "title":session[0],
-            "date":getdays(session[1]),#+" "+session[1].strftime("%Y")[2:],
-            "time":session[1].strftime("%I:%M") + " " + session[1].strftime("%p")}            for session in live_session ]
-        # update_app_usage(student_id)
-        return JsonResponse(response,safe=False,status=200)
+            "title": session[0],
+            "date": getdays(session[1]),
+            "time": session[1].strftime("%I:%M %p").upper()
+        } for session in live_session]
+
+        return JsonResponse(response, safe=False, status=200)
+
     except Exception as e:
-        print(e)
-        return JsonResponse({"message": "Failed",
-                             "error":str(encrypt_message(str({
-                                    "Error_msg": str(e),
-                                    "Stack_trace":str(traceback.format_exc())+'\nUrl:-'+str(request.build_absolute_uri())+'\nBody:-' + (str(json.loads(request.body)) if request.body else "{}")
-                                    })))},safe=False,status=400)
+        return JsonResponse({
+            "message": "Failed",
+            "error": str(encrypt_message(str({
+                "Error_msg": str(e),
+                "Stack_trace": str(traceback.format_exc()) + '\nUrl:-' + str(request.build_absolute_uri()) +
+                                '\nBody:-' + (str(json.loads(request.body)) if request.body else "{}"),
+                "Url": request.build_absolute_uri(),
+                "Body": "{}"
+            })))
+        }, safe=False, status=400)
     
 @api_view(['GET'])
-def fetch_upcoming_events(request,Course_id,batch_id):
+def fetch_upcoming_events(request, Course_id, batch_id):
     try:
-        current_time = datetime.utcnow() + timedelta(days=0,hours=5, minutes=30)
-        # blob_data = json.loads(get_blob('LMS_DayWise/Course0001.json'))
-        blob_data = json.loads(get_blob(f'lms_daywise/{Course_id}/{Course_id}_{batch_id}.json'))
-        response = extract_events(blob_data,current_time)
-        return JsonResponse(response,safe=False,status=200)
+        current_time = timezone.now() + timedelta(hours=5, minutes=30)
+
+        blob_path = f'lms_daywise/{Course_id}/{Course_id}_{batch_id}.json'
+        blob_content = get_blob(blob_path)
+        blob_data = json.loads(blob_content)
+
+        response = extract_events(blob_data, current_time)
+
+        return JsonResponse(response, safe=False, status=200)
+
     except Exception as e:
-        print(e)
-        return JsonResponse({"message": "Failed",
-                             "error":str(encrypt_message(str({
-                                    "Error_msg": str(e),
-                                    "Stack_trace":str(traceback.format_exc())+'\nUrl:-'+str(request.build_absolute_uri())+'\nBody:-' + (str(json.loads(request.body)) if request.body else "{}")
-                                    })))},safe=False,status=400)
+        return JsonResponse({
+            "message": "Failed",
+            "error": str(encrypt_message(str({
+                "Error_msg": str(e),
+                "Stack_trace": str(traceback.format_exc()) + '\nUrl:-' + str(request.build_absolute_uri()) +
+                                '\nBody:-' + (str(json.loads(request.body)) if request.body else "{}"),
+                "Url": request.build_absolute_uri(),
+                "Body": "{}"
+            })))
+        }, safe=False, status=400)
     
-def extract_events(blob_data,current_time):
+def extract_events(blob_data, current_time):
     events = []
-    for event in blob_data:
-        for i in blob_data.get(event):
-            if i.get('topic') == 'Weekly Test' or i.get('topic') == 'Onsite Workshop' or i.get('topic') == 'Internship':
-                date = datetime.strptime(str(i.get('date').replace('T',' ')).split('.')[0], "%Y-%m-%d %H:%M:%S") if str(i.get('date')).__contains__('T') else datetime.strptime(str(i.get('date')+" 00:00:00").split('.')[0], "%Y-%m-%d %H:%M:%S")
+    for subject, items in blob_data.items():
+        for item in items:
+            topic = item.get('topic')
+            if topic in ['Weekly Test', 'Onsite Workshop', 'Internship']:
+                raw_date = item.get('date')
+                try:
+                    if 'T' in raw_date:
+                        date = datetime.strptime(raw_date.split('.')[0].replace('T', ' '), "%Y-%m-%d %H:%M:%S")
+                    else:
+                        date = datetime.strptime(f"{raw_date} 00:00:00", "%Y-%m-%d %H:%M:%S")
+                except Exception:
+                    continue  
+
                 events.append({
-                    "title":i.get('topic'),
-                    'subject':event,
-                    "date":getdays(date),#+" "+date.strftime("%Y")[2:],
-                    "time":date.strftime("%I:%M") + " " + date.strftime("%p"),
-                    'datetime':date
+                    "title": topic,
+                    "subject": subject,
+                    "date": getdays(date),
+                    "time": date.strftime("%I:%M %p"),
+                    "datetime": date
                 })
-    events = sorted(events, key=lambda k: k['datetime'])
-    upcoming = [ event for event in events if event['datetime'].date() >= current_time.date()]
+
+    upcoming = sorted(
+        [event for event in events if event["datetime"].date() >= current_time.date()],
+        key=lambda e: e["datetime"]
+    )
     return upcoming
 
 # FETCH  STUDY HOURS
-
-@api_view(['GET'])
-def fetch_study_hours(request,student_id,week):
+def fetch_study_hours(request, student_id, week):
     try:
-        student = students_info.objects.get(student_id = student_id,del_row = False)
-        today =timezone.now() + timedelta(days=0,hours=5, minutes=30)
-        start_of_week = (today - timedelta(days=today.weekday())).replace(hour=0, minute=0, second=0, microsecond=0)
+        student = students_info.objects.get(student_id=student_id, del_row=False)
+        today = timezone.now() + timedelta(hours=5, minutes=30)
         if timezone.is_naive(today):
             today = timezone.make_aware(today, timezone.get_current_timezone())
+
+        start_of_week = today.replace(hour=0, minute=0, second=0, microsecond=0) - timedelta(days=today.weekday())
+
         if week.isdigit():
             current_week = int(week)
         else:
-            current_weeks = course_plan_details.objects.filter(course_id = student.course_id,
-                                                           batch_id = student.batch_id,
-                                                            day_date__date__lte=today.date(),
-                                                            del_row =False).values('week','day_date').order_by('-week')
-            if current_weeks is None or len(current_weeks) == 0 :
+            current_weeks = course_plan_details.objects.filter(
+                course_id=student.course_id,
+                batch_id=student.batch_id,
+                day_date__date__lte=today.date(),
+                del_row=False
+            ).values('week', 'day_date').order_by('-week')
+
+            if not current_weeks:
                 current_week = 1
             else:
-                if current_weeks[0].get('day_date').date() < today.date():
-                    diff = today.date() - current_weeks[0].get('day_date').date()
-                    diff_in_weeks = diff.days // 7
-                    current_week = current_weeks[0].get('week') + diff_in_weeks
-                else:
-                    current_week=current_weeks[0].get('week')
-        course_details = list(course_plan_details.objects.filter(course_id=student.course_id,
-                                                                batch_id = student.batch_id,
-                                                            week=current_week).values('duration_in_hours','week','day_date').order_by('-week'))
-        if len(course_details) == 0:
-            course_details = list(course_plan_details.objects.filter(course_id=student.course_id,
-                                                                batch_id = student.batch_id).values('duration_in_hours','week','day_date').order_by('-week'))
-            start_of_week = today.replace(hour=0, minute=0, second=0, microsecond=0) - timedelta(days=today.weekday())
+                latest_entry = current_weeks[0]
+                diff_days = (today.date() - latest_entry['day_date'].date()).days
+                current_week = latest_entry['week'] + (diff_days // 7 if diff_days > 0 else 0)
+
+        course_details = list(course_plan_details.objects.filter(
+            course_id=student.course_id,
+            batch_id=student.batch_id,
+            week=current_week
+        ).values('duration_in_hours', 'week', 'day_date').order_by('-week'))
+
+        if not course_details:
+            course_details = list(course_plan_details.objects.filter(
+                course_id=student.course_id,
+                batch_id=student.batch_id
+            ).values('duration_in_hours', 'week', 'day_date').order_by('-week'))
         else:
             if week.isdigit():
-                start_of_week = (course_details[0].get('day_date') - timedelta(days=course_details[0].get('day_date').weekday())).replace(hour=0, minute=0, second=0, microsecond=0)
-        student_app_usages = student_app_usage.objects.filter(student_id = student_id,
-                                                            #   logged_in__gte = course_details[0].get('day_date'),
-                                                            #   logged_in__lte = course_details[-1].get('day_date')+timedelta(days=1),
-                                                              logged_in__gte = start_of_week,
-                                                              logged_in__lte = start_of_week + timedelta(days=6, hours=23, minutes=59, seconds=59),
-                                                              del_row = False
-                                                            ).annotate(date=TruncDate('logged_in'),duration_in_hours=Sum(F('logged_out') - F('logged_in'))).values('date','duration_in_hours','student_id')\
-                                                                .annotate(
-                                                            total_study_hours=Sum(F('logged_out') - F('logged_in'))).order_by('date')       
-        list_of_duration = [i.get("duration_in_hours")  for i in  course_details]
-        response = {'daily_limit':round(sum(list_of_duration)/len(list_of_duration)) if list_of_duration else 0,
-                    'weekly_limit':course_details[0].get('week')+(today.date() - course_details[0].get('day_date').date()).days//7,
-                    'hours':[]}
-        hour_spent ={ i.get('date'):i.get('total_study_hours') for i in student_app_usages}
-        hour_spent2 ={ i.get('date'):round(i.get('duration_in_hours').total_seconds()/3600,2) for i in student_app_usages}
+                first_day = course_details[0]['day_date']
+                start_of_week = first_day.replace(hour=0, minute=0, second=0, microsecond=0) - timedelta(days=first_day.weekday())
+
+        week_end = start_of_week + timedelta(days=6, hours=23, minutes=59, seconds=59)
+        usages = student_app_usage.objects.filter(
+            student_id=student_id,
+            logged_in__gte=start_of_week,
+            logged_in__lte=week_end,
+            del_row=False
+        ).annotate(date=TruncDate('logged_in')) \
+         .values('date') \
+         .annotate(total_study_hours=Sum(F('logged_out') - F('logged_in'))) \
+         .order_by('date')
+
+        list_of_duration = [c.get("duration_in_hours") for c in course_details if c.get("duration_in_hours")]
+        daily_limit = round(sum(list_of_duration) / len(list_of_duration)) if list_of_duration else 0
+        weekly_limit = course_details[0]['week'] + ((today.date() - course_details[0]['day_date'].date()).days // 7)
+
+        hour_spent = {
+            usage['date']: round(usage['total_study_hours'].total_seconds() / 3600, 2)
+            for usage in usages
+        }
+
+        hours = []
         for i in range(7):
-            response.get('hours').append({
-                "date":start_of_week + timedelta(days=i),
-                "day_name":calendar.day_name[(start_of_week + timedelta(days=i)).weekday()][0:3],
-                "isUpcoming":True if (start_of_week + timedelta(days=i)).date() > today.date() else False,
-                "isCurrent":True if (start_of_week + timedelta(days=i)).date() == today.date() else False,
-                "hours":round(hour_spent.get((start_of_week + timedelta(days=i)).date()).total_seconds()/3600,2) if hour_spent.get((start_of_week + timedelta(days=i)).date()) else 0
+            day = start_of_week + timedelta(days=i)
+            hours.append({
+                "date": day,
+                "day_name": calendar.day_name[day.weekday()][:3],
+                "isUpcoming": day.date() > today.date(),
+                "isCurrent": day.date() == today.date(),
+                "hours": hour_spent.get(day.date(), 0)
             })
-        # update_app_usage(student_id) 
-        return JsonResponse(response,safe=False,status=200)
+
+        response = {
+            'daily_limit': daily_limit,
+            'weekly_limit': weekly_limit,
+            'hours': hours
+        }
+
+        return JsonResponse(response, safe=False, status=200)
+
     except Exception as e:
         print(e)
-        # update_app_usage(student_id)
-        return JsonResponse({"message": "Failed",
-                             "error":str(encrypt_message(str({
-                                    "Error_msg": str(e),
-                                    "Stack_trace":str(traceback.format_exc())+'\nUrl:-'+str(request.build_absolute_uri())+'\nBody:-' + (str(json.loads(request.body)) if request.body else "{}")
-                                    })))},safe=False,status=400)
-
+        return JsonResponse({
+            "message": "Failed",
+            "error": str(encrypt_message(str({
+                "Error_msg": str(e),
+                "Stack_trace": str(traceback.format_exc()) +
+                               '\nUrl:-' + str(request.build_absolute_uri()) +
+                               '\nBody:-' + (str(json.loads(request.body)) if request.body else "{}"),
+                "Url": request.build_absolute_uri(),
+                "Body": "{}"
+            })))
+        }, safe=False, status=400)
 #    FETCH CALENDAR
       
 @api_view(['GET'])
-def fetch_calendar(request,student_id):
+def fetch_calendar(request, student_id):
     try:
-        current_time = datetime.utcnow() + timedelta(days=0,hours=5, minutes=30)
-        # blob_data = json.loads(get_blob('LMS_DayWise/Course0001.json'))
-        student = students_info.objects.get(student_id = student_id,del_row = False)
-        blob_data = json.loads(get_blob(f'lms_daywise/{student.course_id.course_id}/{student.course_id.course_id}_{student.batch_id.batch_id}.json'))
-        response = extract_calendar_events(blob_data,current_time)
-        # update_app_usage(student_id)
-        return JsonResponse({'year':(current_time.strftime("%Y")),
-                              'month':str(int(current_time.strftime("%m"))-1),
-                              "calendar":response},
-                              safe=False,status=200)    
+        current_time = timezone.now() + timedelta(hours=5, minutes=30)
+        if timezone.is_naive(current_time):
+            current_time = timezone.make_aware(current_time, timezone.get_current_timezone())
+
+        student = students_info.objects.get(student_id=student_id, del_row=False)
+
+        blob_data = json.loads(get_blob(
+            f'lms_daywise/{student.course_id.course_id}/{student.course_id.course_id}_{student.batch_id.batch_id}.json'
+        ))
+
+        response = extract_calendar_events(blob_data, current_time)
+
+        return JsonResponse({
+            'year': current_time.strftime("%Y"),
+            'month': str(int(current_time.strftime("%m")) - 1),
+            "calendar": response
+        }, safe=False, status=200)
+
     except Exception as e:
         print(e)
-        # update_app_usage(student_id)
-        return JsonResponse({"message": "Failed",
-                             "error":str(encrypt_message(str({
-                                    "Error_msg": str(e),
-                                    "Stack_trace":str(traceback.format_exc())+'\nUrl:-'+str(request.build_absolute_uri())+'\nBody:-' + (str(json.loads(request.body)) if request.body else "{}")
-                                    })))},safe=False,status=400)
-def extract_calendar_events(blob_data,current_time):
+        return JsonResponse({
+            "message": "Failed",
+            "error": str(encrypt_message(str({
+                "Error_msg": str(e),
+                "Stack_trace": traceback.format_exc() +
+                               '\nUrl:-' + str(request.build_absolute_uri()) +
+                               '\nBody:-' + (str(json.loads(request.body)) if request.body else "{}")
+            })))
+        }, safe=False, status=400)
+def extract_calendar_events(blob_data, current_time):
     events = []
-    for event in blob_data:
-        for i in blob_data.get(event):
-            if i.get('topic') == 'Weekly Test' or i.get('topic') == 'Onsite Workshop' or i.get('topic') == 'Internship':
-                date = datetime.strptime(str(i.get('date').replace('T',' ')).split('.')[0], "%Y-%m-%d %H:%M:%S") if str(i.get('date')).__contains__('T') else datetime.strptime(str(i.get('date')+" 00:00:00").split('.')[0], "%Y-%m-%d %H:%M:%S")
+
+    for subject, event_list in blob_data.items():
+        for event in event_list:
+            topic = event.get('topic')
+            if topic in ['Weekly Test', 'Onsite Workshop', 'Internship']:
+                raw_date = event.get('date')
+                date = datetime.strptime(
+                    raw_date.replace('T', ' ').split('.')[0],
+                    "%Y-%m-%d %H:%M:%S"
+                ) if 'T' in raw_date else datetime.strptime(
+                    raw_date + " 00:00:00", "%Y-%m-%d %H:%M:%S"
+                )
+
                 events.append({
-                    "title":i.get('topic'),
-                    'subject':event,
-                    "date":getdays(date),#+" "+date.strftime("%Y"),
-                    "time":date.strftime("%I:%M") + " " + date.strftime("%p"),
-                    'datetime':date.date()
+                    "title": topic,
+                    "subject": subject,
+                    "date": getdays(date),
+                    "time": date.strftime("%I:%M %p"),
+                    "datetime": date.date()
                 })
+
     events = sorted(events, key=lambda k: k['datetime'])
-    this_month = [event for event in events if calendar.month_abbr[int(event['datetime'].strftime("%m"))]==calendar.month_abbr[int(current_time.strftime("%m"))]]
-    return this_month 
+
+    current_month = current_time.month
+    current_year = current_time.year
+
+    this_month = [
+        event for event in events
+        if event['datetime'].month == current_month and event['datetime'].year == current_year
+    ]
+
+    return this_month
 
 #    FETCH STUDENT SUMMARY
 
 @api_view(['GET'])
-def fetch_student_summary(request,student_id):
+def fetch_student_summary(request, student_id):
     try:
-        student = students_info.objects.get(student_id = student_id,del_row = False)
-        student_app_usages = student_app_usage.objects.filter(student_id = student_id,
-                                                              del_row = False
-                                                            ).aggregate(
-                                                            total_seconds=Sum(F('logged_out') - F('logged_in')))
-        
-        student_app_usages_by_student = {student_id:student_app_usages.get('total_seconds') for i in student_app_usages}
-        # student_app_usages = student_app_usage.objects.filter(student_id = student_id,
-        #                                                     #   logged_in__gte = course_details[0].get('day_date'),
-        #                                                     #   logged_in__lte = course_details[-1].get('day_date')+timedelta(days=1),
-        #                                                     #   logged_in__gte = start_of_week,
-        #                                                     #   logged_in__lte = start_of_week + timedelta(days=6, hours=23, minutes=59, seconds=59),
-        #                                                       del_row = False
-        #                                                     ).annotate(date=TruncDate('logged_in')).values('date').annotate(
-        #                                                     total_study_hours=Sum(F('logged_out') - F('logged_in'))).order_by('date')
-        # student_app_usages_by_student = {student_id:i.get('total_study_hours') for i in student_app_usages}
-        # print(student_app_usages)
-        # print(student_app_usages_by_student)
-        response ={
+        student = (
+            students_info.objects
+            .only(
+                'student_id', 'student_firstname', 'student_lastname',
+                'student_score', 'student_catogory',
+                'student_college_rank', 'student_overall_rank'
+            )
+            .get(student_id=student_id, del_row=False)
+        )
+
+        usage = (
+            student_app_usage.objects
+            .filter(student_id=student_id, del_row=False)
+            .aggregate(total=Sum(F('logged_out') - F('logged_in')))
+        )
+        total_td = usage['total'] or timedelta(0)
+        hours_spent = round(total_td.total_seconds() / 3600, 2)
+
+        response = {
             'student_id': student.student_id,
-            'name': student.student_firstname+' '+student.student_lastname,
-            'score':student.student_score,
-            'hour_spent':round(student_app_usages_by_student.get(student_id).total_seconds()/3600,2),
-            'category':student.student_catogory,
-            'college_rank':student.student_college_rank if student.student_college_rank >=0 else '--',
-            'overall_rank':student.student_overall_rank if student.student_college_rank >=0 else '--',
+            'name': f'{student.student_firstname} {student.student_lastname}',
+            'score': student.student_score,
+            'hour_spent': hours_spent,
+            'category': student.student_catogory,
+            'college_rank': student.student_college_rank if student.student_college_rank >= 0 else '--',
+            'overall_rank': student.student_overall_rank if student.student_overall_rank >= 0 else '--',
         }
-        return JsonResponse(response,safe=False,status=200)
+        return JsonResponse(response, safe=False, status=200)
+
+    except students_info.DoesNotExist:
+        return JsonResponse({'message': 'Student not found',
+                             'error': str(encrypt_message(str({'Error_msg': 'Student not found',
+                                                               "Stack_trace": traceback.format_exc()+\
+                                                                    '\nUrl:-'+str(request.build_absolute_uri())+\
+                                                                        '\nBody:-' + (str(json.loads(request.body)) if request.body else "{}"),
+                                                                "Url": request.build_absolute_uri(),
+                                                                "Body": "{}",
+                                                               }))),
+                             }, safe=False, status=404)
+
     except Exception as e:
-        print(e)
-        return JsonResponse({"message": "Failed",
-                             "error":str(encrypt_message(str({
-                                    "Error_msg": str(e),
-                                    "Stack_trace":str(traceback.format_exc())+'\nUrl:-'+str(request.build_absolute_uri())+'\nBody:-' + (str(json.loads(request.body)) if request.body else "{}")
-                                    })))},safe=False,status=400) 
+        payload = {
+            "Error_msg": str(e),
+            "Stack_trace": traceback.format_exc()+\
+                '\nUrl:-'+str(request.build_absolute_uri())+\
+                    '\nBody:-' + (str(json.loads(request.body)) if request.body else "{}"),
+            "Url": request.build_absolute_uri(),
+            "Body": "{}",
+        }
+        return JsonResponse(
+            {"message": "Failed", "error": str(encrypt_message(str(payload)))},
+            safe=False,
+            status=400,
+        )
     
 #    FETCH WEEKLY PROGRESS
-
-# @api_view(['GET'])
-# def get_weekly_progress(request,student_id):
-#     try:
-#         # obj = students_info.objects.get( student_id = student_id,del_row = False)
-#         assessment_data = students_assessments.objects.using('mongodb').filter(
-#             student_id = student_id,
-#             del_row = "False"
-#             ).order_by('-assessment_week_number').values_list('assessment_week_number','assessment_score_secured','assessment_max_score')
-#         practice_data = student_test_questions.objects.using('mongodb').filter(
-#             student_id = student_id,
-#             del_row = "False"
-#             ).order_by('-practice_week_number').values_list('practice_week_number','practice_score_secured','practice_max_score')
-#         return JsonResponse({
-#             "assessment":list(assessment_data),
-#             "practice":list(practice_data),
-#                 })
-#     except Exception as e:
-#         print(e)
-#         return JsonResponse({"message": "Failed","error":str(e)},safe=False,status=400)
-# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++[OLD METHODS]+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++# 
-    
-@api_view(['GET'])
-def get_weekly_progress(request,student_id):
+from collections import defaultdict
+def add_score(d: dict, key: str, add_secured: float, add_total: float):
+    cur_sec, cur_tot = map(float, d[key].split("/"))
+    d[key] = f"{cur_sec + add_secured}/{cur_tot + add_total}"
+@api_view(["GET"])
+def get_weekly_progress(request, student_id):
     try:
-        All_scores ={
-            'Weekly Tests' : '0/0',
-            'Practice MCQs':'0/0',
-            'Practice Codings':'0/0'
+        now = timezone.now()+timedelta(hours=5,minutes=30)
+        student = students_info.objects.only("course_id").get(student_id=student_id, del_row=False)
+
+        subj_qs = subjects.objects.only("subject_id", "subject_name").filter(del_row=False)
+        subj_id2name = {s.subject_id: s.subject_name for s in subj_qs}
+        course_key2name = {
+            f"{student.course_id.course_id}_{sid}": name for sid, name in subj_id2name.items()
         }
-        filters_subject =['All']
-        filters_weeks =[]        
-        filters_subject_week ={
-            'All':["Weekly Tests","Practice MCQs","Practice Codings"]
-        }
-        mcqScores ={}
-        codingScore ={}
-        delays ={
-            'All':0
-        }
-        student_info = students_info.objects.get( student_id = student_id,del_row = False)
-        PracticeQNs_score = students_details.objects.using('mongodb').get( student_id = student_id,\
-                                                                del_row = "False"\
-                                                                )
-        assessments = students_assessments.objects.filter(
-                                    student_id=student_id,
-                                    del_row=False
-                                    ).values('assessment_type','subject_id__subject_id','subject_id__subject_name','course_id__course_id','assessment_week_number',
-                                         'assessment_status','assessment_completion_time','assessment_max_score','assessment_score_secured',
-                                         'student_test_completion_time')
-                                # ).values('assessment_type','subject_id__subject_name','assessment_week_number').annotate(
-                                #     count=Count('id'),
-                                #     max_score=Sum('assessment_max_score'),
-                                #     total_secured_score=Sum('assessment_score_secured')
-                                # )
-        # print (assessments)
-        subject_names = {student_info.course_id.course_id+'_'+sub.subject_id:sub.subject_name for sub in subjects.objects.filter(del_row =False).all()}
-        subject_names_with_id = {sub.subject_id:sub.subject_name for sub in subjects.objects.filter(del_row =False).all()}
-        # print(subject_names)
-        # print("subject_names_with_id\n",subject_names_with_id)          
-        for i in PracticeQNs_score.student_question_details:
-            filters_subject.append(subject_names.get(i))
-            for week in PracticeQNs_score.student_question_details.get(i):
-                filters_weeks.append(week.replace('_',' '))
-                if filters_subject_week.get(subject_names.get(i)) == None:
-                    filters_subject_week.update({subject_names.get(i):[]})
-                filters_subject_week.get(subject_names.get(i)).append(week.replace('_',' '))
-                week_mcq_scores =0
-                week_coding_scores =0
-                week_mcq_total_scores =0
-                week_coding_total_scores =0
-                for day in PracticeQNs_score.student_question_details.get(i).get(week):
-                    day = PracticeQNs_score.student_question_details.get(i).get(week).get(day)
-                    week_mcq_scores = week_mcq_scores + float(day.get('mcq_score','0/0').split('/')[0])
-                    week_mcq_total_scores = week_mcq_total_scores + float(day.get('mcq_score','0/0').split('/')[1])
-                    week_coding_scores = week_coding_scores + float(day.get('coding_score','0/0').split('/')[0])
-                    week_coding_total_scores = week_coding_total_scores + float(day.get('coding_score','0/0').split('/')[1])
-                if mcqScores.get(subject_names.get(i)) == None:
-                    mcqScores.update({subject_names.get(i):{
-                        'All':'0/0'
-                    }})
-                if codingScore.get(subject_names.get(i)) == None:
-                    codingScore.update({subject_names.get(i):{
-                        'All':'0/0'
-                    }})
-                if mcqScores.get(subject_names.get(i)).get(week.replace('_',' ')) == None:
-                    mcqScores.get(subject_names.get(i)).update({week.replace('_',' '):'0/0'})
-                if codingScore.get(subject_names.get(i)).get(week.replace('_',' ')) == None:
-                    codingScore.get(subject_names.get(i)).update({week.replace('_',' '):'0/0'})
-                oldmcqScores = mcqScores.get(subject_names.get(i)).get('All').split('/')[0]
-                oldcodingScore = codingScore.get(subject_names.get(i)).get('All').split('/')[0]
-                oldtotalmcqScores = mcqScores.get(subject_names.get(i)).get('All').split('/')[1]
-                oldtotalcodingScore = codingScore.get(subject_names.get(i)).get('All').split('/')[1]
-                mcqScores.get(subject_names.get(i)).update({'All':str(float(week_mcq_scores)+float(oldmcqScores))+'/'+str(float(week_mcq_total_scores)+float(oldtotalmcqScores))})
-                codingScore.get(subject_names.get(i)).update({'All':str(float(week_coding_scores)+float(oldcodingScore))+'/'+str(float(week_coding_total_scores)+float(oldtotalcodingScore))})
-                mcqScores.get(subject_names.get(i)).update({week.replace('_',' '):(str(week_mcq_scores)+'/'+str(week_mcq_total_scores))})
-                codingScore.get(subject_names.get(i)).update({week.replace('_',' '):(str(week_coding_scores)+'/'+str(week_coding_total_scores))})
-                oldmcqcore = float(str(All_scores.get('Practice MCQs')).split('/')[0])
-                oldmcqoutoff =float(str(All_scores.get('Practice MCQs')).split('/')[1])
-                All_scores.update({'Practice MCQs':str(float(week_mcq_scores)+oldmcqcore)+'/'+str(float(week_mcq_total_scores)+oldmcqoutoff)})
-                oldcodingcore = float(str(All_scores.get('Practice Codings')).split('/')[0])
-                oldcodingoutoff =float(str(All_scores.get('Practice Codings')).split('/')[1])
-                All_scores.update({'Practice Codings':str(float(week_coding_scores)+oldcodingcore)+'/'+str(float(week_coding_total_scores)+oldcodingoutoff)})
-        tests_scores = {}
-        for i in assessments:
-            if i.get('assessment_type') == 'Weekly Test':
-                oldscore = float(str(All_scores.get(i.get('assessment_type')+'s')).split('/')[0])
-                oldoutoff =float(str(All_scores.get(i.get('assessment_type')+'s')).split('/')[1])
-                All_scores.update({str(i.get('assessment_type'))+'s':str(float(i.get('assessment_score_secured','0'))+oldscore)+'/'+str(float(i.get('assessment_max_score'))+oldoutoff)})
-                # tests_scores.update({i.get('subject_id__subject_name'):{
-                #     'week_'+str(i.get('assessment_week_number')):str(i.get('assessment_score_secured','0'))+'/'+str(i.get('assessment_max_score'))
-                # }})
-            # print(i.get('assessment_type'))
-            if filters_subject_week.get(subject_names_with_id.get(i.get('subject_id__subject_id'))) == None:
-                filters_subject_week.update({subject_names_with_id.get(i.get('subject_id__subject_id')):[]})
-            if i.get('assessment_type') != 'Weekly Test':
-                filters_subject_week.get(subject_names_with_id.get(i.get('subject_id__subject_id'))).append(i.get('assessment_type')) 
+
+        # ---------- practice (Mongo) ----------
+        practice_doc = students_details.objects.using("mongodb").get(
+            student_id=student_id, del_row="False"
+        ).student_question_details
+
+        mcq_scores = defaultdict(lambda: defaultdict(lambda: "0/0"))
+        coding_scores = defaultdict(lambda: defaultdict(lambda: "0/0"))
+        filters_subject_week = defaultdict(list, {"All": ["Weekly Tests", "Practice MCQs", "Practice Codings"]})
+        filters_subject = {"All"}
+        filters_weeks = set()
+        all_totals = defaultdict(lambda: float("0"))
+
+        for course_key, weeks in practice_doc.items():
+            subj_name = course_key2name.get(course_key)
+            if not subj_name:
+                continue
+            filters_subject.add(subj_name)
+
+            for week_key, days in weeks.items():
+                week_label = week_key.replace("_", " ")
+                filters_weeks.add(week_label)
+                filters_subject_week[subj_name].append(week_label)
+
+                w_mcq_sec = w_mcq_tot = w_cod_sec = w_cod_tot = float("0")
+
+                for day_blob in days.values():
+                    m_sec, m_tot = map(float, day_blob.get("mcq_score", "0/0").split("/"))
+                    c_sec, c_tot = map(float, day_blob.get("coding_score", "0/0").split("/"))
+                    w_mcq_sec += m_sec
+                    w_mcq_tot += m_tot
+                    w_cod_sec += c_sec
+                    w_cod_tot += c_tot
+
+                add_score(mcq_scores[subj_name], "All", w_mcq_sec, w_mcq_tot)
+                mcq_scores[subj_name][week_label] = f"{w_mcq_sec}/{w_mcq_tot}"
+
+                add_score(coding_scores[subj_name], "All", w_cod_sec, w_cod_tot)
+                coding_scores[subj_name][week_label] = f"{w_cod_sec}/{w_cod_tot}"
+
+                all_totals["Practice MCQs_sec"] += w_mcq_sec
+                all_totals["Practice MCQs_tot"] += w_mcq_tot
+                all_totals["Practice Codings_sec"] += w_cod_sec
+                all_totals["Practice Codings_tot"] += w_cod_tot
+
+        # ---------- assessments (SQL) ----------
+        assess_qs = students_assessments.objects.filter(
+            student_id=student_id, del_row=False
+        ).values(
+            "assessment_type",
+            "subject_id",
+            "subject_id__subject_id",
+            "assessment_week_number",
+            "assessment_score_secured",
+            "assessment_max_score",
+            "assessment_completion_time",
+            "student_test_completion_time",
+        )
+
+        tests_scores = defaultdict(lambda: defaultdict(lambda: "0/0"))
+        delays = defaultdict(int)
+
+        for row in assess_qs:
+            print(row)
+            subj_name = subj_id2name.get(row["subject_id__subject_id"]) or "Unknown"
+            filters_subject_week[subj_name]  # ensure key exists
+
+            atype = row["assessment_type"]
+            score_sec = float(row["assessment_score_secured"] or 0)
+            score_max = float(row["assessment_max_score"] or 0)
+
+            if atype == "Weekly Test":
+                label = f"week_{row['assessment_week_number']}"
+                add_score(tests_scores[subj_name], "All", score_sec, score_max)
+                tests_scores[subj_name][label] = f"{score_sec}/{score_max}"
+
+                all_totals["Weekly Tests_sec"] += score_sec
+                all_totals["Weekly Tests_tot"] += score_max
+
+                comp_time = row["student_test_completion_time"] or now
+                due_time = row["assessment_completion_time"] or now
+                delay_days = max((comp_time - due_time).days, 0)
+                delays["All"] = max(delays["All"], delay_days)
+                delays[subj_name] = max(delays[subj_name], delay_days)
             else:
-                if tests_scores.get(subject_names_with_id.get(i.get('subject_id__subject_id'))).get('All') == None:
-                    tests_scores.get(subject_names_with_id.get(i.get('subject_id__subject_id'))).update({
-                        'All':'0/0'})
-                oldtestscore = float(str(tests_scores.get(subject_names_with_id.get(i.get('subject_id__subject_id'))).get('All')).split('/')[0])
-                oldtestoutoff =float(str(tests_scores.get(subject_names_with_id.get(i.get('subject_id__subject_id'))).get('All')).split('/')[1])
-                tests_scores.get(subject_names_with_id.get(i.get('subject_id__subject_id'))).update({
-                    'All':str(float(i.get('assessment_score_secured','0'))+oldtestscore)+'/'+str(float(i.get('assessment_max_score'))+oldtestoutoff)
-                })
-                if delays.get(subject_names_with_id.get(i.get('subject_id__subject_id')))== None:
-                    delays.update({subject_names_with_id.get(i.get('subject_id__subject_id')):0})
-                delay = (i.get('student_test_completion_time') if i.get('student_test_completion_time') != None else timezone.now().__add__(timedelta(hours=5,minutes=30))) - (i.get('assessment_completion_time') if i.get('assessment_completion_time') != None else timezone.now().__add__(timedelta(hours=5,minutes=30)))
-                delay = delay.days
-                old_delay = delays.get('All')
-                delays.update({'All':delay if delay > old_delay else old_delay})
-                delays.update({subject_names_with_id.get(i.get('subject_id__subject_id')):delay if delay > old_delay else old_delay})
-
-            if tests_scores.get(subject_names_with_id.get(i.get('subject_id__subject_id')))== None:
-                tests_scores.update({subject_names_with_id.get(i.get('subject_id__subject_id')):{}})
-            tests_scores.get(subject_names_with_id.get(i.get('subject_id__subject_id'))).update({
-                'week_'+str(i.get('assessment_week_number')) if i.get('assessment_type') == 'Weekly Test' else i.get('assessment_type') :str(i.get('assessment_score_secured','0'))+'/'+str(i.get('assessment_max_score'))})
-        # all_scores_data ={}
-        # all_scores_data.update({'All':All_scores})
-        # All_scores.update(all_scores_data)
-        response ={
-            "filters_subject":list(filters_subject),
-            "filters_subject_week":filters_subject_week,
-            "mcqScores":mcqScores,
-            "codingScore":codingScore,
-            'tests': tests_scores,
-            "All":{
-                'Practice MCQs':str(All_scores.get('Practice MCQs','0/0')),'Practice Codings':str(All_scores.get('Practice Codings','0/0')),
-                'Weekly Tests':str(All_scores.get('Weekly Tests','0/0')),
-                'All':All_scores
+                filters_subject_week[subj_name].append(atype)
+                tests_scores[subj_name][atype] = f"{score_sec}/{score_max}"
+        print(subj_id2name)
+        # ---------- response ----------
+        response = {
+            "filters_subject": list(filters_subject),
+            "filters_subject_week": filters_subject_week,
+            "mcqScores": mcq_scores,
+            "codingScore": coding_scores,
+            "tests": tests_scores,
+            "All": {
+                "Practice MCQs": f"{all_totals['Practice MCQs_sec']}/{all_totals['Practice MCQs_tot']}",
+                "Practice Codings": f"{all_totals['Practice Codings_sec']}/{all_totals['Practice Codings_tot']}",
+                "Weekly Tests": f"{all_totals['Weekly Tests_sec']}/{all_totals['Weekly Tests_tot']}",
+                "All":{
+                    "Practice MCQs": f"{all_totals['Practice MCQs_sec']}/{all_totals['Practice MCQs_tot']}",
+                    "Practice Codings": f"{all_totals['Practice Codings_sec']}/{all_totals['Practice Codings_tot']}",
+                    "Weekly Tests": f"{all_totals['Weekly Tests_sec']}/{all_totals['Weekly Tests_tot']}",
+                }
             },
-            'delay':delays
+            "delay": delays,
         }
-        return JsonResponse(response,safe=False,status=200)
-    except Exception as e:
-        print(e)
-        return JsonResponse({"message": "Failed",
-                             "error":str(encrypt_message(str({
-                                    "Error_msg": str(e),
-                                    "Stack_trace":str(traceback.format_exc())+'\nUrl:-'+str(request.build_absolute_uri())+'\nBody:-' + (str(json.loads(request.body)) if request.body else "{}")
-                                    })))},safe=False,status=400)
-# OLD 
+        return JsonResponse(response, safe=False, status=200)
 
-@api_view(['GET'])
-def fetch_study_hours_old(request,student_id,week):
-    try:
-        week = int(week)
-        student = students_info.objects.get(student_id = student_id,del_row = False)
-        course_subjects_data = course_subjects.objects.filter(course_id = student.course_id,batch_id = student.batch_id,del_row = False
-                                                              ).values('subject_id__subject_name','duration_in_days','start_date','end_date')
-        subjects ={}
-        currentweek = {}
-        for subject in course_subjects_data:
-            weeks = []
-            initial_date = subject.get('start_date')
-            final_date = subject.get('end_date')
-            today = timezone.now() + timedelta(days=7,hours=5, minutes=30)
-            if  final_date < today or today < initial_date :
-                break
-            i = 1
-            while initial_date <= final_date:
-                week_start = initial_date - timedelta(days=initial_date.weekday())
-                week_end = week_start + timedelta(days=6)  
-                weeks.append({
-                    'start': week_start.date(),
-                    'end': week_end.date()
-                })
-                if timezone.is_naive(today):
-                    today = timezone.make_aware(today, timezone.get_current_timezone())
-                if week_start <= today<= week_end:
-                    currentweek.update({subject.get('subject_id__subject_name'):i})
-                    break
-                i += 1
-                initial_date = week_end + timedelta(days=1)
-            subjects.update({subject.get('subject_id__subject_name'):weeks})
-        subjects = subjects.get(list(currentweek.keys())[0])[currentweek.get(list(currentweek.keys())[0]) - 1]
-        student_app_usages = student_app_usage.objects.filter(student_id = student_id,
-                                                              logged_in__gte = subjects.get('start'),
-                                                              logged_in__lte = subjects.get('end')+timedelta(days=1),
-                                                              del_row = False
-                ).annotate(date=TruncDate('logged_in')).values('date').annotate(
-                total_study_hours=Sum(F('logged_out') - F('logged_in'))).order_by('date')
-        response = {'daily_limit':2.0,
-                    'weekly_limit':currentweek.get(list(currentweek.keys())[0]),
-                    'hours':[]}
-        hour_spent ={ i.get('date'):i.get('total_study_hours') for i in student_app_usages}
-        for i in range(7):
-            response.get('hours').append({
-                "date":subjects.get('start') + timedelta(days=i),
-                "day_name":calendar.day_name[(subjects.get('start') + timedelta(days=i)).weekday()][0:3],
-                "isUpcoming":True if subjects.get('start') + timedelta(days=i) > timezone.now().__add__(timedelta(hours=5,minutes=30)).date() else False,
-                "isCurrent":True if subjects.get('start') + timedelta(days=i) == timezone.now().__add__(timedelta(hours=5,minutes=30)).date() else False,
-                "hours":round(hour_spent.get(subjects.get('start') + timedelta(days=i)).total_seconds()/3600,2) if hour_spent.get(subjects.get('start') + timedelta(days=i)) else 0
-            })
-        return JsonResponse(response,safe=False,status=200)
+    except students_info.DoesNotExist:
+        return JsonResponse({"message": "Student not found"}, safe=False, status=404)
     except Exception as e:
         print(e)
-        return JsonResponse({"message": "Failed","error":str(e)},safe=False,status=400)
+        payload = {"Error_msg": str(e), "Stack_trace": traceback.format_exc()}
+        return JsonResponse({"message": "Failed", "error": str(encrypt_message(str(payload)))}, safe=False, status=400)

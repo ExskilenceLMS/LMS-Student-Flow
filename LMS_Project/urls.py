@@ -1,24 +1,9 @@
-"""LMS_Project URL Configuration
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/4.1/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
 from django.contrib import admin
 from django.urls import path
 from Student_Flow_App import views ,tests ,coding_validation as cv ,AppUsage,StudentProfile as profile
 from Student_Flow_App import StudentDashBoard as dashboard ,StudentLiveSessions as live_session ,LearningModules as learning_modules
-from Student_Flow_App import Student_Tickets as tickets , StudentRoadMap as roadmap , StudentTestDetails as tests_details
-from Student_Flow_App import FinalTest as final_test, Weekly_test as weekly_test,SQL_TESTING,ErrorLog as error_log,Student_Final_test as test_details
+from Student_Flow_App import Student_Tickets as tickets , StudentRoadMap as roadmap , StudentTestDetails as test_details
+from Student_Flow_App import FinalTest as final_test, Weekly_test as weekly_test,SQL_TESTING,ErrorLog as error_log #Student_Final_test as test_details
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.home),
@@ -65,9 +50,9 @@ urlpatterns = [
             # Test URLs
     path('api/student/test/instuction/<str:student_id>/<str:test_id>/', test_details.test_instruction),
     path('api/student/test/section/<str:student_id>/<str:test_id>/', test_details.section_details),
-    path('api/student/test/start/<str:student_id>/<str:test_id>/', test_details.Start_TEST),
-    path('api/student/test/questions/status/<str:student_id>/<str:test_id>/', test_details.Qns_status_update),
-    # path('api/student/test/questions/<str:student_id>/<str:test_id>/<str:section_name>/', test_details.get_test_Qns),
+#     path('api/student/test/start/<str:student_id>/<str:test_id>/', test_details.Start_TEST),
+#     path('api/student/test/questions/status/<str:student_id>/<str:test_id>/', test_details.Qns_status_update),
+    path('api/student/test/questions/<str:student_id>/<str:test_id>/<str:section_name>/', test_details.get_test_Qns),
     path('api/student/test/questions/submit/mcq/', test_details.submit_test_mcq_questions),
     path('api/student/test/questions/submit/coding/', test_details.submit_test_coding_questions),
     path('api/student/test/submit/<str:student_id>/<str:test_id>/', test_details.submit_test),
@@ -96,8 +81,7 @@ urlpatterns = [
     path('api/colleges/', profile.college_and_branch_list),
 
     # Media URLs
-    path('media2/', views.get_media),
-    path('media/', views.generate_secure_blob_url),
+    path('media/', views.get_media),
 
     # Error_log URLs
     path('api/errorlog/', error_log.Upload_ErrorLog),

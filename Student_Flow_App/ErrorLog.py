@@ -1,8 +1,7 @@
 from datetime import datetime, timedelta
 import json
 from django.http import JsonResponse
-from LMS_Mongodb_App.models import *
-from LMS_MSSQLdb_App.models import *
+from .models import *
 import traceback
 from django.utils import timezone
 from rest_framework.decorators import api_view

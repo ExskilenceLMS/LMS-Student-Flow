@@ -1,6 +1,5 @@
 
-from LMS_MSSQLdb_App.models import *
-from LMS_Mongodb_App.models import *
+from .models import *
 from django.db.models import Max, F ,Sum
 from django.http import JsonResponse
 from datetime import datetime, timedelta

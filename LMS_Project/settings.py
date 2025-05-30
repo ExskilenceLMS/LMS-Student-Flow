@@ -20,7 +20,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-^@eeb&6o=6x!dv6hdtm+x*@xc=!#cv)ibjx6n^#((z^zet$fa3'
+SECRET_KEY = 'django-insecure-cood-2aik$83%a#!!7!ig#9rtq3-s!7ap9g$nr)-mx6#q=tut#'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
@@ -40,8 +40,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework', 
     'djongo',
-    'LMS_Mongodb_App',
-    'LMS_MSSQLdb_App',
+    'Student_Flow_App',
 ]
 
 MIDDLEWARE = [
@@ -63,6 +62,7 @@ uri = f"mongodb+srv://{escaped_username}:{escaped_password}@lmsmongo.mongocluste
 DATABASES = {
     'mongodb': {
         'ENGINE': 'djongo',
+
         # 'NAME': 'LMSmongodb',
         # 'CLIENT': {
         #     'host': 'mongodb+srv://kecoview:FVy5fqqCtQy3KIt6@cluster0.b9wmlid.mongodb.net/',
@@ -93,38 +93,6 @@ DATABASES = {
         },
     }
 }
-# DATABASES = {
-#     'mongodb': {
-#         'ENGINE': 'djongo',
-#         'NAME': 'LMSmongodb',
-#         'CLIENT': {
-#             'host': 'mongodb+srv://kecoview:FVy5fqqCtQy3KIt6@cluster0.b9wmlid.mongodb.net/',
-#             'username': 'kecoview',
-#             'password': 'FVy5fqqCtQy3KIt6',
-#             'authMechanism': 'SCRAM-SHA-1',
-#         }
-#     },
-#     'default': {
-#         'ENGINE': 'mssql',
-        
-#         # 'NAME': 'LMSdb',
-#         # 'USER': 'sa',
-#         # 'PASSWORD': 'sql2014!',
-#         # 'HOST': 'localhost',
-
-#         'NAME': 'eussdb',
-#         'USER': 'eudbuser',#'eudev',#
-#         'PASSWORD': 'EU@TPS2025',#'Devlop99@#',#
-#         'HOST': 'slnsgdhutmtbs.database.windows.net', 
-#         # 'HOST': 'Rudresh\\SQLEXPRESS',
-#         'PORT': '1433',
-#         'OPTIONS': {
-#             'driver': 'ODBC Driver 17 for SQL Server',
-#             'trustServerCertificate': 'yes',  # Add this to avoid SSL errors
-#         },
-#     }
-# }
-
 
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000',
@@ -163,8 +131,16 @@ AZURE_ACCOUNT_NAME = 'eustoreholder'
 AZURE_ACCOUNT_KEY = 'C2+T9kL7MgZbmODARQYK/HjWSxZy2o1+IqQifEhqPAxhs/ul4pPPisrWFN50yXSBWUHy5ShSPV1B+ASthIYLYw=='
 AZURE_CONTAINER = 'lmsdata'
 
-# Database
-# https://docs.djangoproject.com/en/4.1/ref/settings/#databases
+MIGRATION_MODULES = {
+    'LMS_Mongodb_App': None,
+    'LMS_MSSQLdb_App': None
+}
+MSSQL_SERVER_NAME = 'slnkshmtbsil.database.windows.net'
+MSSQL_DATABASE_NAME = 'exe_test'
+MSSQL_USERNAME = 'tpssa'
+MSSQL_PWD = 'TPSuser@sa123'
+MSSQL_DRIVER =  'ODBC Driver 17 for SQL Server'
+
 
 # Password validation
 # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
@@ -206,12 +182,3 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-MIGRATION_MODULES = {
-    'LMS_Mongodb_App': None,
-    # 'LMS_MSSQLdb_App': None
-}
-MSSQL_SERVER_NAME = 'slnkshmtbsil.database.windows.net'
-MSSQL_DATABASE_NAME = 'exe_test'
-MSSQL_USERNAME = 'tpssa'
-MSSQL_PWD = 'TPSuser@sa123'
-MSSQL_DRIVER =  'ODBC Driver 17 for SQL Server'

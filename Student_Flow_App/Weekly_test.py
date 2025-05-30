@@ -2,8 +2,7 @@
 from LMS_Project.Blobstorage import *
 from django.http import JsonResponse
 from rest_framework.decorators import api_view
-from LMS_MSSQLdb_App.models import *
-from LMS_Mongodb_App.models import *
+from .models import *
 from datetime import datetime, timedelta
 from django.utils import timezone
 from django.db.models import Max, F ,Sum,Min,Count

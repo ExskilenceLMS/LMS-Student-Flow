@@ -1,8 +1,7 @@
 import json
 from django.http import HttpResponse, JsonResponse
 from rest_framework.decorators import api_view
-from LMS_MSSQLdb_App.models import *
-from LMS_Mongodb_App.models import *
+from .models import *
 from datetime import datetime, timedelta
 from django.core.serializers import serialize
 from .AppUsage import update_app_usage
