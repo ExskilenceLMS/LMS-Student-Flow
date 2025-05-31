@@ -56,6 +56,11 @@ LOGGING = {
             'level': 'INFO',
             'propagate': False,
         },
+        'Student_Flow_App.roadmaptesting': {
+            'handlers': ['console', 'file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
         # Django default logger - keep WARNING and above to reduce noise
         'django': {
             'handlers': ['console', 'file'],
