@@ -303,6 +303,7 @@ def fetch_questions(request,type,student_id,subject,subject_id,day_number,week_n
 @api_view(['POST'])
 def submit_MCQ_Question(request):
     try:
+        logger.info("Submit MCQ question started at " + str(timezone.now()) + "")
         data = json.loads(request.body)
         student_id = data['student_id']
         question_id = data['question_id']
@@ -327,7 +328,7 @@ def submit_MCQ_Question(request):
         if correct_ans == entered_ans:
                 score = int(outoff)
         outoff = int(outoff)
-        start_time1=timezone.now().__add__(timedelta(days=0,hours=5,minutes=30))
+        start_time1=timezone.now()
         student_practiceMCQ_answer ,created= student_practiceMCQ_answers.objects.using('mongodb'
                                                             ).get_or_create(student_id = student_id,
                                                                  question_id = question_id,
@@ -343,13 +344,16 @@ def submit_MCQ_Question(request):
                                                                      'score':int(score),
                                                                      'answered_time':timezone.now() + timedelta(hours=5, minutes=30)
                                                                  })
-        duration1= (timezone.now().__add__(timedelta(days=0,hours=5,minutes=30))-start_time1).total_seconds()
+        logger.info("Student MCQ question details from mongo DB, fetched in " + str((timezone.now()-start_time1).total_seconds()) + " seconds." )
+
+
         response ={'message':'Already Submited'}
         if created:
-            start_time2=timezone.now().__add__(timedelta(days=0,hours=5,minutes=30))
+            logger.info("Student details from mongo DB, fetched in " + str((timezone.now()-start_time1).total_seconds()) + " seconds.")
             student = students_details.objects.using('mongodb').get(student_id = student_id,
                                                                     del_row = 'False')
-            start_time3=timezone.now().__add__(timedelta(days=0,hours=5,minutes=30))
+            
+            logger.info("Student details, fetched in " + str((timezone.now()-start_time1).total_seconds()) + " seconds.")
             student_info = students_info.objects.get(student_id = student_id,del_row = False)
             courseID= student_info.course_id.course_id
             if student.student_question_details.get(courseID+'_'+subject_id) == None:
@@ -389,14 +393,14 @@ def submit_MCQ_Question(request):
                     str(float(student.student_score_details.get('total_practice_mcq','0/0').split('/')[1])+outoff)
                     })
             student.save()
-            duration2= (timezone.now().__add__(timedelta(days=0,hours=5,minutes=30))-start_time2).total_seconds()
+            logger.info("Student details from mongo DB, updated in " + str((timezone.now()-start_time1).total_seconds()) + " seconds.")
             student_info.student_score = int(student_info.student_score) + outoff
             student_info.student_total_score = int(student_info.student_total_score) + outoff
             student_info.save()
-            duration3= (timezone.now().__add__(timedelta(days=0,hours=5,minutes=30))-start_time3).total_seconds()   
-
-            response ={"duration1":duration1,"duration2":duration2,"duration3":duration3, "total": (timezone.now().__add__(timedelta(days=0,hours=5,minutes=30))-start_time1).total_seconds(),'message':'Submited','score':str(student_practiceMCQ_answer.score)+'/'+str(outoff)}
+            logger.info("Student details, updated in " + str((timezone.now()-start_time1).total_seconds()) + " seconds.")
+            response ={'message':'Submited','score':str(student_practiceMCQ_answer.score)+'/'+str(outoff)}
         update_app_usage(student_id)
+        logger.info("Submitting MCQ question API completed at " + str((timezone.now()-start_time1).total_seconds()) + "")
         return JsonResponse(response,safe=False,status=200)
     except Exception as e:
         print(e)
@@ -413,6 +417,8 @@ def submit_MCQ_Question(request):
 @api_view(['PUT']) 
 def submition_coding_question(request):
     try:
+        logger.info("Submitting coding question started at " + str(timezone.now()) + "")
+        start_time1=timezone.now()
         data = json.loads(request.body)
         student_id = data['student_id']
         question_id = data['Qn']
@@ -422,9 +428,10 @@ def submition_coding_question(request):
         final_score = data.get('final_score','0/0')
         subject = data['subject']
         result_data = data['Result']
-        start_time1=timezone.now().__add__(timedelta(days=0,hours=5,minutes=30))
+        start_time1=timezone.now()
+        logger.info("Student details, fetched in " + str((timezone.now()-start_time1).total_seconds()) + " seconds." )
         student_info = students_info.objects.get(student_id = student_id,del_row = False)
-        start_time2=timezone.now().__add__(timedelta(days=0,hours=5,minutes=30))
+        logger.info("Student details from mongo DB, fetched in " + str((timezone.now()-start_time1).total_seconds()) + " seconds." )
         student = students_details.objects.using('mongodb').get(student_id = student_id,
                                                                 del_row = 'False')
         courseID= student_info.course_id.course_id
@@ -467,7 +474,7 @@ def submition_coding_question(request):
                 score = 0
         print(score,passedcases,totalcases)
         score = round(score*(passedcases/totalcases),2)
-        start_time3 = timezone.now().__add__(timedelta(days=0,hours=5,minutes=30))
+        logger.info("Student Coding question details from mongo DB, fetched in " + str((timezone.now()-start_time1).total_seconds()) + " seconds." )
         user , created = student_practice_coding_answers.objects.using('mongodb').get_or_create(student_id=student_id,
                                                                                           subject_id=subject_id,
                                                                                           question_id=data.get('Qn'),
@@ -493,7 +500,7 @@ def submition_coding_question(request):
             user.testcase_results = result
             user.score = score
             user.save()
-        duration3=(timezone.now().__add__(timedelta(days=0,hours=5,minutes=30))-start_time3).total_seconds()
+        logger.info("Student Coding question details from mongo DB, updated in " + str((timezone.now()-start_time1).total_seconds()) + " seconds." )
             # return JsonResponse({'message':'Already Submited'},safe=False,status=200)
         # student_info = students_info.objects.get(student_id = student_id,del_row = False)
         old_score = student.student_question_details.get(courseID+'_'+subject_id).get('week_'+str(week_number)).get('day_'+str(day_number)).get('coding_score').split('/')
@@ -515,13 +522,13 @@ def submition_coding_question(request):
                     str(float(student.student_score_details.get('total_practice_coding','0/0').split('/')[1])+outoff)
                     })
         student.save()
-        duration2=(timezone.now().__add__(timedelta(days=0,hours=5,minutes=30)) - start_time2).total_seconds()
+        logger.info("Student details from mongo DB, updated in " + str((timezone.now()-start_time1).total_seconds()) + " seconds." )
         student_info.student_score = int(student_info.student_score) + int(score)
         student_info.student_total_score = int(student_info.student_total_score) + int(outoff)
         student_info.save()
-        duration1=(timezone.now().__add__(timedelta(days=0,hours=5,minutes=30)) - start_time1).total_seconds()
+        logger.info("Student Coding question details, updated in " + str((timezone.now()-start_time1).total_seconds()) + " seconds." )
         update_app_usage(student_id)
-        response.update({'duration1':duration1,'duration2':duration2,'duration3':duration3,"total":(timezone.now().__add__(timedelta(days=0,hours=5,minutes=30)) - start_time1).total_seconds()})
+        logger.info("Student Coding question details API, completed in " + str((timezone.now()-start_time1).total_seconds()) + " seconds." )
         return JsonResponse(response,safe=False,status=200)
     except Exception as e:
         print(e)

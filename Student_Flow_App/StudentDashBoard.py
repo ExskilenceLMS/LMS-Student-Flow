@@ -436,28 +436,28 @@ def add_score(d: dict, key: str, add_secured: float, add_total: float):
 @api_view(["GET"])
 def get_weekly_progress(request, student_id):
     try:
-        logger.info("Method ------------------------ Fetch weekly progress accessed.")
+        logger.info("Weekly progress student details started at " + str(timezone.now()) + "")
         now = timezone.now()+timedelta(hours=5,minutes=30)
-        start_time1=timezone.now().__add__(timedelta(days=0,hours=5,minutes=30))
+        start_time1=timezone.now()
         student = students_info.objects.only("course_id").get(student_id=student_id, del_row=False)
-        duration1=(timezone.now().__add__(timedelta(days=0,hours=5,minutes=30))-start_time1).total_seconds()
-        logger.info("Weekly progress student details fetched at " + str(duration1) + " seconds.")
-        start_time2=timezone.now().__add__(timedelta(days=0,hours=5,minutes=30))
+        duration1=(timezone.now()-start_time1).total_seconds()
+        logger.info("Student details, fetched in " + str((timezone.now()-start_time1).total_seconds()) + " seconds.")
+        start_time2=timezone.now()
         subj_qs = subjects.objects.only("subject_id", "subject_name").filter(del_row=False)
-        duration2=(timezone.now().__add__(timedelta(days=0,hours=5,minutes=30))-start_time2).total_seconds()
-        logger.info("Weekly progress subject details fetched at " + str(duration2) + " seconds.")
+        duration2=(timezone.now()-start_time2).total_seconds()
+        logger.info("Subject details, fetched in " + str((timezone.now()-start_time1).total_seconds()) + " seconds.")
         subj_id2name = {s.subject_id: s.subject_name for s in subj_qs}
         course_key2name = {
             f"{student.course_id.course_id}_{sid}": name for sid, name in subj_id2name.items()
         }
 
         # ---------- practice (Mongo) ----------
-        start_time3=timezone.now().__add__(timedelta(days=0,hours=5,minutes=30))
+        start_time3=timezone.now()
         practice_doc = students_details.objects.using("mongodb").get(
             student_id=student_id, del_row="False"
         ).student_question_details
-        duration3=(timezone.now().__add__(timedelta(days=0,hours=5,minutes=30))-start_time3).total_seconds()
-        logger.info("Weekly progress mongo student details fetched at " + str(duration3) + " seconds.")
+        duration3=(timezone.now()-start_time3).total_seconds()
+        logger.info("Weekly progress of students from mongo DB, fetched in " +str((timezone.now()-start_time1).total_seconds()) + " seconds.")
         mcq_scores = defaultdict(lambda: defaultdict(lambda: "0/0"))
         coding_scores = defaultdict(lambda: defaultdict(lambda: "0/0"))
         filters_subject_week = defaultdict(list, {"All": ["Weekly Tests", "Practice MCQs", "Practice Codings"]})
@@ -498,7 +498,7 @@ def get_weekly_progress(request, student_id):
                 all_totals["Practice Codings_tot"] += w_cod_tot
 
         # ---------- assessments (SQL) ----------
-        start_time4=timezone.now().__add__(timedelta(days=0,hours=5,minutes=30))
+        start_time4=timezone.now()
         assess_qs = students_assessments.objects.filter(
             student_id=student_id, del_row=False
         ).values(
@@ -511,8 +511,8 @@ def get_weekly_progress(request, student_id):
             "assessment_completion_time",
             "student_test_completion_time",
         )
-        duration4=(timezone.now().__add__(timedelta(days=0,hours=5,minutes=30))-start_time4).total_seconds()
-        logger.info("Weekly progress sql student details fetched at " + str(duration4) + " seconds.")
+        duration4=(timezone.now()-start_time4).total_seconds()
+        logger.info("Student assessments details, fetched in " + str((timezone.now()-start_time1).total_seconds()) + " seconds.")
         tests_scores = defaultdict(lambda: defaultdict(lambda: "0/0"))
         delays = defaultdict(int)
 
@@ -544,11 +544,6 @@ def get_weekly_progress(request, student_id):
         print(subj_id2name)
         # ---------- response ----------
         response = {
-            "duration1": duration1,
-            "duration2": duration2,
-            "duration3": duration3,
-            "duration4": duration4,
-            "total" : (timezone.now().__add__(timedelta(days=0,hours=5,minutes=30))-start_time1).total_seconds(),
             "filters_subject": list(filters_subject),
             "filters_subject_week": filters_subject_week,
             "mcqScores": mcq_scores,
@@ -566,6 +561,8 @@ def get_weekly_progress(request, student_id):
             },
             "delay": delays,
         }
+        logger.info("Weekly progress student details API, completed in " + str((timezone.now()-start_time1).total_seconds()) + " seconds.")
+
         return JsonResponse(response, safe=False, status=200)
 
     except students_info.DoesNotExist:

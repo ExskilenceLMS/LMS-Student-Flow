@@ -51,7 +51,7 @@ LOGGING = {
     },
     'loggers': {
         # Your app's logger - keep INFO and above
-        'Student_Flow_App.StudentRoadMap': {
+        'Student_Flow_App': {
             'handlers': ['console', 'file'],
             'level': 'INFO',
             'propagate': False,

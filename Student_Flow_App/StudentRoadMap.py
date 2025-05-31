@@ -283,7 +283,7 @@ def fetch_roadmap(request, student_id, course_id, subject_id):
         logger.info("student details, fetched in " + str((timezone.now()-start_time1).total_seconds()) + " seconds.")
         course = student.course_id
         sub = subjects.objects.get(subject_id=subject_id, del_row=False)
-        logger.info("student subject details, fetched in " + str((timezone.now()-start_time1).total_seconds()) + " seconds." )
+        logger.info("Student subject details, fetched in " + str((timezone.now()-start_time1).total_seconds()) + " seconds." )
         blob_json = json.loads(get_blob(f'lms_daywise/{course.course_id}/{course.course_id}_{student.batch_id.batch_id}.json'))
         raw_days = blob_json.get(sub.subject_name, [])
         blob_days = [{**d, 'dt': _parse_blob_date(d['date']), 'key': d['day'].split(' ')[-1]} for d in raw_days]
@@ -295,9 +295,9 @@ def fetch_roadmap(request, student_id, course_id, subject_id):
             .annotate(startDate=Min('day_date'), endDate=Max('day_date'), totalHours=Sum('duration_in_hours'))
             .order_by('week')
         )
-        logger.info("Student weeks details, fetched at " + str((timezone.now()-start_time1).total_seconds()) + " seconds.")
+        logger.info("Student weeks details, fetched in " + str((timezone.now()-start_time1).total_seconds()) + " seconds.")
         mongo_student = students_details.objects.using('mongodb').get(student_id=student_id, del_row=False)
-        logger.info("Student details fr9om Mongo DB, fetched in " + str((timezone.now()-start_time1).total_seconds()) + " seconds.")
+        logger.info("Student details from Mongo DB, fetched in " + str((timezone.now()-start_time1).total_seconds()) + " seconds.")
         sub_questions = mongo_student.student_question_details.get(f'{course.course_id}_{sub.subject_id}', {})
 
         assess_qs = students_assessments.objects.filter(student_id=student, subject_id=sub, del_row=False)
