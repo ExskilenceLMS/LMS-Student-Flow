@@ -129,3 +129,28 @@
 2025-05-31 22:59:45,831 [INFO] Student_Flow_App.roadmaptesting: Student assessments, fetched in 2.511905 seconds.
 2025-05-31 22:59:47,034 [INFO] Student_Flow_App.roadmaptesting: Student roadmap, processed in 3.714253 seconds.
 2025-05-31 22:59:47,034 [INFO] Student_Flow_App.roadmaptesting: Roadmap student details API, completed in 3.714253 seconds.
+2025-05-31 23:41:21,865 [INFO] Student_Flow_App.roadmaptesting: Roadmap student details, started at 2025-05-31 18:11:21.865170+00:00
+2025-05-31 23:41:22,410 [INFO] Student_Flow_App.roadmaptesting: student details, fetched in 0.544927 seconds.
+2025-05-31 23:41:22,484 [INFO] Student_Flow_App.roadmaptesting: student subject details, fetched in 0.619669 seconds.
+2025-05-31 23:41:23,181 [INFO] Student_Flow_App.roadmaptesting: student blob days, fetched in 1.31672 seconds.
+2025-05-31 23:41:23,275 [INFO] Student_Flow_App.roadmaptesting: Student weeks details, fetched in 1.410717 seconds.
+2025-05-31 23:41:24,708 [INFO] Student_Flow_App.roadmaptesting: Student details from Mongo DB, fetched in 2.843382 seconds.
+2025-05-31 23:41:24,711 [INFO] Student_Flow_App.roadmaptesting: Student assessments, fetched in 2.845592 seconds.
+2025-05-31 23:41:25,422 [INFO] Student_Flow_App.roadmaptesting: Student roadmap, processed in 3.557371 seconds.
+2025-05-31 23:41:25,422 [INFO] Student_Flow_App.roadmaptesting: Roadmap student details API, completed in 3.557371 seconds.
+2025-06-01 00:29:09,474 [ERROR] Student_Flow_App.LearningModules: Field 'id' expected a number but got 'course1'.
+2025-06-01 00:31:01,137 [ERROR] Student_Flow_App.LearningModules: Field 'id' expected a number but got 'course1'.
+2025-06-01 00:32:12,224 [ERROR] Student_Flow_App.LearningModules: Field 'id' expected a number but got 'sq'.
+2025-06-01 00:33:47,989 [ERROR] Student_Flow_App.LearningModules: 'list' object has no attribute 'values'
+2025-06-01 00:35:33,269 [ERROR] Student_Flow_App.LearningModules: list indices must be integers or slices, not dict
+2025-06-01 00:36:25,878 [ERROR] Student_Flow_App.LearningModules: list indices must be integers or slices, not dict
+2025-06-01 00:37:14,611 [ERROR] Student_Flow_App.LearningModules: list indices must be integers or slices, not dict
+2025-06-01 01:42:04,912 [INFO] Student_Flow_App.roadmaptesting: Roadmap student details, started at 2025-05-31 20:12:04.912621+00:00
+2025-06-01 01:42:05,519 [INFO] Student_Flow_App.roadmaptesting: student details, fetched in 0.607173 seconds.
+2025-06-01 01:42:05,628 [INFO] Student_Flow_App.roadmaptesting: student subject details, fetched in 0.715596 seconds.
+2025-06-01 01:42:06,211 [INFO] Student_Flow_App.roadmaptesting: student blob days, fetched in 1.298722 seconds.
+2025-06-01 01:42:06,302 [INFO] Student_Flow_App.roadmaptesting: Student weeks details, fetched in 1.389607 seconds.
+2025-06-01 01:42:08,666 [INFO] Student_Flow_App.roadmaptesting: Student details from Mongo DB, fetched in 3.753906 seconds.
+2025-06-01 01:42:08,667 [INFO] Student_Flow_App.roadmaptesting: Student assessments, fetched in 3.754901 seconds.
+2025-06-01 01:42:09,306 [INFO] Student_Flow_App.roadmaptesting: Student roadmap, processed in 4.393245 seconds.
+2025-06-01 01:42:09,306 [INFO] Student_Flow_App.roadmaptesting: Roadmap student details API, completed in 4.394284 seconds.

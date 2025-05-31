@@ -572,30 +572,36 @@ def get_weekly_progress(request, student_id):
         payload = {"Error_msg": str(e), "Stack_trace": traceback.format_exc()}
         return JsonResponse({"message": "Failed", "error": str(encrypt_message(str(payload)))}, safe=False, status=400)
 
-# def get_weekly_progress(request, student_id):
-#     try:
-#         now = timezone.now()+timedelta(hours=5,minutes=30)
-#         student = students_info.objects.only("course_id").get(student_id=student_id, del_row=False)
+def get_weekly_progress0(request, student_id):
+    
+    try:
+        now = timezone.now()+timedelta(hours=5,minutes=30)
+        student = students_info.objects.only("course_id").get(student_id=student_id, del_row=False)
 
-#         subj_qs = subjects.objects.only("subject_id", "subject_name").filter(del_row=False)
-#         subj_id2name = {s.subject_id: s.subject_name for s in subj_qs}
-#         course_key2name = {
-#             f"{student.course_id.course_id}_{sid}": name for sid, name in subj_id2name.items()
-#         }
-#         students_details_obj = students_details.objects.using("mongodb").get(
-#             student_id=student_id, del_row="False"
-#         )
-#         mcq_scores = defaultdict(lambda: defaultdict(lambda: "0/0"))
-#         coding_scores = defaultdict(lambda: defaultdict(lambda: "0/0"))
-#         filters_subject_week = defaultdict(list, {"All": ["Weekly Tests", "Practice MCQs", "Practice Codings"]})
-#         filters_subject = {"All"}
-#         filters_weeks = set()
-#         all_totals = defaultdict(lambda: float("0"))
-#         return JsonResponse('',safe=False,status=200)
-#     except Exception as e:
-#         print(e)
-#         return JsonResponse({"message": "Failed",
-#                              "error":str(encrypt_message(str({
-#                                     "Error_msg": str(e),
-#                                     "Stack_trace":str(traceback.format_exc())+'\nUrl:-'+str(request.build_absolute_uri())+'\nBody:-' + (str(json.loads(request.body)) if request.body else "{}")
-#                                     })))},safe=False,status=400)
+        subj_qs = subjects.objects.only("subject_id", "subject_name").filter(del_row=False)
+        subj_id2name = {s.subject_id: s.subject_name for s in subj_qs}
+        course_key2name = {
+            f"{student.course_id.course_id}_{sid}": name for sid, name in subj_id2name.items()
+        }
+        students_details_obj = students_details.objects.using("mongodb").get(
+            student_id=student_id, del_row="False"
+        )
+        score_details = students_details_obj.student_score_details
+        if score_details == {}:
+            score_details =defaultdict(lambda: defaultdict(lambda: "0/0"))
+            
+
+        mcq_scores = defaultdict(lambda: defaultdict(lambda: "0/0"))
+        coding_scores = defaultdict(lambda: defaultdict(lambda: "0/0"))
+        filters_subject_week = defaultdict(list, {"All": ["Weekly Tests", "Practice MCQs", "Practice Codings"]})
+        filters_subject = {"All"}
+        filters_weeks = set()
+        all_totals = defaultdict(lambda: float("0"))
+        return JsonResponse('',safe=False,status=200)
+    except Exception as e:
+        print(e)
+        return JsonResponse({"message": "Failed",
+                             "error":str(encrypt_message(str({
+                                    "Error_msg": str(e),
+                                    "Stack_trace":str(traceback.format_exc())+'\nUrl:-'+str(request.build_absolute_uri())+'\nBody:-' + (str(json.loads(request.body)) if request.body else "{}")
+                                    })))},safe=False,status=400)
