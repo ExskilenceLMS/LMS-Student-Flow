@@ -573,9 +573,13 @@ def update_day_status(request):
                                                                         ).get('day_'+str(day_number)
                                                                               ).get('coding_questions_status',[]))
 
-            status_of_qns = [{i:mcq_questions_ids.get(i)} for i in mcq_questions_ids if i[1:-5] == data['sub_topic']]
-            status_of_qns.extend([{i:coding_questons.get(i)} for i in coding_questons if i[1:-5] == data['sub_topic']])
-            if len(status_of_qns) == len([i for i in status_of_qns if i.get(list(i.keys())[0])  == 2]):
+            status_of_mcq_qns = [{i:mcq_questions_ids.get(i)} for i in mcq_questions_ids if i[1:-5] == data['sub_topic']]
+            status_of_mcq_qns_status = [i for i in status_of_mcq_qns if i.get(list(i.keys())[0])  == 2]
+            status_of_coding_qns = [{i:coding_questons.get(i)} for i in coding_questons if i[1:-5] == data['sub_topic']]
+            status_of_coding_qns_status = [i for i in status_of_coding_qns if i.get(list(i.keys())[0])  == 2]
+            status_of_qns = status_of_mcq_qns + status_of_coding_qns
+            status_of_qns_status = status_of_mcq_qns_status + status_of_coding_qns_status
+            if len(status_of_qns) == len(status_of_qns_status):
                 student.student_question_details.get(courseID+'_'+subject_id
                                              ).get('week_'+str(week_number)
                                                    ).get('day_'+str(day_number)
@@ -584,7 +588,9 @@ def update_day_status(request):
                 student.save()
             else:
                 update_app_usage(student_id)
-                return JsonResponse({'message':'Not Completed','message2':message},safe=False,status=200)
+                return JsonResponse({'message':'Not Completed','message2':message,
+                                     'qns_status': f'Progress: {len(status_of_mcq_qns_status)}/{len(status_of_mcq_qns)\
+                                        } MCQs and {len(status_of_coding_qns_status)}/{len(status_of_coding_qns)} Coding tasks Completed'},safe=False,status=200)
         else:
             if student.student_question_details.get(courseID+'_'+subject_id
                                              ).get('week_'+str(week_number)
