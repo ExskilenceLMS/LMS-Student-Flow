@@ -59,24 +59,29 @@ def fetch_roadmap0(request, student_id, course_id, subject_id):
         start_count = 0
 
         out_weeks, extra_days, day_counter, last_day_cache = [], {'Onsite Workshop': [], 'Internship': [], 'Final Test': []}, 0, {}
+        base_key = f'{course.course_id}_{sub.subject_id}'
+        weeks_count = 0
         for w in weeks:
+            weeks_count = weeks_count + 1
             wk_days = []
+            week_number = w["week"]
             start = w['startDate'].date()
             end = w['endDate'].date()
             filtered_days = [x for x in blob_days if start <= x['dt'].date() <= end]
             for d in filtered_days:
-                status = score_details.get(f'{course.course_id}_{sub.subject_id}_{w["week"]}_{d["key"]}_sub_topic_status', 0)
-                # # prev_stats = score_details.get(f'{course.course_id}_{sub.subject_id}_{w["week"]}_{d["key"]}_sub_topic_status', 0)
+                day_number = d["key"]
+                status = score_details.get(f'{base_key}_{week_number}_{day_number}_sub_topic_status', 0)
                 topic = d['topic']
+                topic_lower = topic.lower()
                 if status == 2:
                     status = 'Completed'
                 elif status == 1:
                     status = 'Resume'
                 # # elif prev_stats  == 2 :
                 else:
-                    if start_count == 0 and  topic.lower() not in ('festivals', 'preparation day', 'semester exam', 'internship'):
+                    if start_count == 0 and  topic_lower not in ('festivals', 'preparation day', 'semester exam', 'internship'):
                             if topic == 'Weekly Test':
-                                test_name = f'Week {w["week"]} Test' if topic == 'Weekly Test' else topic
+                                test_name = f'Week {week_number} Test' if topic == 'Weekly Test' else topic
                                 ass = assessments.get(test_name)
                                 test_status = ass.assessment_status if ass else ''
                                 if test_status in ('Pending', 'Started'):
@@ -93,36 +98,38 @@ def fetch_roadmap0(request, student_id, course_id, subject_id):
                     status = 'Start'
                 
                 if topic in ('Weekly Test', 'Onsite Workshop', 'Internship', 'Final Test'):
-                    test_name = f'Week {w["week"]} Test' if topic == 'Weekly Test' else topic
+                    test_name = f'Week {week_number} Test' if topic == 'Weekly Test' else topic
                     ass = assessments.get(test_name)
                     if topic == 'Weekly Test':
-                        score = f'{round(ass.assessment_score_secured, 2)}/{round(ass.assessment_max_score)}' if ass else '0/0'
-                        wk_days.append({'day': day_counter + 1, 'day_key': d['key'], 'date': d['dt'],
-                                        'week': w['week'], 'topics': topic,
+                        assessment_score = round(ass.assessment_score_secured, 2) if ass else 0
+                        assessment_max_score = round(ass.assessment_max_score, 2) if ass else 0
+                        score = f'{assessment_score}/{assessment_max_score}'
+                        wk_days.append({'day': day_counter + 1, 'day_key': day_number, 'date': getdays(d['dt']),
+                                        'week': week_number, 'topics': topic,
                                         'score': score, 'status': ass.assessment_status if ass else status})
                     else:
-                        extra_days[topic].append({'day_key': d['key'], 'date': d['dt'],
-                                                  'week': len(weeks) + 1, 'topics': topic,
+                        extra_days[topic].append({'day_key': day_number, 'date': getdays(d['dt']),
+                                                  'week': weeks_count, 'topics': topic,
                                                   'score': '0/0', 'days': [], 'status': ''})
                 else:
-                    wk_days.append({'day': day_counter + 1, 'day_key': d['key'], 'date': d['dt'],
-                                    'week': w['week'], 'topics': topic,
-                                    'practiceMCQ': {'questions': score_details.get(f'{course.course_id}_{sub.subject_id}_{w["week"]}_{d["key"]}_mcq_questions', '0/0'),
-                                                    'score': score_details.get( f'{course.course_id}_{sub.subject_id}_{w["week"]}_{d["key"]}_mcq', '0/0')},
-                                    'practiceCoding': {'questions': score_details.get(f'{course.course_id}_{sub.subject_id}_{w["week"]}_{d["key"]}_coding_questions', '0/0'),
-                                                       'score':   score_details.get(f'{course.course_id}_{sub.subject_id}_{w["week"]}_{d["key"]}_coding', '0/0')},
-                                    'status': status if topic.lower() not in ('festivals', 'preparation day', 'semester exam', 'internship') else ''})
+                    wk_days.append({'day': day_counter + 1, 'day_key': day_number, 'date': getdays(d['dt']),
+                                    'week': week_number, 'topics': topic,
+                                    'practiceMCQ': {'questions': score_details.get(f'{base_key}_{week_number}_{day_number}_mcq_questions', '0/0'),
+                                                    'score': score_details.get( f'{base_key}_{week_number}_{day_number}_mcq', '0/0')},
+                                    'practiceCoding': {'questions': score_details.get(f'{base_key}_{week_number}_{day_number}_coding_questions', '0/0'),
+                                                       'score':   score_details.get(f'{base_key}_{week_number}_{day_number}_coding', '0/0')},
+                                    'status': status if topic_lower not in ('festivals', 'preparation day', 'semester exam', 'internship') else ''})
                 day_counter += 1
             w['days'] = wk_days
             out_weeks.append(w)
         out_weeks.extend([
-            {'week': len(weeks) + 1, 'startDate': extra_days['Onsite Workshop'][0]['date'] if extra_days['Onsite Workshop'] else '',
+            {'week': weeks_count + 1, 'startDate': extra_days['Onsite Workshop'][0]['date'] if extra_days['Onsite Workshop'] else '',
              'endDate': extra_days['Onsite Workshop'][-1]['date'] if extra_days['Onsite Workshop'] else '',
              'days': extra_days['Onsite Workshop'], 'topics': 'Onsite Workshop'},
-            {'week': len(weeks) + 2, 'startDate': extra_days['Final Test'][0]['date'] if extra_days['Final Test'] else '',
+            {'week': weeks_count + 2, 'startDate': extra_days['Final Test'][0]['date'] if extra_days['Final Test'] else '',
              'endDate': extra_days['Final Test'][-1]['date'] if extra_days['Final Test'] else '',
              'days': extra_days['Final Test'], 'topics': 'Final Test'},
-            {'week': len(weeks) + 3, 'startDate': extra_days['Internship'][0]['date'] if extra_days['Internship'] else '',
+            {'week': weeks_count + 3, 'startDate': extra_days['Internship'][0]['date'] if extra_days['Internship'] else '',
              'endDate': extra_days['Internship'][-1]['date'] if extra_days['Internship'] else '',
              'days': extra_days['Internship'], 'topics': 'Internship Challenge'},
         ])
@@ -132,6 +139,7 @@ def fetch_roadmap0(request, student_id, course_id, subject_id):
         return JsonResponse({'weeks': out_weeks}, safe=False, status=200)
 
     except Exception as exc:
+        logger.error(exc)
         update_app_usage(student_id)
         return JsonResponse(
             {'message': 'Failed', 

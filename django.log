@@ -25,3 +25,35 @@
 2025-05-31 18:24:17,526 [INFO] Student_Flow_App.roadmaptesting: Student assessments, fetched in 2.640279 seconds.
 2025-05-31 18:24:17,734 [INFO] Student_Flow_App.roadmaptesting: Student roadmap, processed in 2.848022 seconds.
 2025-05-31 18:24:17,741 [INFO] Student_Flow_App.roadmaptesting: Roadmap student details API, completed in 2.854432 seconds.
+2025-05-31 19:17:37,132 [INFO] Student_Flow_App.roadmaptesting: Roadmap student details, started at 2025-05-31 13:47:37.132008+00:00
+2025-05-31 19:17:37,386 [INFO] Student_Flow_App.roadmaptesting: student details, fetched in 0.228986 seconds.
+2025-05-31 19:17:37,434 [INFO] Student_Flow_App.roadmaptesting: student subject details, fetched in 0.277029 seconds.
+2025-05-31 19:17:37,971 [INFO] Student_Flow_App.roadmaptesting: student blob days, fetched in 0.81404 seconds.
+2025-05-31 19:17:37,998 [INFO] Student_Flow_App.roadmaptesting: Student weeks details, fetched in 0.841431 seconds.
+2025-05-31 19:17:39,608 [INFO] Student_Flow_App.roadmaptesting: Student details from Mongo DB, fetched in 2.450477 seconds.
+2025-05-31 19:17:39,611 [INFO] Student_Flow_App.roadmaptesting: Student assessments, fetched in 2.453479 seconds.
+2025-05-31 19:17:40,166 [WARNING] django.request: Bad Request: /api/roadmap/25EABCXIS001/course1/sq/n
+2025-05-31 19:17:40,166 [WARNING] django.request: Bad Request: /api/roadmap/25EABCXIS001/course1/sq/n
+2025-05-31 19:17:40,199 [WARNING] django.server: "GET /api/roadmap/25EABCXIS001/course1/sq/n HTTP/1.1" 400 969
+2025-05-31 19:17:40,199 [WARNING] django.server: "GET /api/roadmap/25EABCXIS001/course1/sq/n HTTP/1.1" 400 969
+2025-05-31 19:18:33,164 [INFO] Student_Flow_App.roadmaptesting: Roadmap student details, started at 2025-05-31 13:48:33.164168+00:00
+2025-05-31 19:18:33,401 [INFO] Student_Flow_App.roadmaptesting: student details, fetched in 0.237744 seconds.
+2025-05-31 19:18:33,419 [INFO] Student_Flow_App.roadmaptesting: student subject details, fetched in 0.255742 seconds.
+2025-05-31 19:18:33,564 [INFO] Student_Flow_App.roadmaptesting: student blob days, fetched in 0.400502 seconds.
+2025-05-31 19:18:33,594 [INFO] Student_Flow_App.roadmaptesting: Student weeks details, fetched in 0.430507 seconds.
+2025-05-31 19:18:34,141 [INFO] Student_Flow_App.roadmaptesting: Student details from Mongo DB, fetched in 0.976974 seconds.
+2025-05-31 19:18:34,143 [INFO] Student_Flow_App.roadmaptesting: Student assessments, fetched in 0.979565 seconds.
+2025-05-31 19:18:34,316 [ERROR] Student_Flow_App.roadmaptesting: cannot access local variable 'day_number' where it is not associated with a value
+2025-05-31 19:18:34,362 [WARNING] django.request: Bad Request: /api/roadmap/25EABCXIS001/course1/sq/n
+2025-05-31 19:18:34,362 [WARNING] django.request: Bad Request: /api/roadmap/25EABCXIS001/course1/sq/n
+2025-05-31 19:18:34,371 [WARNING] django.server: "GET /api/roadmap/25EABCXIS001/course1/sq/n HTTP/1.1" 400 969
+2025-05-31 19:18:34,371 [WARNING] django.server: "GET /api/roadmap/25EABCXIS001/course1/sq/n HTTP/1.1" 400 969
+2025-05-31 19:19:41,043 [INFO] Student_Flow_App.roadmaptesting: Roadmap student details, started at 2025-05-31 13:49:41.043004+00:00
+2025-05-31 19:19:41,220 [INFO] Student_Flow_App.roadmaptesting: student details, fetched in 0.176774 seconds.
+2025-05-31 19:19:41,241 [INFO] Student_Flow_App.roadmaptesting: student subject details, fetched in 0.197781 seconds.
+2025-05-31 19:19:41,623 [INFO] Student_Flow_App.roadmaptesting: student blob days, fetched in 0.579666 seconds.
+2025-05-31 19:19:41,645 [INFO] Student_Flow_App.roadmaptesting: Student weeks details, fetched in 0.601675 seconds.
+2025-05-31 19:19:42,177 [INFO] Student_Flow_App.roadmaptesting: Student details from Mongo DB, fetched in 1.133 seconds.
+2025-05-31 19:19:42,178 [INFO] Student_Flow_App.roadmaptesting: Student assessments, fetched in 1.134 seconds.
+2025-05-31 19:19:42,383 [INFO] Student_Flow_App.roadmaptesting: Student roadmap, processed in 1.339041 seconds.
+2025-05-31 19:19:42,393 [INFO] Student_Flow_App.roadmaptesting: Roadmap student details API, completed in 1.349039 seconds.
