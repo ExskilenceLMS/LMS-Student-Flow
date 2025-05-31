@@ -16,6 +16,8 @@ from django.core.cache import cache
 from .ErrorLog import *
 from .StudentDashBoard import getdays
 
+import logging
+logger = logging.getLogger(__name__)
 
 
 @api_view(['GET'])
@@ -274,15 +276,17 @@ def _parse_blob_date(s):
 @api_view(['GET'])
 def fetch_roadmap(request, student_id, course_id, subject_id):
     try:
-        now = timezone.now() + timedelta(hours=5, minutes=30)
+        logger.info("Roadmap student details, started at " + str(timezone.now()) + "")
+        start_time1=timezone.now()
+        now = timezone.now()
         student = students_info.objects.select_related('batch_id', 'course_id').get(student_id=student_id, del_row=False)
+        logger.info("student details, fetched in " + str((timezone.now()-start_time1).total_seconds()) + " seconds.")
         course = student.course_id
         sub = subjects.objects.get(subject_id=subject_id, del_row=False)
-
+        logger.info("student subject details, fetched in " + str((timezone.now()-start_time1).total_seconds()) + " seconds." )
         blob_json = json.loads(get_blob(f'lms_daywise/{course.course_id}/{course.course_id}_{student.batch_id.batch_id}.json'))
         raw_days = blob_json.get(sub.subject_name, [])
         blob_days = [{**d, 'dt': _parse_blob_date(d['date']), 'key': d['day'].split(' ')[-1]} for d in raw_days]
-
         weeks = list(
             course_plan_details.objects.filter(
                 course_id=course, subject_id=sub, batch_id_id=student.batch_id.batch_id, del_row=False
@@ -291,11 +295,13 @@ def fetch_roadmap(request, student_id, course_id, subject_id):
             .annotate(startDate=Min('day_date'), endDate=Max('day_date'), totalHours=Sum('duration_in_hours'))
             .order_by('week')
         )
-
+        logger.info("Student weeks details, fetched at " + str((timezone.now()-start_time1).total_seconds()) + " seconds.")
         mongo_student = students_details.objects.using('mongodb').get(student_id=student_id, del_row=False)
+        logger.info("Student details fr9om Mongo DB, fetched in " + str((timezone.now()-start_time1).total_seconds()) + " seconds.")
         sub_questions = mongo_student.student_question_details.get(f'{course.course_id}_{sub.subject_id}', {})
 
         assess_qs = students_assessments.objects.filter(student_id=student, subject_id=sub, del_row=False)
+        logger.info("Student assessments, fetched in " + str((timezone.now()-start_time1).total_seconds()) + " seconds.")
         assessments = {a.test_id.test_name: a for a in assess_qs}
         start_count = 0
         def _day_status(day_data, prev_day_data, topic):
@@ -380,8 +386,13 @@ def fetch_roadmap(request, student_id, course_id, subject_id):
              'endDate': extra_days['Internship'][-1]['date'] if extra_days['Internship'] else '',
              'days': extra_days['Internship'], 'topics': 'Internship Challenge'},
         ])
+        
+        logger.info("Student roadmap, processed in " + str((timezone.now()-start_time1).total_seconds()) + " seconds.")
 
         update_app_usage(student_id)
+        
+        logger.info("Roadmap student details API, completed in " + str((timezone.now()-start_time1).total_seconds()) + " seconds.")
+
         return JsonResponse({'weeks': out_weeks}, safe=False, status=200)
 
     except Exception as exc:

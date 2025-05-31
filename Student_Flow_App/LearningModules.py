@@ -16,6 +16,8 @@ from django.core.cache import cache
 from .sqlrun import get_all_tables
 from .ErrorLog import *
 # FETCH STUDENT LEARNING MODULEs
+import logging 
+logger = logging.getLogger(__name__)
 
 @api_view(['GET'])
 def fetch_learning_modules(request,student_id,subject,subject_id,day_number,week_number):
@@ -326,6 +328,7 @@ def submit_MCQ_Question(request):
         if correct_ans == entered_ans:
                 score = int(outoff)
         outoff = int(outoff)
+        start_time1=timezone.now().__add__(timedelta(days=0,hours=5,minutes=30))
         student_practiceMCQ_answer ,created= student_practiceMCQ_answers.objects.using('mongodb'
                                                             ).get_or_create(student_id = student_id,
                                                                  question_id = question_id,
@@ -341,11 +344,14 @@ def submit_MCQ_Question(request):
                                                                      'score':int(score),
                                                                      'answered_time':timezone.now() + timedelta(hours=5, minutes=30)
                                                                  })
+        duration1= (timezone.now().__add__(timedelta(days=0,hours=5,minutes=30))-start_time1).total_seconds()
         response ={'message':'Already Submited'}
         if created:
+            start_time2=timezone.now().__add__(timedelta(days=0,hours=5,minutes=30))
             student = students_details.objects.using('mongodb').get(student_id = student_id,
                                                                     del_row = 'False')
-            student_info = students_info.objects.get(student_id = student_id,del_row = False)   
+            start_time3=timezone.now().__add__(timedelta(days=0,hours=5,minutes=30))
+            student_info = students_info.objects.get(student_id = student_id,del_row = False)
             courseID= student_info.course_id.course_id
             if student.student_question_details.get(courseID+'_'+subject_id) == None:
                 student.student_question_details.update({
@@ -384,10 +390,13 @@ def submit_MCQ_Question(request):
                     str(float(student.student_score_details.get('total_practice_mcq','0/0').split('/')[1])+outoff)
                     })
             student.save()
+            duration2= (timezone.now().__add__(timedelta(days=0,hours=5,minutes=30))-start_time2).total_seconds()
             student_info.student_score = int(student_info.student_score) + outoff
             student_info.student_total_score = int(student_info.student_total_score) + outoff
             student_info.save()
-            response ={'message':'Submited','score':str(student_practiceMCQ_answer.score)+'/'+str(outoff)}
+            duration3= (timezone.now().__add__(timedelta(days=0,hours=5,minutes=30))-start_time3).total_seconds()   
+
+            response ={"duration1":duration1,"duration2":duration2,"duration3":duration3, "total": (timezone.now().__add__(timedelta(days=0,hours=5,minutes=30))-start_time1).total_seconds(),'message':'Submited','score':str(student_practiceMCQ_answer.score)+'/'+str(outoff)}
         update_app_usage(student_id)
         return JsonResponse(response,safe=False,status=200)
     except Exception as e:
@@ -414,7 +423,9 @@ def submition_coding_question(request):
         final_score = data.get('final_score','0/0')
         subject = data['subject']
         result_data = data['Result']
+        start_time1=timezone.now().__add__(timedelta(days=0,hours=5,minutes=30))
         student_info = students_info.objects.get(student_id = student_id,del_row = False)
+        start_time2=timezone.now().__add__(timedelta(days=0,hours=5,minutes=30))
         student = students_details.objects.using('mongodb').get(student_id = student_id,
                                                                 del_row = 'False')
         courseID= student_info.course_id.course_id
@@ -457,6 +468,7 @@ def submition_coding_question(request):
                 score = 0
         print(score,passedcases,totalcases)
         score = round(score*(passedcases/totalcases),2)
+        start_time3 = timezone.now().__add__(timedelta(days=0,hours=5,minutes=30))
         user , created = student_practice_coding_answers.objects.using('mongodb').get_or_create(student_id=student_id,
                                                                                           subject_id=subject_id,
                                                                                           question_id=data.get('Qn'),
@@ -482,6 +494,7 @@ def submition_coding_question(request):
             user.testcase_results = result
             user.score = score
             user.save()
+        duration3=(timezone.now().__add__(timedelta(days=0,hours=5,minutes=30))-start_time3).total_seconds()
             # return JsonResponse({'message':'Already Submited'},safe=False,status=200)
         # student_info = students_info.objects.get(student_id = student_id,del_row = False)
         old_score = student.student_question_details.get(courseID+'_'+subject_id).get('week_'+str(week_number)).get('day_'+str(day_number)).get('coding_score').split('/')
@@ -503,10 +516,13 @@ def submition_coding_question(request):
                     str(float(student.student_score_details.get('total_practice_coding','0/0').split('/')[1])+outoff)
                     })
         student.save()
+        duration2=(timezone.now().__add__(timedelta(days=0,hours=5,minutes=30)) - start_time2).total_seconds()
         student_info.student_score = int(student_info.student_score) + int(score)
         student_info.student_total_score = int(student_info.student_total_score) + int(outoff)
         student_info.save()
+        duration1=(timezone.now().__add__(timedelta(days=0,hours=5,minutes=30)) - start_time1).total_seconds()
         update_app_usage(student_id)
+        response.update({'duration1':duration1,'duration2':duration2,'duration3':duration3,"total":(timezone.now().__add__(timedelta(days=0,hours=5,minutes=30)) - start_time1).total_seconds()})
         return JsonResponse(response,safe=False,status=200)
     except Exception as e:
         print(e)
