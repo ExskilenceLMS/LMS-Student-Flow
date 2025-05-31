@@ -68,7 +68,7 @@ def fetch_learning_modules(request,student_id,subject,subject_id,day_number,week
         update_app_usage(student_id)
         return JsonResponse(response,safe=False,status=200)
     except Exception as e:
-        print(e)
+        logger.error(e)
         update_app_usage(student_id)
         return JsonResponse({"message": "Failed",
                              "error":str(encrypt_message(str({
@@ -90,7 +90,7 @@ def add_days_to_student(request):
         response  = add_day_to_student(student_id,subject_id,subject,week_number,day_number)
         return JsonResponse(response,safe=False,status=200)
     except Exception as e:
-        print(e)
+        logger.error(e)
         return JsonResponse({"message": "Failed",
                              "error":str(encrypt_message(str({
                                     "Error_msg": str(e),
@@ -122,24 +122,16 @@ def add_day_to_student(student_id,subject,subject_name,week_number,day_number):
                 'day_'+str(day_number):{}
             })
             needTOsave = True
-        print('needTOsave',needTOsave)
         response = {'message':'not updated'}
         if needTOsave == True :
-            # student_info = students_info.objects.get(student_id = student_id,del_row = False)
-            # cache_data = cache.get('LMS_DayWise/'+courseID+'.json')
             cache_data = json.loads(get_blob(f'lms_daywise/{courseID}/{courseID}_{student_info.batch_id.batch_id}.json'))
             if cache_data :
-                # cache.set('LMS_DayWise/'+courseID+'.json',cache_data)
                 cache.set(f'lms_daywise/{courseID}/{courseID}_{student_info.batch_id.batch_id}.json',cache_data)
                 blob_data = cache_data
             else:
-                # blob_data = json.loads(get_blob('LMS_DayWise/'+courseID+'.json'))
                 blob_data = json.loads(get_blob(f'lms_daywise/{courseID}/{courseID}_{student_info.batch_id.batch_id}.json'))
-                # cache.set('LMS_DayWise/'+courseID+'.json',blob_data)
                 cache.set(f'lms_daywise/{courseID}/{courseID}_{student_info.batch_id.batch_id}.json',blob_data)
-            # print('blob_data',blob_data.get(subject_name),subject_name)
             day_data = [day  for day in blob_data.get(subject_name) if day.get('day') == 'Day '+str(day_number)][0]
-            # print('day_data',day_data)
             types = []
             levels ={}
             if day_data.get('mcq'):
@@ -167,18 +159,11 @@ def add_day_to_student(student_id,subject,subject_name,week_number,day_number):
             student.save()
             response.update({'message':'updated',
                              'data':student.student_question_details.get(courseID+'_'+subject)})
-        # else:
-        #     day_Qna_data =student.student_question_details.get(subject).get('week_'+str(week_number)).get('day_'+str(day_number))
-        #     sub_topics  = [ i[1:-5]  for i in day_Qna_data.get('mcq_questions_status')]
-        #     res = {
-        #         subtopic:{"mcq" :True if any([True for subtop in day_Qna_data.get('mcq_questions_status')if subtopic == subtop[1:-5] and day_Qna_data.get('mcq_questions_status').get(subtop) < 2]) else False ,
-        #                   "coding":True if any([True for subtop in day_Qna_data.get('coding_questions_status')if subtopic == subtop[1:-5] and day_Qna_data.get('coding_questions_status').get(subtop) < 2]) else False} for subtopic in sub_topics}
-        #     response.update({'message':'not updated',
-        #                     'res':res})
+
         
         return response
     except Exception as e:
-        print(e)
+        logger.error(e)
         return {"message": "Failed-","error":str(e)}
     
 # FETCH OVERVIEW
@@ -193,7 +178,7 @@ def fetch_overview_modules(request,student_id,subject,day_number):
         update_app_usage(student_id)
         return JsonResponse(response,safe=False,status=200)
     except Exception as e:
-        print(e)
+        logger.error(e)
         update_app_usage(student_id)
         return JsonResponse({"message": "Failed",
                              "error":str(encrypt_message(str({
@@ -233,7 +218,6 @@ def fetch_questions(request,type,student_id,subject,subject_id,day_number,week_n
             for ans in student_answers }
         container_client =  get_blob_container_client()
         qn_data = []
-        # blob_path = 'LMSData/'
         blob_path = 'subjects/'
         list_of_qns = [qn for qn in questions_ids if qn[1:-5] == subTopic]
         if list_of_qns == []:
@@ -241,19 +225,16 @@ def fetch_questions(request,type,student_id,subject,subject_id,day_number,week_n
             list_of_qns = [qn for qn in questions_ids if qn[1:-5] == subTopic]
         cacheresponse = cache.get('lms_rules/rules.json')
         if cacheresponse:
-            # print('cache hit')
             cache.set('lms_rules/rules.json',cacheresponse)
             Rules = cacheresponse
         else:
             blob_client = container_client.get_blob_client('lms_rules/rules.json')
             Rules = json.loads(blob_client.download_blob().readall())
             cache.set('lms_rules/rules.json',Rules)
-        # if type.lower() == 'mcq':
         for Qn in list_of_qns:
             path = f'{blob_path}{Qn[1:3]}/{Qn[1:-7]}/{Qn[1:-5]}/{type.lower()}/{Qn}.json'
             cacheres = cache.get(path)
             if cacheres:
-                # print('cache hit')
                 cache.set(path,cacheres)
                 blob_data = cacheres
             else:
@@ -290,7 +271,7 @@ def fetch_questions(request,type,student_id,subject,subject_id,day_number,week_n
         update_app_usage(student_id)
         return JsonResponse(qn_data,safe=False,status=200)
     except Exception as e:
-        print(e)
+        logger.error(e)
         update_app_usage(student_id)
         return JsonResponse({"message": "Failed",
                              "error":str(encrypt_message(str({
@@ -303,6 +284,7 @@ def fetch_questions(request,type,student_id,subject,subject_id,day_number,week_n
 @api_view(['POST'])
 def submit_MCQ_Question(request):
     try:
+        logger.info("Submit MCQ question started at " + str(timezone.now()) + "")
         data = json.loads(request.body)
         student_id = data['student_id']
         question_id = data['question_id']
@@ -327,7 +309,7 @@ def submit_MCQ_Question(request):
         if correct_ans == entered_ans:
                 score = int(outoff)
         outoff = int(outoff)
-        start_time1=timezone.now().__add__(timedelta(days=0,hours=5,minutes=30))
+        start_time1=timezone.now()
         student_practiceMCQ_answer ,created= student_practiceMCQ_answers.objects.using('mongodb'
                                                             ).get_or_create(student_id = student_id,
                                                                  question_id = question_id,
@@ -343,13 +325,16 @@ def submit_MCQ_Question(request):
                                                                      'score':int(score),
                                                                      'answered_time':timezone.now() + timedelta(hours=5, minutes=30)
                                                                  })
-        duration1= (timezone.now().__add__(timedelta(days=0,hours=5,minutes=30))-start_time1).total_seconds()
+        logger.info("Student MCQ question details from mongo DB, fetched in " + str((timezone.now()-start_time1).total_seconds()) + " seconds." )
+
+
         response ={'message':'Already Submited'}
         if created:
-            start_time2=timezone.now().__add__(timedelta(days=0,hours=5,minutes=30))
+            logger.info("Student details from mongo DB, fetched in " + str((timezone.now()-start_time1).total_seconds()) + " seconds.")
             student = students_details.objects.using('mongodb').get(student_id = student_id,
                                                                     del_row = 'False')
-            start_time3=timezone.now().__add__(timedelta(days=0,hours=5,minutes=30))
+            
+            logger.info("Student details, fetched in " + str((timezone.now()-start_time1).total_seconds()) + " seconds.")
             student_info = students_info.objects.get(student_id = student_id,del_row = False)
             courseID= student_info.course_id.course_id
             if student.student_question_details.get(courseID+'_'+subject_id) == None:
@@ -389,18 +374,17 @@ def submit_MCQ_Question(request):
                     str(float(student.student_score_details.get('total_practice_mcq','0/0').split('/')[1])+outoff)
                     })
             student.save()
-            duration2= (timezone.now().__add__(timedelta(days=0,hours=5,minutes=30))-start_time2).total_seconds()
+            logger.info("Student details from mongo DB, updated in " + str((timezone.now()-start_time1).total_seconds()) + " seconds.")
             student_info.student_score = int(student_info.student_score) + outoff
             student_info.student_total_score = int(student_info.student_total_score) + outoff
             student_info.save()
-            duration3= (timezone.now().__add__(timedelta(days=0,hours=5,minutes=30))-start_time3).total_seconds()   
-
-            response ={"duration1":duration1,"duration2":duration2,"duration3":duration3, "total": (timezone.now().__add__(timedelta(days=0,hours=5,minutes=30))-start_time1).total_seconds(),'message':'Submited','score':str(student_practiceMCQ_answer.score)+'/'+str(outoff)}
+            logger.info("Student details, updated in " + str((timezone.now()-start_time1).total_seconds()) + " seconds.")
+            response ={'message':'Submited','score':str(student_practiceMCQ_answer.score)+'/'+str(outoff)}
         update_app_usage(student_id)
+        logger.info("Submitting MCQ question API completed at " + str((timezone.now()-start_time1).total_seconds()) + "")
         return JsonResponse(response,safe=False,status=200)
     except Exception as e:
-        print(e)
-        print(traceback.format_exc())
+        logger.error(e)
         update_app_usage( json.loads(request.body).get('student_id') )
         return JsonResponse({"message": "Failed",
                              "error":str(encrypt_message(str({
@@ -413,6 +397,8 @@ def submit_MCQ_Question(request):
 @api_view(['PUT']) 
 def submition_coding_question(request):
     try:
+        logger.info("Submitting coding question started at " + str(timezone.now()) + "")
+        start_time1=timezone.now()
         data = json.loads(request.body)
         student_id = data['student_id']
         question_id = data['Qn']
@@ -422,9 +408,10 @@ def submition_coding_question(request):
         final_score = data.get('final_score','0/0')
         subject = data['subject']
         result_data = data['Result']
-        start_time1=timezone.now().__add__(timedelta(days=0,hours=5,minutes=30))
+        start_time1=timezone.now()
+        logger.info("Student details, fetched in " + str((timezone.now()-start_time1).total_seconds()) + " seconds." )
         student_info = students_info.objects.get(student_id = student_id,del_row = False)
-        start_time2=timezone.now().__add__(timedelta(days=0,hours=5,minutes=30))
+        logger.info("Student details from mongo DB, fetched in " + str((timezone.now()-start_time1).total_seconds()) + " seconds." )
         student = students_details.objects.using('mongodb').get(student_id = student_id,
                                                                 del_row = 'False')
         courseID= student_info.course_id.course_id
@@ -453,7 +440,6 @@ def submition_coding_question(request):
                 totalcases = float(str(final_score).split('/')[1])
                 result = { 'TestCases':final_score}
         else:
-            print('result')
             for r in result_data:
                 i += 1
                 if r.get("TestCase" + str(i)) == 'Passed' or r.get("TestCase" + str(i)) == 'Failed':
@@ -465,9 +451,8 @@ def submition_coding_question(request):
                     result.update(r)
             if passedcases == totalcases and passedcases ==0:
                 score = 0
-        print(score,passedcases,totalcases)
         score = round(score*(passedcases/totalcases),2)
-        start_time3 = timezone.now().__add__(timedelta(days=0,hours=5,minutes=30))
+        logger.info("Student Coding question details from mongo DB, fetched in " + str((timezone.now()-start_time1).total_seconds()) + " seconds." )
         user , created = student_practice_coding_answers.objects.using('mongodb').get_or_create(student_id=student_id,
                                                                                           subject_id=subject_id,
                                                                                           question_id=data.get('Qn'),
@@ -493,7 +478,7 @@ def submition_coding_question(request):
             user.testcase_results = result
             user.score = score
             user.save()
-        duration3=(timezone.now().__add__(timedelta(days=0,hours=5,minutes=30))-start_time3).total_seconds()
+        logger.info("Student Coding question details from mongo DB, updated in " + str((timezone.now()-start_time1).total_seconds()) + " seconds." )
             # return JsonResponse({'message':'Already Submited'},safe=False,status=200)
         # student_info = students_info.objects.get(student_id = student_id,del_row = False)
         old_score = student.student_question_details.get(courseID+'_'+subject_id).get('week_'+str(week_number)).get('day_'+str(day_number)).get('coding_score').split('/')
@@ -515,17 +500,16 @@ def submition_coding_question(request):
                     str(float(student.student_score_details.get('total_practice_coding','0/0').split('/')[1])+outoff)
                     })
         student.save()
-        duration2=(timezone.now().__add__(timedelta(days=0,hours=5,minutes=30)) - start_time2).total_seconds()
+        logger.info("Student details from mongo DB, updated in " + str((timezone.now()-start_time1).total_seconds()) + " seconds." )
         student_info.student_score = int(student_info.student_score) + int(score)
         student_info.student_total_score = int(student_info.student_total_score) + int(outoff)
         student_info.save()
-        duration1=(timezone.now().__add__(timedelta(days=0,hours=5,minutes=30)) - start_time1).total_seconds()
+        logger.info("Student Coding question details, updated in " + str((timezone.now()-start_time1).total_seconds()) + " seconds." )
         update_app_usage(student_id)
-        response.update({'duration1':duration1,'duration2':duration2,'duration3':duration3,"total":(timezone.now().__add__(timedelta(days=0,hours=5,minutes=30)) - start_time1).total_seconds()})
+        logger.info("Student Coding question details API, completed in " + str((timezone.now()-start_time1).total_seconds()) + " seconds." )
         return JsonResponse(response,safe=False,status=200)
     except Exception as e:
-        print(e)
-        print(traceback.format_exc())
+        logger.error(e)
         update_app_usage(json.loads(request.body).get('student_id'))
         return JsonResponse({"message": "Failed",
                              "error":str(encrypt_message(str({
@@ -537,7 +521,6 @@ def get_SQL_tables (request):
     try:
         return JsonResponse(get_all_tables(),safe=False,status=200)
     except Exception as e:
-        print(e)
         return JsonResponse({"message": "Failed",
                              "error":str(encrypt_message(str({
                                     "Error_msg": str(e),
@@ -617,17 +600,11 @@ def update_day_status(request):
                                                          ).get('sub_topic_status').update({data['sub_topic']: 1})
                 student.save()
         update_app_usage(student_id)
-        # list_of_sub_topics = [i for i in student.student_question_details.get(courseID+'_'+subject_id
-        #                                      ).get('week_'+str(week_number)
-        #                                            ).get('day_'+str(day_number)
-        #                                                  ).get('sub_topic_status')]
-        # print(list_of_sub_topics)
         if list_of_sub_topics != []:
             if list_of_sub_topics[-1] == data['sub_topic']:
                 return JsonResponse({'message':'Day Completed','message2':message},safe=False,status=200)    
         return JsonResponse({'message':'Updated','message2':message},safe=False,status=200)    
     except Exception as e:
-        print(e)
         update_app_usage(json.loads(request.body).get('student_id'))
         return JsonResponse({"message": "Failed",
                              "error":str(encrypt_message(str({
@@ -637,7 +614,6 @@ def update_day_status(request):
 
 def start_learning_activity(student_id,sub_topic_id,week_number,day_number):
     try :  
-        # print(student_id)
         sub_topic = sub_topics.objects.get(sub_topic_id=sub_topic_id,del_row=False)
         student = students_info.objects.get(student_id=student_id,del_row=False)
         student,created = student_activities.objects.get_or_create(student_id=student,subject_id=sub_topic.topic_id.subject_id,activity_subtopic=sub_topic,del_row=False,
@@ -652,5 +628,4 @@ def start_learning_activity(student_id,sub_topic_id,week_number,day_number):
                                                            })
         return 'Done'
     except Exception as e:
-        print(e)
         return str(e)
