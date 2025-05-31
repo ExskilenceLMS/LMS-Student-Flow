@@ -37,8 +37,8 @@ def fetch_roadmap0(request, student_id, course_id, subject_id):
 
         blob_json = json.loads(get_blob(f'lms_daywise/{course.course_id}/{course.course_id}_{student.batch_id.batch_id}.json'))
         raw_days = blob_json.get(sub.subject_name, [])
-        blob_days = [{**d, 'dt': _parse_blob_date(d['date']), 'key': d['day'].split(' ')[-1]} for d in raw_days]
-
+        blob_days = [{'topic':d['topic'], 'dt': _parse_blob_date(d['date']), 'key': d['day'].split(' ')[-1]} for d in raw_days]
+        logger.info("student blob days, fetched in " + str((timezone.now()-start_time1).total_seconds()) + " seconds." )
         weeks = list(
             course_plan_details.objects.filter(
                 course_id=course, subject_id=sub, batch_id_id=student.batch_id.batch_id, del_row=False
@@ -67,7 +67,7 @@ def fetch_roadmap0(request, student_id, course_id, subject_id):
             for d in filtered_days:
                 status = score_details.get(f'{course.course_id}_{sub.subject_id}_{w["week"]}_{d["key"]}_sub_topic_status', 0)
                 # # prev_stats = score_details.get(f'{course.course_id}_{sub.subject_id}_{w["week"]}_{d["key"]}_sub_topic_status', 0)
-
+                topic = d['topic']
                 if status == 2:
                     status = 'Completed'
                 elif status == 1:
@@ -91,7 +91,7 @@ def fetch_roadmap0(request, student_id, course_id, subject_id):
                         status = ''
                 if not status and not day_counter:
                     status = 'Start'
-                topic = d['topic']
+                
                 if topic in ('Weekly Test', 'Onsite Workshop', 'Internship', 'Final Test'):
                     test_name = f'Week {w["week"]} Test' if topic == 'Weekly Test' else topic
                     ass = assessments.get(test_name)

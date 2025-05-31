@@ -1,0 +1,12 @@
+# Environment
+.env
+.venv/
+venv/
+ENV/
+env/
+*.env
+*.venv
+
+
+django.log
+logsss.log
