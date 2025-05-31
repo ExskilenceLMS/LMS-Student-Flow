@@ -15,18 +15,25 @@ from .AppUsage import update_app_usage
 from django.core.cache import cache
 from .ErrorLog import *
 from .StudentDashBoard import getdays
-
+import logging
+logger = logging.getLogger(__name__)
 def _parse_blob_date(s):
     if 'T' in s or 'Z' in s or len(s) > 10:
         return datetime.strptime(s.replace('T', ' ').split('.')[0].replace('Z', ''), '%Y-%m-%d %H:%M:%S')
     return datetime.strptime(f'{s} 00:00:00', '%Y-%m-%d %H:%M:%S')
 
 @api_view(['GET'])
-def fetch_roadmap(request, student_id, course_id, subject_id):
-    try:        
+def fetch_roadmap0(request, student_id, course_id, subject_id):
+    try:
+        logger.info("Roadmap student details, started at " + str(timezone.now()) + "")
+        start_time1=timezone.now()
+        now = timezone.now()        
         student = students_info.objects.select_related('batch_id', 'course_id').get(student_id=student_id, del_row=False)
+        logger.info("student details, fetched in " + str((timezone.now()-start_time1).total_seconds()) + " seconds.")
+
         course = student.course_id
         sub = subjects.objects.get(subject_id=subject_id, del_row=False)
+        logger.info("student subject details, fetched in " + str((timezone.now()-start_time1).total_seconds()) + " seconds." )
 
         blob_json = json.loads(get_blob(f'lms_daywise/{course.course_id}/{course.course_id}_{student.batch_id.batch_id}.json'))
         raw_days = blob_json.get(sub.subject_name, [])
@@ -40,10 +47,14 @@ def fetch_roadmap(request, student_id, course_id, subject_id):
             .annotate(startDate=Min('day_date'), endDate=Max('day_date'), totalHours=Sum('duration_in_hours'))
             .order_by('week')
         )
-
+        logger.info("Student weeks details, fetched in " + str((timezone.now()-start_time1).total_seconds()) + " seconds.")
         mongo_student = students_details.objects.using('mongodb').get(student_id=student_id, del_row=False)
+        logger.info("Student details from Mongo DB, fetched in " + str((timezone.now()-start_time1).total_seconds()) + " seconds.")
+
         score_details = mongo_student.student_score_details
         assess_qs = students_assessments.objects.filter(student_id=student, subject_id=sub, del_row=False)
+        logger.info("Student assessments, fetched in " + str((timezone.now()-start_time1).total_seconds()) + " seconds.")
+
         assessments = {a.test_id.test_name: a for a in assess_qs}
         start_count = 0
 
@@ -55,13 +66,14 @@ def fetch_roadmap(request, student_id, course_id, subject_id):
             filtered_days = [x for x in blob_days if start <= x['dt'].date() <= end]
             for d in filtered_days:
                 status = score_details.get(f'{course.course_id}_{sub.subject_id}_{w["week"]}_{d["key"]}_sub_topic_status', 0)
-                prev_stats = score_details.get(f'{course.course_id}_{sub.subject_id}_{w["week"]}_{d["key"]-1 if d["key"] > 1 else 1}_sub_topic_status', 0)
+                # # prev_stats = score_details.get(f'{course.course_id}_{sub.subject_id}_{w["week"]}_{d["key"]}_sub_topic_status', 0)
 
                 if status == 2:
                     status = 'Completed'
                 elif status == 1:
                     status = 'Resume'
-                elif prev_stats  == 2 :
+                # # elif prev_stats  == 2 :
+                else:
                     if start_count == 0 and  topic.lower() not in ('festivals', 'preparation day', 'semester exam', 'internship'):
                             if topic == 'Weekly Test':
                                 test_name = f'Week {w["week"]} Test' if topic == 'Weekly Test' else topic
@@ -69,12 +81,14 @@ def fetch_roadmap(request, student_id, course_id, subject_id):
                                 test_status = ass.assessment_status if ass else ''
                                 if test_status in ('Pending', 'Started'):
                                     start_count = start_count + 1
-                                    return 'Start' if test_status == 'Pending' else 'Resume'
+                                    status = 'Start' if test_status == 'Pending' else 'Resume'
                                 else:
-                                    return test_status
+                                    status = test_status
                             else:
                                 start_count = start_count + 1
-                                return 'Start'
+                                status = 'Start'
+                    else:
+                        status = ''
                 if not status and not day_counter:
                     status = 'Start'
                 topic = d['topic']
@@ -112,6 +126,9 @@ def fetch_roadmap(request, student_id, course_id, subject_id):
              'endDate': extra_days['Internship'][-1]['date'] if extra_days['Internship'] else '',
              'days': extra_days['Internship'], 'topics': 'Internship Challenge'},
         ])
+        logger.info("Student roadmap, processed in " + str((timezone.now()-start_time1).total_seconds()) + " seconds.")
+        logger.info("Roadmap student details API, completed in " + str((timezone.now()-start_time1).total_seconds()) + " seconds.")
+
         return JsonResponse({'weeks': out_weeks}, safe=False, status=200)
 
     except Exception as exc:

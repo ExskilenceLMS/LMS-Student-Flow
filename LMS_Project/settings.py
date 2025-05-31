@@ -27,8 +27,59 @@ DEBUG = False
 
 ALLOWED_HOSTS = ['*']
 
+import os
 
-# Application definition
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{asctime} [{levelname}] {name}: {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+        'file': {
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(BASE_DIR, 'django.log'),
+            'formatter': 'verbose',
+        },
+    },
+    'loggers': {
+        # Your app's logger - keep INFO and above
+        'Student_Flow_App.StudentRoadMap': {
+            'handlers': ['console', 'file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'Student_Flow_App.roadmaptesting': {
+            'handlers': ['console', 'file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        # Django default logger - keep WARNING and above to reduce noise
+        'django': {
+            'handlers': ['console', 'file'],
+            'level': 'WARNING',
+            'propagate': True,
+        },
+        # Azure SDK logger - suppress info/debug logs by raising level to WARNING or ERROR
+        'azure.core.pipeline.policies.http_logging_policy': {
+            'handlers': ['console', 'file'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
+        # Root logger fallback
+        '': {
+            'handlers': ['console', 'file'],
+            'level': 'WARNING',
+        },
+    },
+}
 
 INSTALLED_APPS = [
     'django.contrib.admin',
