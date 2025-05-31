@@ -2,8 +2,8 @@ from django.contrib import admin
 from django.urls import path
 from Student_Flow_App import views ,tests ,coding_validation as cv ,AppUsage,StudentProfile as profile
 from Student_Flow_App import StudentDashBoard as dashboard ,StudentLiveSessions as live_session ,LearningModules as learning_modules
-from Student_Flow_App import Student_Tickets as tickets , StudentRoadMap as roadmap , StudentTestDetails as test_details
-from Student_Flow_App import Weekly_test as weekly_test,SQL_TESTING,ErrorLog as error_log #Student_Final_test as test_details
+from Student_Flow_App import Student_Tickets as tickets , StudentRoadMap as roadmap , StudentTestDetails as tests_details
+from Student_Flow_App import Weekly_test as weekly_test,SQL_TESTING,ErrorLog as error_log ,Student_Final_test as test_details
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.home),
@@ -50,9 +50,9 @@ urlpatterns = [
             # Test URLs
     path('api/student/test/instuction/<str:student_id>/<str:test_id>/', test_details.test_instruction),
     path('api/student/test/section/<str:student_id>/<str:test_id>/', test_details.section_details),
-#     path('api/student/test/start/<str:student_id>/<str:test_id>/', test_details.Start_TEST),
-#     path('api/student/test/questions/status/<str:student_id>/<str:test_id>/', test_details.Qns_status_update),
-    path('api/student/test/questions/<str:student_id>/<str:test_id>/<str:section_name>/', test_details.get_test_Qns),
+    path('api/student/test/start/<str:student_id>/<str:test_id>/', test_details.Start_TEST),
+    path('api/student/test/questions/status/<str:student_id>/<str:test_id>/', test_details.Qns_status_update),
+#     path('api/student/test/questions/<str:student_id>/<str:test_id>/<str:section_name>/', test_details.get_test_Qns),
     path('api/student/test/questions/submit/mcq/', test_details.submit_test_mcq_questions),
     path('api/student/test/questions/submit/coding/', test_details.submit_test_coding_questions),
     path('api/student/test/submit/<str:student_id>/<str:test_id>/', test_details.submit_test),

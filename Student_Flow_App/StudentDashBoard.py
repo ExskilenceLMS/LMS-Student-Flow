@@ -557,3 +557,15 @@ def get_weekly_progress(request, student_id):
         print(e)
         payload = {"Error_msg": str(e), "Stack_trace": traceback.format_exc()}
         return JsonResponse({"message": "Failed", "error": str(encrypt_message(str(payload)))}, safe=False, status=400)
+
+# def get_weekly_progress(request, student_id):
+#     try:
+
+#         return JsonResponse('',safe=False,status=200)
+#     except Exception as e:
+#         print(e)
+#         return JsonResponse({"message": "Failed",
+#                              "error":str(encrypt_message(str({
+#                                     "Error_msg": str(e),
+#                                     "Stack_trace":str(traceback.format_exc())+'\nUrl:-'+str(request.build_absolute_uri())+'\nBody:-' + (str(json.loads(request.body)) if request.body else "{}")
+#                                     })))},safe=False,status=400)
