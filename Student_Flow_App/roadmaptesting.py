@@ -76,6 +76,7 @@ def fetch_roadmap0(request, student_id, course_id, subject_id):
                 if status == 2:
                     status = 'Completed'
                 elif status == 1:
+                    start_count = start_count + 1
                     status = 'Resume'
                 # # elif prev_stats  == 2 :
                 else:
