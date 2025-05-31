@@ -1,0 +1,27 @@
+2025-05-31 18:07:34,855 [INFO] Student_Flow_App.roadmaptesting: Roadmap student details, started at 2025-05-31 12:37:34.855922+00:00
+2025-05-31 18:07:35,132 [INFO] Student_Flow_App.roadmaptesting: student details, fetched in 0.260394 seconds.
+2025-05-31 18:07:35,151 [INFO] Student_Flow_App.roadmaptesting: student subject details, fetched in 0.278399 seconds.
+2025-05-31 18:07:35,596 [INFO] Student_Flow_App.roadmaptesting: student blob days, fetched in 0.724887 seconds.
+2025-05-31 18:07:35,618 [INFO] Student_Flow_App.roadmaptesting: Student weeks details, fetched in 0.74628 seconds.
+2025-05-31 18:07:37,948 [INFO] Student_Flow_App.roadmaptesting: Student details from Mongo DB, fetched in 3.076493 seconds.
+2025-05-31 18:07:37,949 [INFO] Student_Flow_App.roadmaptesting: Student assessments, fetched in 3.077492 seconds.
+2025-05-31 18:07:38,142 [INFO] Student_Flow_App.roadmaptesting: Student roadmap, processed in 3.270454 seconds.
+2025-05-31 18:07:38,155 [INFO] Student_Flow_App.roadmaptesting: Roadmap student details API, completed in 3.283249 seconds.
+2025-05-31 18:07:40,737 [INFO] Student_Flow_App.roadmaptesting: Roadmap student details, started at 2025-05-31 12:37:40.737682+00:00
+2025-05-31 18:07:40,816 [INFO] Student_Flow_App.roadmaptesting: student details, fetched in 0.076975 seconds.
+2025-05-31 18:07:40,832 [INFO] Student_Flow_App.roadmaptesting: student subject details, fetched in 0.092975 seconds.
+2025-05-31 18:07:40,905 [INFO] Student_Flow_App.roadmaptesting: student blob days, fetched in 0.165535 seconds.
+2025-05-31 18:07:40,927 [INFO] Student_Flow_App.roadmaptesting: Student weeks details, fetched in 0.18804 seconds.
+2025-05-31 18:07:41,087 [INFO] Student_Flow_App.roadmaptesting: Student details from Mongo DB, fetched in 0.347792 seconds.
+2025-05-31 18:07:41,088 [INFO] Student_Flow_App.roadmaptesting: Student assessments, fetched in 0.348788 seconds.
+2025-05-31 18:07:41,256 [INFO] Student_Flow_App.roadmaptesting: Student roadmap, processed in 0.517052 seconds.
+2025-05-31 18:07:41,257 [INFO] Student_Flow_App.roadmaptesting: Roadmap student details API, completed in 0.518053 seconds.
+2025-05-31 18:24:14,885 [INFO] Student_Flow_App.roadmaptesting: Roadmap student details, started at 2025-05-31 12:54:14.885244+00:00
+2025-05-31 18:24:15,091 [INFO] Student_Flow_App.roadmaptesting: student details, fetched in 0.204763 seconds.
+2025-05-31 18:24:15,111 [INFO] Student_Flow_App.roadmaptesting: student subject details, fetched in 0.224771 seconds.
+2025-05-31 18:24:15,846 [INFO] Student_Flow_App.roadmaptesting: student blob days, fetched in 0.959904 seconds.
+2025-05-31 18:24:15,871 [INFO] Student_Flow_App.roadmaptesting: Student weeks details, fetched in 0.983913 seconds.
+2025-05-31 18:24:17,524 [INFO] Student_Flow_App.roadmaptesting: Student details from Mongo DB, fetched in 2.638225 seconds.
+2025-05-31 18:24:17,526 [INFO] Student_Flow_App.roadmaptesting: Student assessments, fetched in 2.640279 seconds.
+2025-05-31 18:24:17,734 [INFO] Student_Flow_App.roadmaptesting: Student roadmap, processed in 2.848022 seconds.
+2025-05-31 18:24:17,741 [INFO] Student_Flow_App.roadmaptesting: Roadmap student details API, completed in 2.854432 seconds.

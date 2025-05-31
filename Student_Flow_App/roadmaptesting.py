@@ -97,15 +97,15 @@ def fetch_roadmap0(request, student_id, course_id, subject_id):
                     ass = assessments.get(test_name)
                     if topic == 'Weekly Test':
                         score = f'{round(ass.assessment_score_secured, 2)}/{round(ass.assessment_max_score)}' if ass else '0/0'
-                        wk_days.append({'day': day_counter + 1, 'day_key': d['key'], 'date': getdays(d['dt']),
+                        wk_days.append({'day': day_counter + 1, 'day_key': d['key'], 'date': d['dt'],
                                         'week': w['week'], 'topics': topic,
                                         'score': score, 'status': ass.assessment_status if ass else status})
                     else:
-                        extra_days[topic].append({'day_key': d['key'], 'date': getdays(d['dt']),
+                        extra_days[topic].append({'day_key': d['key'], 'date': d['dt'],
                                                   'week': len(weeks) + 1, 'topics': topic,
                                                   'score': '0/0', 'days': [], 'status': ''})
                 else:
-                    wk_days.append({'day': day_counter + 1, 'day_key': d['key'], 'date': getdays(d['dt']),
+                    wk_days.append({'day': day_counter + 1, 'day_key': d['key'], 'date': d['dt'],
                                     'week': w['week'], 'topics': topic,
                                     'practiceMCQ': {'questions': score_details.get(f'{course.course_id}_{sub.subject_id}_{w["week"]}_{d["key"]}_mcq_questions', '0/0'),
                                                     'score': score_details.get( f'{course.course_id}_{sub.subject_id}_{w["week"]}_{d["key"]}_mcq', '0/0')},
