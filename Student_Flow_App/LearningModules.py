@@ -39,15 +39,15 @@ def fetch_learning_modules(request,student_id,subject,subject_id,day_number,week
             })
         status ={'current_id': ""}
         if student_details.student_question_details.get(student.course_id.course_id+'_'+subject_id,None) == None \
-              or student_details.student_question_details.get(student.course_id.course_id+'_'+subject_id).get('week_'+str(1))== None\
-                  or student_details.student_question_details.get(student.course_id.course_id+'_'+subject_id).get('week_'+str(1)).get('day_'+str(day_number)) == None \
-                    or student_details.student_question_details.get(student.course_id.course_id+'_'+subject_id).get('week_'+str(1)).get('day_'+str(day_number)).get('sub_topic_status')==None:
+              or student_details.student_question_details.get(student.course_id.course_id+'_'+subject_id).get('week_'+str(week_number))== None\
+                  or student_details.student_question_details.get(student.course_id.course_id+'_'+subject_id).get('week_'+str(week_number)).get('day_'+str(day_number)) == None \
+                    or student_details.student_question_details.get(student.course_id.course_id+'_'+subject_id).get('week_'+str(week_number)).get('day_'+str(day_number)).get('sub_topic_status')==None:
             pass
             
         else:
-            [status.update({'current_id':i}) for i in student_details.student_question_details.get(student.course_id.course_id+'_'+subject_id).get('week_'+str(1)).get('day_'+str(day_number)).get('sub_topic_status')
-                    if student_details.student_question_details.get(student.course_id.course_id+'_'+subject_id).get('week_'+str(1)).get('day_'+str(day_number)).get('sub_topic_status').get(i) == 1\
-                        or student_details.student_question_details.get(student.course_id.course_id+'_'+subject_id).get('week_'+str(1)).get('day_'+str(day_number)).get('sub_topic_status').get(i) == 2]   
+            [status.update({'current_id':i}) for i in student_details.student_question_details.get(student.course_id.course_id+'_'+subject_id).get('week_'+str(week_number)).get('day_'+str(day_number)).get('sub_topic_status')
+                    if student_details.student_question_details.get(student.course_id.course_id+'_'+subject_id).get('week_'+str(week_number)).get('day_'+str(day_number)).get('sub_topic_status').get(i) == 1\
+                        or student_details.student_question_details.get(student.course_id.course_id+'_'+subject_id).get('week_'+str(week_number)).get('day_'+str(day_number)).get('sub_topic_status').get(i) == 2]   
         if status.get('current_id') == '': 
             status.update({'current_id':[i for i in student_details.student_question_details.get(student.course_id.course_id+'_'+subject_id).get('week_'+str(week_number)).get('day_'+str(day_number)).get('sub_topic_status').keys()][0]})
         if status.get('current_id') == [sb for sb in student_details.student_question_details.get(student.course_id.course_id+'_'+subject_id).get('week_'+str(week_number)).get('day_'+str(day_number)).get('sub_topic_status').keys()][-1]:
@@ -63,7 +63,6 @@ def fetch_learning_modules(request,student_id,subject,subject_id,day_number,week
             'day_completed': daycompleted,
             'sub_topic_data':response_data
         }]
-        # print(9)
         update_app_usage(student_id)
         return JsonResponse(response,safe=False,status=200)
     except Exception as e:
