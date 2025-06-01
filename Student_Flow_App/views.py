@@ -111,11 +111,25 @@ def fetch_FAQ(request):
 def get_media(request):
     try:
         data = json.loads(request.body)
-        # file_url = data.get('file_url')
-        file_url = f'https://{AZURE_ACCOUNT_NAME}.blob.core.windows.net/{AZURE_CONTAINER}/{data.get('file_url')}'
-        response = requests.get(file_url, stream=True)
+        blob_name = data.get('file_url')
+        if blob_name == '':
+            return JsonResponse({"message": "Failed",
+                                 "error":str(encrypt_message(str({
+                                        "Error_msg": "file_url is empty",
+                                        "Stack_trace":str(traceback.format_exc())+'\nUrl:-'+str(request.build_absolute_uri())+'\nBody:-' + (str(json.loads(request.body)) if request.body else "{}")
+                                        })))},safe=False,status=400)
+        sas_token = generate_blob_sas(
+            account_name=AZURE_ACCOUNT_NAME,
+            container_name=AZURE_CONTAINER,
+            blob_name=blob_name,
+            account_key=AZURE_ACCOUNT_KEY,
+            permission=BlobSasPermissions(read=True),
+            expiry=datetime.utcnow() + timedelta(minutes=15)
+        )
+        blob_path =f"https://{AZURE_ACCOUNT_NAME}.blob.core.windows.net/{AZURE_CONTAINER}/{blob_name}?{sas_token}"
+        response = requests.get(blob_path, stream=True)
         response.raise_for_status()
-        path = urlparse(file_url).path
+        path = urlparse(blob_path).path
         content_type, _ = mimetypes.guess_type(path)
         if content_type is None:
             content_type = 'application/octet-stream'

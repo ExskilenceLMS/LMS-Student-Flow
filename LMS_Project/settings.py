@@ -179,7 +179,7 @@ AZURE_CONTAINER = 'lmsdata'
 
 MIGRATION_MODULES = {
     'LMS_Mongodb_App': None,
-    # 'LMS_MSSQLdb_App': None
+    'LMS_MSSQLdb_App': None
 }
 MSSQL_SERVER_NAME = 'slnkshmtbsil.database.windows.net'
 MSSQL_DATABASE_NAME = 'exe_test'

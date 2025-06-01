@@ -26,7 +26,7 @@ def fetch_enrolled_subjects(request, student_id):
             batch_id=student.batch_id,
             del_row=False
         )
-
+         
         latest_activities = (
             student_activities.objects
             .filter(student_id=student_id, del_row=False)
@@ -433,6 +433,9 @@ from collections import defaultdict
 def add_score(d: dict, key: str, add_secured: float, add_total: float):
     cur_sec, cur_tot = map(float, d[key].split("/"))
     d[key] = f"{cur_sec + add_secured}/{cur_tot + add_total}"
+def add_score_new_score_details(d: dict, key: str, add_secured: float, add_total: float):
+    cur_sec, cur_tot = map(float, d.get(key, "0/0").split("/"))
+    d[key] = f"{cur_sec + add_secured}/{cur_tot + add_total}"
 @api_view(["GET"])
 def get_weekly_progress(request, student_id):
     try:
@@ -566,16 +569,9 @@ def get_weekly_progress(request, student_id):
 def get_weekly_progress01(request, student_id):
     
     try:
-        # logger.info("New Weekly progress student details started at " + str(timezone.now()) + "")
         now = timezone.now()+timedelta(hours=5,minutes=30)
-        # start_time1=timezone.now()
-        student = students_info.objects.only("course_id").get(student_id=student_id, del_row=False)
-
         subj_qs = subjects.objects.only("subject_id", "subject_name").filter(del_row=False)
         subj_id2name = {s.subject_id: s.subject_name for s in subj_qs}
-        course_key2name = {
-            f"{student.course_id.course_id}_{sid}": name for sid, name in subj_id2name.items()
-        }
         students_details_obj = students_details.objects.using("mongodb").get(
             student_id=student_id, del_row="False"
         )
@@ -591,30 +587,99 @@ def get_weekly_progress01(request, student_id):
         filters_weeks = set()
         all_totals = defaultdict(lambda: float("0"))
         for key, value in score_details.items():
-            print(key,value)
             keys = key.split("_")
-            print(keys)
-            subj_name = subj_id2name.get(keys[1]) or "Unknown"
+            subj_name = subj_id2name.get(keys[1]) 
             if not subj_name:
                 continue
             filters_subject.add(subj_name)
             week_label = f'{keys[2]}' 
             filters_weeks.add(week_label)
-            filters_subject_week[subj_name].append(week_label)
-            w_sec , w_tot = 0,0
-            if 'mcq' == keys[4] :
-                w_sec , w_tot  = map(float, value.split("/"))
-                mcq_scores[subj_name][week_label] = f"{w_sec}/{w_tot}"
-            if 'coding' == keys[4] :
-                w_sec , w_tot  = map(float, value.split("/"))
-                coding_scores[subj_name][week_label] = f"{w_sec}/{w_tot}"
-            add_score(all_totals, "All", w_sec, w_tot)
-            add_score(mcq_scores[subj_name], "All", w_sec, w_tot)
+            week_key_label = f"Week_{week_label}"
+            if week_key_label not in filters_subject_week[subj_name]:
+                filters_subject_week[subj_name].append(week_key_label) 
+            w_sec , w_tot = float("0"),float("0")
+
+            if len(keys) > 3:
+                if 'mcq' == keys[4] :
+                    w_sec , w_tot  = map(float, value.split("/"))
+                    mcq_scores[subj_name][week_label] = f"{w_sec}/{w_tot}"
+                    all_totals["Practice MCQs_sec"] += w_sec
+                    all_totals["Practice MCQs_tot"] += w_tot
+                    add_score_new_score_details(mcq_scores[subj_name], "All", w_sec, w_tot)
+                if 'coding' == keys[4] :
+                    w_sec , w_tot  = map(float, value.split("/"))
+                    coding_scores[subj_name][week_label] = f"{w_sec}/{w_tot}"
+                    all_totals["Practice Codings_sec"] += w_sec
+                    all_totals["Practice Codings_tot"] += w_tot
+                    add_score_new_score_details(coding_scores[subj_name], "All", w_sec, w_tot)
+            add_score_new_score_details(all_totals, "All", w_sec, w_tot)
             
-                
-        return JsonResponse('',safe=False,status=200)
+            
+        assess_qs = students_assessments.objects.filter(
+            student_id=student_id, del_row=False
+        ).values(
+            "assessment_type",
+            "subject_id",
+            "subject_id__subject_id",
+            "assessment_week_number",
+            "assessment_score_secured",
+            "assessment_max_score",
+            "assessment_completion_time",
+            "student_test_completion_time",
+        )  
+        tests_scores = defaultdict(lambda: defaultdict(lambda: "0/0"))
+        delays = defaultdict(int)
+        for row in assess_qs:
+            subj_name = subj_id2name.get(row["subject_id__subject_id"])  
+            if not subj_name:
+                continue
+            filters_subject_week[subj_name]  # ensure key exists
+
+            atype = row["assessment_type"]
+            score_sec = float(row["assessment_score_secured"] or 0)
+            score_max = float(row["assessment_max_score"] or 0)
+
+            if atype == "Weekly Test":
+                label = f"week_{row['assessment_week_number']}"
+                add_score(tests_scores[subj_name], "All", score_sec, score_max)
+                tests_scores[subj_name][label] = f"{score_sec}/{score_max}"
+
+                all_totals["Weekly Tests_sec"] += score_sec
+                all_totals["Weekly Tests_tot"] += score_max
+
+                comp_time = row["student_test_completion_time"] or now
+                due_time = row["assessment_completion_time"] or now
+                delay_days = max((comp_time - due_time).days, 0)
+                delays["All"] = max(delays["All"], delay_days)
+                delays[subj_name] = max(delays[subj_name], delay_days)
+            else:
+                if atype not in filters_subject_week[subj_name]:
+                    filters_subject_week[subj_name].append(atype)
+                    tests_scores[subj_name][atype] = f"{score_sec}/{score_max}" 
+                else:
+                    add_score(tests_scores[subj_name], atype, score_sec, score_max)
+        response = {
+            "filters_subject": list(filters_subject),
+            "filters_subject_week": filters_subject_week,
+            "mcqScores": mcq_scores,
+            "codingScore": coding_scores,
+            "tests": tests_scores,
+            "All": {
+                "Practice MCQs": f"{all_totals['Practice MCQs_sec']}/{all_totals['Practice MCQs_tot']}",
+                "Practice Codings": f"{all_totals['Practice Codings_sec']}/{all_totals['Practice Codings_tot']}",
+                "Weekly Tests": f"{all_totals['Weekly Tests_sec']}/{all_totals['Weekly Tests_tot']}",
+                "All":{
+                    "Practice MCQs": f"{all_totals['Practice MCQs_sec']}/{all_totals['Practice MCQs_tot']}",
+                    "Practice Codings": f"{all_totals['Practice Codings_sec']}/{all_totals['Practice Codings_tot']}",
+                    "Weekly Tests": f"{all_totals['Weekly Tests_sec']}/{all_totals['Weekly Tests_tot']}",
+                }
+            },
+            "delay": delays,
+        }     
+        return JsonResponse(response, safe=False, status=200)
     except Exception as e:
         print(e)
+        print(traceback.format_exc())
         return JsonResponse({"message": "Failed",
                              "error":str(encrypt_message(str({
                                     "Error_msg": str(e),

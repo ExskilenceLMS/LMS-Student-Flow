@@ -330,3 +330,198 @@ Traceback (most recent call last):
 json.decoder.JSONDecodeError: Expecting property name enclosed in double quotes: line 4 column 5 (char 17)
 2025-06-01 16:32:11,963 [ERROR] django.server: "POST /media/ HTTP/1.1" 500 145
 2025-06-01 16:32:11,963 [ERROR] django.server: "POST /media/ HTTP/1.1" 500 145
+2025-06-01 16:48:33,795 [ERROR] django.request: Internal Server Error: /media/
+Traceback (most recent call last):
+  File "G:\Rudresh\30-05-25\Staging\.venv\Lib\site-packages\django\core\handlers\exception.py", line 56, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "G:\Rudresh\30-05-25\Staging\.venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "G:\Rudresh\30-05-25\Staging\.venv\Lib\site-packages\django\views\decorators\csrf.py", line 55, in wrapped_view
+    return view_func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "G:\Rudresh\30-05-25\Staging\.venv\Lib\site-packages\django\views\generic\base.py", line 103, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "G:\Rudresh\30-05-25\Staging\.venv\Lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "G:\Rudresh\30-05-25\Staging\.venv\Lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "G:\Rudresh\30-05-25\Staging\.venv\Lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "G:\Rudresh\30-05-25\Staging\.venv\Lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "G:\Rudresh\30-05-25\Staging\.venv\Lib\site-packages\rest_framework\decorators.py", line 50, in handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "G:\Rudresh\30-05-25\Staging\LMS-Student-Flow\Student_Flow_App\views.py", line 113, in get_media
+    data = json.loads(request.body)
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\RUD2BLR\AppData\Local\Programs\Python\Python312\Lib\json\__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\RUD2BLR\AppData\Local\Programs\Python\Python312\Lib\json\decoder.py", line 337, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\RUD2BLR\AppData\Local\Programs\Python\Python312\Lib\json\decoder.py", line 353, in raw_decode
+    obj, end = self.scan_once(s, idx)
+               ^^^^^^^^^^^^^^^^^^^^^^
+json.decoder.JSONDecodeError: Expecting property name enclosed in double quotes: line 4 column 5 (char 17)
+2025-06-01 16:48:33,795 [ERROR] django.request: Internal Server Error: /media/
+Traceback (most recent call last):
+  File "G:\Rudresh\30-05-25\Staging\.venv\Lib\site-packages\django\core\handlers\exception.py", line 56, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "G:\Rudresh\30-05-25\Staging\.venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "G:\Rudresh\30-05-25\Staging\.venv\Lib\site-packages\django\views\decorators\csrf.py", line 55, in wrapped_view
+    return view_func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "G:\Rudresh\30-05-25\Staging\.venv\Lib\site-packages\django\views\generic\base.py", line 103, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "G:\Rudresh\30-05-25\Staging\.venv\Lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "G:\Rudresh\30-05-25\Staging\.venv\Lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "G:\Rudresh\30-05-25\Staging\.venv\Lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "G:\Rudresh\30-05-25\Staging\.venv\Lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "G:\Rudresh\30-05-25\Staging\.venv\Lib\site-packages\rest_framework\decorators.py", line 50, in handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "G:\Rudresh\30-05-25\Staging\LMS-Student-Flow\Student_Flow_App\views.py", line 113, in get_media
+    data = json.loads(request.body)
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\RUD2BLR\AppData\Local\Programs\Python\Python312\Lib\json\__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\RUD2BLR\AppData\Local\Programs\Python\Python312\Lib\json\decoder.py", line 337, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\RUD2BLR\AppData\Local\Programs\Python\Python312\Lib\json\decoder.py", line 353, in raw_decode
+    obj, end = self.scan_once(s, idx)
+               ^^^^^^^^^^^^^^^^^^^^^^
+json.decoder.JSONDecodeError: Expecting property name enclosed in double quotes: line 4 column 5 (char 17)
+2025-06-01 16:48:34,108 [ERROR] django.server: "POST /media/ HTTP/1.1" 500 145
+2025-06-01 16:48:34,108 [ERROR] django.server: "POST /media/ HTTP/1.1" 500 145
+2025-06-01 16:48:41,390 [INFO] Student_Flow_App.roadmaptesting: Roadmap student details, started at 2025-06-01 11:18:41.390262+00:00
+2025-06-01 16:48:42,221 [INFO] Student_Flow_App.roadmaptesting: student details, fetched in 0.830691 seconds.
+2025-06-01 16:48:42,244 [INFO] Student_Flow_App.roadmaptesting: student subject details, fetched in 0.853218 seconds.
+2025-06-01 16:48:44,844 [INFO] Student_Flow_App.roadmaptesting: student blob days, fetched in 3.453307 seconds.
+2025-06-01 16:48:44,867 [INFO] Student_Flow_App.roadmaptesting: Student weeks details, fetched in 3.476339 seconds.
+2025-06-01 16:48:46,616 [INFO] Student_Flow_App.roadmaptesting: Student details from Mongo DB, fetched in 5.225683 seconds.
+2025-06-01 16:48:46,617 [INFO] Student_Flow_App.roadmaptesting: Student assessments, fetched in 5.226683 seconds.
+2025-06-01 16:48:46,635 [INFO] Student_Flow_App.roadmaptesting: Student roadmap, processed in 5.244075 seconds.
+2025-06-01 16:48:46,635 [INFO] Student_Flow_App.roadmaptesting: Roadmap student details API, completed in 5.244075 seconds.
+2025-06-01 16:48:47,720 [WARNING] django.request: Bad Request: /api/studentdashboard/weeklyprogress/25EABCXIS001/
+2025-06-01 16:48:47,720 [WARNING] django.request: Bad Request: /api/studentdashboard/weeklyprogress/25EABCXIS001/
+2025-06-01 16:48:47,772 [WARNING] django.server: "GET /api/studentdashboard/weeklyprogress/25EABCXIS001/ HTTP/1.1" 400 669
+2025-06-01 16:48:47,772 [WARNING] django.server: "GET /api/studentdashboard/weeklyprogress/25EABCXIS001/ HTTP/1.1" 400 669
+2025-06-01 17:10:28,547 [WARNING] django.request: Bad Request: /api/studentdashboard/mycourses/25SCITMCS010/
+2025-06-01 17:10:28,547 [WARNING] django.request: Bad Request: /api/studentdashboard/mycourses/25SCITMCS010/
+2025-06-01 17:10:28,570 [WARNING] django.server: "GET /api/studentdashboard/mycourses/25SCITMCS010/ HTTP/1.1" 400 881
+2025-06-01 17:10:28,570 [WARNING] django.server: "GET /api/studentdashboard/mycourses/25SCITMCS010/ HTTP/1.1" 400 881
+2025-06-01 17:17:22,699 [WARNING] django.request: Bad Request: /api/studentdashboard/weeklyprogress/25EABCXIS001/
+2025-06-01 17:17:22,699 [WARNING] django.request: Bad Request: /api/studentdashboard/weeklyprogress/25EABCXIS001/
+2025-06-01 17:17:22,745 [WARNING] django.server: "GET /api/studentdashboard/weeklyprogress/25EABCXIS001/ HTTP/1.1" 400 1009
+2025-06-01 17:17:22,745 [WARNING] django.server: "GET /api/studentdashboard/weeklyprogress/25EABCXIS001/ HTTP/1.1" 400 1009
+2025-06-01 17:18:02,072 [WARNING] django.request: Bad Request: /api/studentdashboard/weeklyprogress/25EABCXIS001/
+2025-06-01 17:18:02,072 [WARNING] django.request: Bad Request: /api/studentdashboard/weeklyprogress/25EABCXIS001/
+2025-06-01 17:18:02,073 [WARNING] django.server: "GET /api/studentdashboard/weeklyprogress/25EABCXIS001/ HTTP/1.1" 400 1009
+2025-06-01 17:18:02,073 [WARNING] django.server: "GET /api/studentdashboard/weeklyprogress/25EABCXIS001/ HTTP/1.1" 400 1009
+2025-06-01 17:20:46,595 [INFO] Student_Flow_App.StudentDashBoard: Weekly progress student details started at 2025-06-01 11:50:46.595902+00:00
+2025-06-01 17:20:46,829 [INFO] Student_Flow_App.StudentDashBoard: Student details, fetched in 0.176347 seconds.
+2025-06-01 17:20:46,836 [INFO] Student_Flow_App.StudentDashBoard: Subject details, fetched in 0.183348 seconds.
+2025-06-01 17:20:49,633 [INFO] Student_Flow_App.StudentDashBoard: Weekly progress of students from mongo DB, fetched in 2.981017 seconds.
+2025-06-01 17:20:49,638 [INFO] Student_Flow_App.StudentDashBoard: Student assessments details, fetched in 2.985593 seconds.
+2025-06-01 17:20:49,673 [INFO] Student_Flow_App.StudentDashBoard: Weekly progress student details API, completed in 3.021106 seconds.
+2025-06-01 17:21:22,599 [WARNING] django.request: Bad Request: /api/studentdashboard/weeklyprogress/25EABCXIS001/n
+2025-06-01 17:21:22,599 [WARNING] django.request: Bad Request: /api/studentdashboard/weeklyprogress/25EABCXIS001/n
+2025-06-01 17:21:22,604 [WARNING] django.server: "GET /api/studentdashboard/weeklyprogress/25EABCXIS001/n HTTP/1.1" 400 1009
+2025-06-01 17:21:22,604 [WARNING] django.server: "GET /api/studentdashboard/weeklyprogress/25EABCXIS001/n HTTP/1.1" 400 1009
+2025-06-01 17:25:54,331 [WARNING] django.request: Bad Request: /api/studentdashboard/weeklyprogress/25EABCXIS001/n
+2025-06-01 17:25:54,331 [WARNING] django.request: Bad Request: /api/studentdashboard/weeklyprogress/25EABCXIS001/n
+2025-06-01 17:25:54,422 [WARNING] django.server: "GET /api/studentdashboard/weeklyprogress/25EABCXIS001/n HTTP/1.1" 400 1009
+2025-06-01 17:25:54,422 [WARNING] django.server: "GET /api/studentdashboard/weeklyprogress/25EABCXIS001/n HTTP/1.1" 400 1009
+2025-06-01 17:27:00,313 [WARNING] django.request: Bad Request: /api/studentdashboard/weeklyprogress/25EABCXIS001/n
+2025-06-01 17:27:00,313 [WARNING] django.request: Bad Request: /api/studentdashboard/weeklyprogress/25EABCXIS001/n
+2025-06-01 17:27:00,314 [WARNING] django.server: "GET /api/studentdashboard/weeklyprogress/25EABCXIS001/n HTTP/1.1" 400 713
+2025-06-01 17:27:00,314 [WARNING] django.server: "GET /api/studentdashboard/weeklyprogress/25EABCXIS001/n HTTP/1.1" 400 713
+2025-06-01 17:28:04,176 [INFO] Student_Flow_App.StudentDashBoard: Weekly progress student details started at 2025-06-01 11:58:04.176209+00:00
+2025-06-01 17:28:04,380 [INFO] Student_Flow_App.StudentDashBoard: Student details, fetched in 0.188357 seconds.
+2025-06-01 17:28:04,418 [INFO] Student_Flow_App.StudentDashBoard: Subject details, fetched in 0.226051 seconds.
+2025-06-01 17:28:05,849 [INFO] Student_Flow_App.StudentDashBoard: Weekly progress of students from mongo DB, fetched in 1.657029 seconds.
+2025-06-01 17:28:05,856 [INFO] Student_Flow_App.StudentDashBoard: Student assessments details, fetched in 1.663849 seconds.
+2025-06-01 17:28:05,874 [INFO] Student_Flow_App.StudentDashBoard: Weekly progress student details API, completed in 1.682384 seconds.
+2025-06-01 17:28:45,337 [WARNING] django.request: Bad Request: /api/studentdashboard/weeklyprogress/25EABCXIS001/n
+2025-06-01 17:28:45,337 [WARNING] django.request: Bad Request: /api/studentdashboard/weeklyprogress/25EABCXIS001/n
+2025-06-01 17:28:45,341 [WARNING] django.server: "GET /api/studentdashboard/weeklyprogress/25EABCXIS001/n HTTP/1.1" 400 1009
+2025-06-01 17:28:45,341 [WARNING] django.server: "GET /api/studentdashboard/weeklyprogress/25EABCXIS001/n HTTP/1.1" 400 1009
+2025-06-01 17:30:07,848 [WARNING] django.request: Bad Request: /api/studentdashboard/weeklyprogress/25EABCXIS001/n
+2025-06-01 17:30:07,848 [WARNING] django.request: Bad Request: /api/studentdashboard/weeklyprogress/25EABCXIS001/n
+2025-06-01 17:30:07,849 [WARNING] django.server: "GET /api/studentdashboard/weeklyprogress/25EABCXIS001/n HTTP/1.1" 400 1009
+2025-06-01 17:30:07,849 [WARNING] django.server: "GET /api/studentdashboard/weeklyprogress/25EABCXIS001/n HTTP/1.1" 400 1009
+2025-06-01 17:30:47,530 [WARNING] django.request: Bad Request: /api/studentdashboard/weeklyprogress/25EABCXIS001/n
+2025-06-01 17:30:47,530 [WARNING] django.request: Bad Request: /api/studentdashboard/weeklyprogress/25EABCXIS001/n
+2025-06-01 17:30:47,564 [WARNING] django.server: "GET /api/studentdashboard/weeklyprogress/25EABCXIS001/n HTTP/1.1" 400 1009
+2025-06-01 17:30:47,564 [WARNING] django.server: "GET /api/studentdashboard/weeklyprogress/25EABCXIS001/n HTTP/1.1" 400 1009
+2025-06-01 17:31:25,403 [WARNING] django.request: Bad Request: /api/studentdashboard/weeklyprogress/25EABCXIS001/n
+2025-06-01 17:31:25,403 [WARNING] django.request: Bad Request: /api/studentdashboard/weeklyprogress/25EABCXIS001/n
+2025-06-01 17:31:25,404 [WARNING] django.server: "GET /api/studentdashboard/weeklyprogress/25EABCXIS001/n HTTP/1.1" 400 1009
+2025-06-01 17:31:25,404 [WARNING] django.server: "GET /api/studentdashboard/weeklyprogress/25EABCXIS001/n HTTP/1.1" 400 1009
+2025-06-01 17:32:06,535 [INFO] Student_Flow_App.StudentDashBoard: Weekly progress student details started at 2025-06-01 12:02:06.535160+00:00
+2025-06-01 17:32:06,636 [INFO] Student_Flow_App.StudentDashBoard: Student details, fetched in 0.059498 seconds.
+2025-06-01 17:32:06,646 [INFO] Student_Flow_App.StudentDashBoard: Subject details, fetched in 0.0695 seconds.
+2025-06-01 17:32:06,896 [INFO] Student_Flow_App.StudentDashBoard: Weekly progress of students from mongo DB, fetched in 0.319154 seconds.
+2025-06-01 17:32:06,913 [INFO] Student_Flow_App.StudentDashBoard: Student assessments details, fetched in 0.336201 seconds.
+2025-06-01 17:32:06,938 [INFO] Student_Flow_App.StudentDashBoard: Weekly progress student details API, completed in 0.361335 seconds.
+2025-06-01 17:35:05,672 [WARNING] django.request: Bad Request: /api/studentdashboard/weeklyprogress/25EABCXIS001/n
+2025-06-01 17:35:05,672 [WARNING] django.request: Bad Request: /api/studentdashboard/weeklyprogress/25EABCXIS001/n
+2025-06-01 17:35:05,676 [WARNING] django.server: "GET /api/studentdashboard/weeklyprogress/25EABCXIS001/n HTTP/1.1" 400 1053
+2025-06-01 17:35:05,676 [WARNING] django.server: "GET /api/studentdashboard/weeklyprogress/25EABCXIS001/n HTTP/1.1" 400 1053
+2025-06-01 17:35:40,547 [WARNING] django.request: Bad Request: /api/studentdashboard/weeklyprogress/25EABCXIS001/n
+2025-06-01 17:35:40,547 [WARNING] django.request: Bad Request: /api/studentdashboard/weeklyprogress/25EABCXIS001/n
+2025-06-01 17:35:40,551 [WARNING] django.server: "GET /api/studentdashboard/weeklyprogress/25EABCXIS001/n HTTP/1.1" 400 713
+2025-06-01 17:35:40,551 [WARNING] django.server: "GET /api/studentdashboard/weeklyprogress/25EABCXIS001/n HTTP/1.1" 400 713
+2025-06-01 17:38:50,045 [WARNING] django.request: Bad Request: /api/studentdashboard/weeklyprogress/25EABCXIS001/n
+2025-06-01 17:38:50,045 [WARNING] django.request: Bad Request: /api/studentdashboard/weeklyprogress/25EABCXIS001/n
+2025-06-01 17:38:50,061 [WARNING] django.server: "GET /api/studentdashboard/weeklyprogress/25EABCXIS001/n HTTP/1.1" 400 713
+2025-06-01 17:38:50,061 [WARNING] django.server: "GET /api/studentdashboard/weeklyprogress/25EABCXIS001/n HTTP/1.1" 400 713
+2025-06-01 17:39:28,610 [WARNING] django.request: Bad Request: /api/studentdashboard/weeklyprogress/25EABCXIS001/n
+2025-06-01 17:39:28,610 [WARNING] django.request: Bad Request: /api/studentdashboard/weeklyprogress/25EABCXIS001/n
+2025-06-01 17:39:28,620 [WARNING] django.server: "GET /api/studentdashboard/weeklyprogress/25EABCXIS001/n HTTP/1.1" 400 713
+2025-06-01 17:39:28,620 [WARNING] django.server: "GET /api/studentdashboard/weeklyprogress/25EABCXIS001/n HTTP/1.1" 400 713
+2025-06-01 17:41:20,743 [WARNING] django.request: Bad Request: /api/studentdashboard/weeklyprogress/25EABCXIS001/n
+2025-06-01 17:41:20,743 [WARNING] django.request: Bad Request: /api/studentdashboard/weeklyprogress/25EABCXIS001/n
+2025-06-01 17:41:20,757 [WARNING] django.server: "GET /api/studentdashboard/weeklyprogress/25EABCXIS001/n HTTP/1.1" 400 1053
+2025-06-01 17:41:20,757 [WARNING] django.server: "GET /api/studentdashboard/weeklyprogress/25EABCXIS001/n HTTP/1.1" 400 1053
+2025-06-01 17:41:52,618 [WARNING] django.request: Bad Request: /api/studentdashboard/weeklyprogress/25EABCXIS001/n
+2025-06-01 17:41:52,618 [WARNING] django.request: Bad Request: /api/studentdashboard/weeklyprogress/25EABCXIS001/n
+2025-06-01 17:41:52,619 [WARNING] django.server: "GET /api/studentdashboard/weeklyprogress/25EABCXIS001/n HTTP/1.1" 400 1053
+2025-06-01 17:41:52,619 [WARNING] django.server: "GET /api/studentdashboard/weeklyprogress/25EABCXIS001/n HTTP/1.1" 400 1053
+2025-06-01 17:42:33,540 [INFO] Student_Flow_App.StudentDashBoard: Weekly progress student details started at 2025-06-01 12:12:33.540992+00:00
+2025-06-01 17:42:33,608 [INFO] Student_Flow_App.StudentDashBoard: Student details, fetched in 0.063013 seconds.
+2025-06-01 17:42:33,617 [INFO] Student_Flow_App.StudentDashBoard: Subject details, fetched in 0.071535 seconds.
+2025-06-01 17:42:33,877 [INFO] Student_Flow_App.StudentDashBoard: Weekly progress of students from mongo DB, fetched in 0.3313 seconds.
+2025-06-01 17:42:33,885 [INFO] Student_Flow_App.StudentDashBoard: Student assessments details, fetched in 0.340043 seconds.
+2025-06-01 17:42:33,918 [INFO] Student_Flow_App.StudentDashBoard: Weekly progress student details API, completed in 0.372923 seconds.
+2025-06-01 17:44:07,041 [WARNING] django.request: Bad Request: /api/studentdashboard/weeklyprogress/25EABCXIS001/n
+2025-06-01 17:44:07,041 [WARNING] django.request: Bad Request: /api/studentdashboard/weeklyprogress/25EABCXIS001/n
+2025-06-01 17:44:07,050 [WARNING] django.server: "GET /api/studentdashboard/weeklyprogress/25EABCXIS001/n HTTP/1.1" 400 925
+2025-06-01 17:44:07,050 [WARNING] django.server: "GET /api/studentdashboard/weeklyprogress/25EABCXIS001/n HTTP/1.1" 400 925
+2025-06-01 17:44:37,916 [WARNING] django.request: Bad Request: /api/studentdashboard/weeklyprogress/25EABCXIS001/n
+2025-06-01 17:44:37,916 [WARNING] django.request: Bad Request: /api/studentdashboard/weeklyprogress/25EABCXIS001/n
+2025-06-01 17:44:37,916 [WARNING] django.server: "GET /api/studentdashboard/weeklyprogress/25EABCXIS001/n HTTP/1.1" 400 945
+2025-06-01 17:44:37,916 [WARNING] django.server: "GET /api/studentdashboard/weeklyprogress/25EABCXIS001/n HTTP/1.1" 400 945
+2025-06-01 17:45:18,278 [WARNING] django.request: Bad Request: /api/studentdashboard/weeklyprogress/25EABCXIS001/n
+2025-06-01 17:45:18,278 [WARNING] django.request: Bad Request: /api/studentdashboard/weeklyprogress/25EABCXIS001/n
+2025-06-01 17:45:18,279 [WARNING] django.server: "GET /api/studentdashboard/weeklyprogress/25EABCXIS001/n HTTP/1.1" 400 689
+2025-06-01 17:45:18,279 [WARNING] django.server: "GET /api/studentdashboard/weeklyprogress/25EABCXIS001/n HTTP/1.1" 400 689
