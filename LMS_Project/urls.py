@@ -23,8 +23,8 @@ urlpatterns = [
     
     # top navigation and roadmap URLs
     path('api/notifications/<str:student_id>/',       roadmap.fetch_top_navigation),
-    path('api/roadmap/<str:student_id>/<str:course_id>/<str:subject_id>/',       roadmap.fetch_roadmap),
-    path('api/roadmap/<str:student_id>/<str:course_id>/<str:subject_id>/n',       roadmaptesting.fetch_roadmap0),
+    path('api/roadmap/<str:student_id>/<str:course_id>/<str:subject_id>/o',       roadmap.fetch_roadmap),
+    path('api/roadmap/<str:student_id>/<str:course_id>/<str:subject_id>/',       roadmaptesting.fetch_roadmap0),
 
     # learning modules URLs
     path('api/student/learningmodules/<str:student_id>/<str:subject>/<str:subject_id>/<str:day_number>/<str:week_number>/',       learning_modules.fetch_learning_modules),
