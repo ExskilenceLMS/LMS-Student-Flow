@@ -16,7 +16,7 @@ urlpatterns = [
     path('api/studentdashboard/mycourses/<str:student_id>/',       dashboard.fetch_enrolled_subjects),
     path('api/studentdashboard/upcomming/sessions/<str:student_id>/',      dashboard.fetch_live_session),
     path('api/studentdashboard/upcomming/events/<str:Course_id>/<str:batch_id>/',       dashboard.fetch_upcoming_events),
-    path('api/studentdashboard/weeklyprogress/<str:student_id>/',       dashboard.get_weekly_progress),
+    path('api/studentdashboard/weeklyprogress/<str:student_id>/',       dashboard.get_weekly_progress01),
     path('api/studentdashboard/hourspent/<str:student_id>/<str:week>/',       dashboard.fetch_study_hours),
     path('api/studentdashboard/summary/<str:student_id>/',       dashboard.fetch_student_summary),
     path('api/studentdashboard/event/calender/<str:student_id>/',       dashboard.fetch_calendar),

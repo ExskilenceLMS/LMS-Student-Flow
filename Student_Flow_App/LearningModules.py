@@ -721,12 +721,12 @@ def update_day_status(request):
                 last_sub_topic = list_of_sub_topics[-1] if list_of_sub_topics != [] else ""
                 if first_sub_topic == sub_topic:
                     student.student_score_details.update({
-                        f'{courseID}_{subject_id}_{week_number}_{day_number}_sub_topic_status':2
+                        f'{courseID}_{subject_id}_{week_number}_{day_number}_sub_topic_status':1
                     })
                     
                 elif last_sub_topic == sub_topic: 
                     student.student_score_details.update({
-                        f'{courseID}_{subject_id}_{week_number}_{day_number}_sub_topic_status':1
+                        f'{courseID}_{subject_id}_{week_number}_{day_number}_sub_topic_status':2
                     })
                 else:
                     pass    

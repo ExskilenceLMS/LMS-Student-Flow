@@ -590,6 +590,28 @@ def get_weekly_progress01(request, student_id):
         filters_subject = {"All"}
         filters_weeks = set()
         all_totals = defaultdict(lambda: float("0"))
+        for key, value in score_details.items():
+            print(key,value)
+            keys = key.split("_")
+            print(keys)
+            subj_name = subj_id2name.get(keys[1]) or "Unknown"
+            if not subj_name:
+                continue
+            filters_subject.add(subj_name)
+            week_label = f'{keys[2]}' 
+            filters_weeks.add(week_label)
+            filters_subject_week[subj_name].append(week_label)
+            w_sec , w_tot = 0,0
+            if 'mcq' == keys[4] :
+                w_sec , w_tot  = map(float, value.split("/"))
+                mcq_scores[subj_name][week_label] = f"{w_sec}/{w_tot}"
+            if 'coding' == keys[4] :
+                w_sec , w_tot  = map(float, value.split("/"))
+                coding_scores[subj_name][week_label] = f"{w_sec}/{w_tot}"
+            add_score(all_totals, "All", w_sec, w_tot)
+            add_score(mcq_scores[subj_name], "All", w_sec, w_tot)
+            
+                
         return JsonResponse('',safe=False,status=200)
     except Exception as e:
         print(e)

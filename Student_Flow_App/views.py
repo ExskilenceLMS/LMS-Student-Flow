@@ -120,7 +120,7 @@ def get_media(request):
         if content_type is None:
             content_type = 'application/octet-stream'
         return StreamingHttpResponse(
-            response.iter_content(chunk_size=10*10),  # 10 KB chunks
+            response.iter_content(chunk_size=10*1024),  # 10 KB chunks
             content_type=content_type
         )
     except requests.RequestException as err:
@@ -162,7 +162,7 @@ def generate_secure_blob_url(request):
             if content_type is None:
                 content_type = 'application/octet-stream'
             return StreamingHttpResponse(
-                response.iter_content(chunk_size=10*10),  # 10 KB chunks
+                response.iter_content(chunk_size=10*1024),  # 10 KB chunks
                 content_type=content_type
             )
         return JsonResponse({"message": "Successfully Logged Out",
