@@ -83,6 +83,7 @@ urlpatterns = [
     path('api/colleges/', profile.college_and_branch_list),
 
     # Media URLs
+    path('media/', views.get_media),
     path('media/', views.generate_secure_blob_url),
 
     # Error_log URLs

@@ -41,6 +41,7 @@ def fetch_learning_modules(request,student_id,subject,subject_id,day_number,week
                 'codingQuestions':sum([day_data.get('coding').get(i.get('subtopic_id')).get(qn,0) for qn in day_data.get('coding').get(i.get('subtopic_id'),{} )])
             })
         status ={'current_id': ""}
+        subtopics = [i for i in student_details.student_question_details.get(student.course_id.course_id+'_'+subject_id).get('week_'+str(week_number)).get('day_'+str(day_number)).get('sub_topic_status').keys()]
         if student_details.student_question_details.get(student.course_id.course_id+'_'+subject_id,None) == None \
               or student_details.student_question_details.get(student.course_id.course_id+'_'+subject_id).get('week_'+str(week_number))== None\
                   or student_details.student_question_details.get(student.course_id.course_id+'_'+subject_id).get('week_'+str(week_number)).get('day_'+str(day_number)) == None \
@@ -52,8 +53,8 @@ def fetch_learning_modules(request,student_id,subject,subject_id,day_number,week
                     if student_details.student_question_details.get(student.course_id.course_id+'_'+subject_id).get('week_'+str(week_number)).get('day_'+str(day_number)).get('sub_topic_status').get(i) == 1\
                         or student_details.student_question_details.get(student.course_id.course_id+'_'+subject_id).get('week_'+str(week_number)).get('day_'+str(day_number)).get('sub_topic_status').get(i) == 2]   
         if status.get('current_id') == '': 
-            status.update({'current_id':[i for i in student_details.student_question_details.get(student.course_id.course_id+'_'+subject_id).get('week_'+str(week_number)).get('day_'+str(day_number)).get('sub_topic_status').keys()][0]})
-        if status.get('current_id') == [sb for sb in student_details.student_question_details.get(student.course_id.course_id+'_'+subject_id).get('week_'+str(week_number)).get('day_'+str(day_number)).get('sub_topic_status').keys()][-1]:
+            status.update({'current_id':subtopics[0]})
+        if status.get('current_id') == subtopics[-1]:
             daycompleted = True
         else:
             daycompleted = False

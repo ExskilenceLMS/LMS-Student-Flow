@@ -440,11 +440,8 @@ def get_weekly_progress(request, student_id):
         now = timezone.now()+timedelta(hours=5,minutes=30)
         start_time1=timezone.now()
         student = students_info.objects.only("course_id").get(student_id=student_id, del_row=False)
-        duration1=(timezone.now()-start_time1).total_seconds()
         logger.info("Student details, fetched in " + str((timezone.now()-start_time1).total_seconds()) + " seconds.")
-        start_time2=timezone.now()
         subj_qs = subjects.objects.only("subject_id", "subject_name").filter(del_row=False)
-        duration2=(timezone.now()-start_time2).total_seconds()
         logger.info("Subject details, fetched in " + str((timezone.now()-start_time1).total_seconds()) + " seconds.")
         subj_id2name = {s.subject_id: s.subject_name for s in subj_qs}
         course_key2name = {
@@ -452,11 +449,9 @@ def get_weekly_progress(request, student_id):
         }
 
         # ---------- practice (Mongo) ----------
-        start_time3=timezone.now()
         practice_doc = students_details.objects.using("mongodb").get(
             student_id=student_id, del_row="False"
         ).student_question_details
-        duration3=(timezone.now()-start_time3).total_seconds()
         logger.info("Weekly progress of students from mongo DB, fetched in " +str((timezone.now()-start_time1).total_seconds()) + " seconds.")
         mcq_scores = defaultdict(lambda: defaultdict(lambda: "0/0"))
         coding_scores = defaultdict(lambda: defaultdict(lambda: "0/0"))
@@ -498,7 +493,6 @@ def get_weekly_progress(request, student_id):
                 all_totals["Practice Codings_tot"] += w_cod_tot
 
         # ---------- assessments (SQL) ----------
-        start_time4=timezone.now()
         assess_qs = students_assessments.objects.filter(
             student_id=student_id, del_row=False
         ).values(
@@ -511,13 +505,11 @@ def get_weekly_progress(request, student_id):
             "assessment_completion_time",
             "student_test_completion_time",
         )
-        duration4=(timezone.now()-start_time4).total_seconds()
         logger.info("Student assessments details, fetched in " + str((timezone.now()-start_time1).total_seconds()) + " seconds.")
         tests_scores = defaultdict(lambda: defaultdict(lambda: "0/0"))
         delays = defaultdict(int)
 
         for row in assess_qs:
-            print(row)
             subj_name = subj_id2name.get(row["subject_id__subject_id"]) or "Unknown"
             filters_subject_week[subj_name]  # ensure key exists
 
@@ -541,7 +533,6 @@ def get_weekly_progress(request, student_id):
             else:
                 filters_subject_week[subj_name].append(atype)
                 tests_scores[subj_name][atype] = f"{score_sec}/{score_max}"
-        print(subj_id2name)
         # ---------- response ----------
         response = {
             "filters_subject": list(filters_subject),
@@ -572,10 +563,12 @@ def get_weekly_progress(request, student_id):
         payload = {"Error_msg": str(e), "Stack_trace": traceback.format_exc()}
         return JsonResponse({"message": "Failed", "error": str(encrypt_message(str(payload)))}, safe=False, status=400)
 
-def get_weekly_progress0(request, student_id):
+def get_weekly_progress01(request, student_id):
     
     try:
+        # logger.info("New Weekly progress student details started at " + str(timezone.now()) + "")
         now = timezone.now()+timedelta(hours=5,minutes=30)
+        # start_time1=timezone.now()
         student = students_info.objects.only("course_id").get(student_id=student_id, del_row=False)
 
         subj_qs = subjects.objects.only("subject_id", "subject_name").filter(del_row=False)
