@@ -491,8 +491,8 @@ def submit_MCQ_Question(request):
             #         str(float(student.student_score_details.get('total_practice_mcq','0/0').split('/')[1])+outoff)
             #         })
             student.student_score_details.update({
-                f'{key}_mcq':f'{str(float(secured)+score)}/{str(float(max_score)+outoff)}',
-                f'{key}_mcq_questions':f'{str(int(answerd)+1)}/{str(int(max_score))}',
+                f'{key}_mcq':f'{str(float(secured)+score)}/{max_score}',
+                f'{key}_mcq_questions':f'{str(int(answerd)+1)}/{totalQns}',
                 f'{key}_total_practice_mcq':f'{str(float(totalsecured)+score)}/{str(float(totalmax_score)+outoff)}',
             })
             student.save()
@@ -626,8 +626,8 @@ def submition_coding_question(request):
         #             str(float(student.student_score_details.get('total_practice_coding','0/0').split('/')[1])+outoff)
         #             })
         student.student_score_details.update({
-                f'{key}_coding':f'{str(float(secured)+score)}/{str(float(max_score)+outoff)}',
-                f'{key}_coding_questions':f'{str(int(answerd)+1)}/{str(int(max_score))}',
+                f'{key}_coding':f'{str(float(secured)+score)}/{max_score}',
+                f'{key}_coding_questions':f'{str(int(answerd)+1)}/{totalQns}',
                 f'{key}_total_practice_coding':f'{str(float(totalsecured)+score)}/{str(float(totalmax_score)+outoff)}',
             })
         student.save()
