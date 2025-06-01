@@ -97,6 +97,7 @@ def fetch_roadmap0(request, student_id, course_id, subject_id):
                     else:
                         status = ''
                 if not status and not day_counter:
+                    start_count = start_count + 1
                     status = 'Start'
                 
                 if topic in ('Weekly Test', 'Onsite Workshop', 'Internship', 'Final Test'):
@@ -108,7 +109,7 @@ def fetch_roadmap0(request, student_id, course_id, subject_id):
                         score = f'{assessment_score}/{assessment_max_score}'
                         wk_days.append({'day': day_counter + 1, 'day_key': day_number, 'date': getdays(d['dt']),
                                         'week': week_number, 'topics': topic,
-                                        'score': score, 'status': ass.assessment_status if ass else status})
+                                        'score': score, 'status': ass.assessment_status if ass and start_count == 0 else status})
                     else:
                         extra_days[topic].append({'day_key': day_number, 'date': getdays(d['dt']),
                                                   'week': weeks_count, 'topics': topic,
