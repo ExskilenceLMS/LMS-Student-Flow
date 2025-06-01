@@ -85,8 +85,8 @@ def fetch_roadmap0(request, student_id, course_id, subject_id):
                             if topic == 'Weekly Test':
                                 test_name = f'Week {week_number} Test' if topic == 'Weekly Test' else topic
                                 ass = assessments.get(test_name)
-                                test_status = ass.assessment_status if ass else ''
-                                if test_status in ('Pending', 'Started'):
+                                test_status = ass.assessment_status if ass else 'Pending'
+                                if test_status in ('Pending', 'Started',):
                                     start_count = start_count + 1
                                     status = 'Start' if test_status == 'Pending' else 'Resume'
                                 else:
@@ -99,10 +99,11 @@ def fetch_roadmap0(request, student_id, course_id, subject_id):
                 if not status and not day_counter:
                     start_count = start_count + 1
                     status = 'Start'
-                
+                # print('Topic:=', topic)
                 if topic in ('Weekly Test', 'Onsite Workshop', 'Internship', 'Final Test'):
                     test_name = f'Week {week_number} Test' if topic == 'Weekly Test' else topic
                     ass = assessments.get(test_name)
+                    # print('ass',ass,'test_name',test_name,'topic',topic,'Status',status)
                     if topic == 'Weekly Test':
                         assessment_score = round(ass.assessment_score_secured, 2) if ass else 0
                         assessment_max_score = round(ass.assessment_max_score, 2) if ass else 0
