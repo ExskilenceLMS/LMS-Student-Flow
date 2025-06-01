@@ -724,12 +724,10 @@ def update_day_status(request):
                         f'{courseID}_{subject_id}_{week_number}_{day_number}_sub_topic_status':1
                     })
                     
-                elif last_sub_topic == sub_topic: 
+                if last_sub_topic == sub_topic: 
                     student.student_score_details.update({
                         f'{courseID}_{subject_id}_{week_number}_{day_number}_sub_topic_status':2
-                    })
-                else:
-                    pass    
+                    })   
                 student.save()
             else:
                 update_app_usage(student_id)
