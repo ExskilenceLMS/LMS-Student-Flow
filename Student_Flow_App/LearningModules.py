@@ -731,8 +731,8 @@ def update_day_status(request):
             else:
                 update_app_usage(student_id)
                 return JsonResponse({'message':'Not Completed','message2':message,
-                                     'qns_status': f'Progress: {len(status_of_mcq_qns_status)}/{len(status_of_mcq_qns)\
-                                        } MCQs and {len(status_of_coding_qns_status)}/{len(status_of_coding_qns)} Coding tasks Completed'},safe=False,status=200)
+                                     'qns_status': f'You have not completed the questions,\n MCQs : {len(status_of_mcq_qns_status)}/{len(status_of_mcq_qns)\
+                                        } and Coding : {len(status_of_coding_qns_status)}/{len(status_of_coding_qns)}.'},safe=False,status=200)
         else:
             if student.student_question_details.get(courseID+'_'+subject_id
                                              ).get('week_'+str(week_number)
