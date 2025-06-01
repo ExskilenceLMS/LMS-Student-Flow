@@ -500,6 +500,9 @@ class students_details(djongo_models.Model):
     
     class Meta:
         db_table = 'students_details'
+        # indexes = [
+        #     djongo_models.Index(fields=['student_score_details','student_id','student_question_details']),
+        # ]
 # 12
 class participant(djongo_models.Model):
     session_id                  = djongo_models.CharField(max_length=20)
