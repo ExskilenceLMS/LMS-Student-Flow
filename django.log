@@ -605,3 +605,65 @@ json.decoder.JSONDecodeError: Expecting property name enclosed in double quotes:
 2025-06-01 19:19:31,133 [WARNING] django.request: Bad Request: /api/student/test/weekly/25EABCXIS001/1/py/
 2025-06-01 19:19:31,174 [WARNING] django.server: "GET /api/student/test/weekly/25EABCXIS001/1/py/ HTTP/1.1" 400 31
 2025-06-01 19:19:31,174 [WARNING] django.server: "GET /api/student/test/weekly/25EABCXIS001/1/py/ HTTP/1.1" 400 31
+2025-06-02 13:29:53,787 [WARNING] django.request: Not Found: /mcqtesting/
+2025-06-02 13:29:53,787 [WARNING] django.request: Not Found: /mcqtesting/
+2025-06-02 13:29:53,820 [WARNING] django.server: "GET /mcqtesting/ HTTP/1.1" 404 179
+2025-06-02 13:29:53,820 [WARNING] django.server: "GET /mcqtesting/ HTTP/1.1" 404 179
+2025-06-02 13:32:11,835 [ERROR] django.request: Internal Server Error: /mcqtesting/
+Traceback (most recent call last):
+  File "G:\Rudresh\30-05-25\Staging\.venv\Lib\site-packages\django\core\handlers\exception.py", line 56, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "G:\Rudresh\30-05-25\Staging\.venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "G:\Rudresh\30-05-25\Staging\.venv\Lib\site-packages\django\views\decorators\csrf.py", line 55, in wrapped_view
+    return view_func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "G:\Rudresh\30-05-25\Staging\.venv\Lib\site-packages\django\views\generic\base.py", line 103, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "G:\Rudresh\30-05-25\Staging\.venv\Lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "G:\Rudresh\30-05-25\Staging\.venv\Lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "G:\Rudresh\30-05-25\Staging\.venv\Lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "G:\Rudresh\30-05-25\Staging\.venv\Lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "G:\Rudresh\30-05-25\Staging\.venv\Lib\site-packages\rest_framework\decorators.py", line 50, in handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+TypeError: get_mcqs() missing 1 required positional argument: 'subject_id'
+2025-06-02 13:32:11,835 [ERROR] django.request: Internal Server Error: /mcqtesting/
+Traceback (most recent call last):
+  File "G:\Rudresh\30-05-25\Staging\.venv\Lib\site-packages\django\core\handlers\exception.py", line 56, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "G:\Rudresh\30-05-25\Staging\.venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "G:\Rudresh\30-05-25\Staging\.venv\Lib\site-packages\django\views\decorators\csrf.py", line 55, in wrapped_view
+    return view_func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "G:\Rudresh\30-05-25\Staging\.venv\Lib\site-packages\django\views\generic\base.py", line 103, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "G:\Rudresh\30-05-25\Staging\.venv\Lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "G:\Rudresh\30-05-25\Staging\.venv\Lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "G:\Rudresh\30-05-25\Staging\.venv\Lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "G:\Rudresh\30-05-25\Staging\.venv\Lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "G:\Rudresh\30-05-25\Staging\.venv\Lib\site-packages\rest_framework\decorators.py", line 50, in handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+TypeError: get_mcqs() missing 1 required positional argument: 'subject_id'
+2025-06-02 13:32:12,121 [ERROR] django.server: "GET /mcqtesting/ HTTP/1.1" 500 145
+2025-06-02 13:32:12,121 [ERROR] django.server: "GET /mcqtesting/ HTTP/1.1" 500 145

@@ -19,17 +19,17 @@ from .AppUsage import update_app_usage, create_app_usage
 from django.core.cache import cache
 from .ErrorLog import *
 @api_view(['GET'])
-def get_mcqs (request):
+def get_mcqs (request,subject_id):
     try:
         Questions = questions.objects.filter(question_type="mcq",del_row = False).order_by('question_id')
         container_client = get_blob_container_client()
         question_list = []
         for question in Questions:
-            if question.question_id[1:3] != 'sq':
+            if question.question_id[1:3] != subject_id:
                 continue
             Qn = question.question_id
             path = f"subjects/{Qn[1:3]}/{Qn[1:-7]}/{Qn[1:-5]}/{'mcq' if Qn[-5]=='m' else 'coding'}/{Qn}.json"
-            print(path)
+            # print(path)
             if cache.get(path) == None:
                 blobdata = container_client.get_blob_client(path)
                 blob_data = json.loads(blobdata.download_blob().readall())

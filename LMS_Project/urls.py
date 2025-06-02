@@ -102,7 +102,7 @@ urlpatterns = [
     # path('addtestdetails/',   tests.add_test_sction),
     # path('ids/',   views.generate_ids),
     # path('upvideo/',   views    .upload_video),
-    path('mcqtesting/',   SQL_TESTING.get_mcqs),
+    path('mcqtesting/<str:subject_id>/',   SQL_TESTING.get_mcqs),
     # path('testing/<str:student_id>/', student_final_test.fetch_all_test_details),
 
 ]
