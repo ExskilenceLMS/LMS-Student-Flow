@@ -189,3 +189,89 @@ def generate_secure_blob_url(request):
                                     "Error_msg": str(err),
                                     "Stack_trace":str(traceback.format_exc())+'\nUrl:-'+str(request.build_absolute_uri())+'\nBody:-' + (str(json.loads(request.body)) if request.body else "{}")
                                     })))},safe=False,status=400)
+
+def migrate():
+    try:
+        students_data = students_details.objects.using('mongodb').all()
+        for student in students_data:
+             if student.student_id[3:].startswith('ABC'): 
+            #     print(student.student_id,student.student_id[3:])
+            #  if student.student_id == "25SABCXIS006":
+                 print(student.student_id[3:])
+                 old_data = student.student_question_details
+                 new_data = {}
+                 for course_sub_key in old_data.keys():
+                     new_data = {
+                         "total_practice_mcq": "0/0",
+                        "total_practice_coding": "0/0",
+                     }
+                     course_id , sub_id = course_sub_key.split('_')
+                     for week_num in old_data[course_sub_key].keys():
+                         week_id= week_num.split('_')[1]
+                         for days_keys in old_data[course_sub_key][week_num].keys():
+                            day_id = days_keys.split('_')[1]
+                            for days_data in old_data[course_sub_key][week_num][days_keys].keys():
+                                if days_data == 'sub_topic_status':
+                                    sts =[v for  v  in old_data[course_sub_key][week_num][days_keys][days_data].values()]
+                                    if sum(sts) == len(sts)*2:
+                                        new_data.update({
+                                            f'{course_id}_{sub_id}_{week_id}_{day_id}_sub_topic_status':2
+                                        })
+                                    elif sum(sts) == 0 :
+                                        new_data.update({
+                                            f'{course_id}_{sub_id}_{week_id}_{day_id}_sub_topic_status':0
+                                        })
+                                    elif sum(sts)>0 and sum(sts)<len(sts)*2:
+                                        new_data.update({
+                                            f'{course_id}_{sub_id}_{week_id}_{day_id}_sub_topic_status':1
+                                        })
+                                    else: 
+                                        print("error")
+                                if days_data == 'mcq_score':
+                                    mcq = old_data[course_sub_key][week_num][days_keys][days_data]
+                                    sec , tot = mcq.split('/')
+                                    old_sec , old_tot = new_data.get(f'total_practice_mcq','0/0').split('/')
+                                    new_sec = float(old_sec) + float(sec)
+                                    new_tot = float(old_tot) + float(tot)
+                                    new_data.update({
+                                        f'{course_id}_{sub_id}_{week_id}_{day_id}_mcq':mcq,
+                                        'total_practice_mcq':f'{new_sec}/{new_tot}'
+                                    })
+                                if days_data == 'coding_score':
+                                    coding = old_data[course_sub_key][week_num][days_keys][days_data]
+                                    sec , tot = coding.split('/')
+                                    old_sec , old_tot = new_data.get(f'total_practice_coding','0/0').split('/')
+                                    new_sec = float(old_sec) + float(sec)
+                                    new_tot = float(old_tot) + float(tot)
+                                    new_data.update({
+                                        f'{course_id}_{sub_id}_{week_id}_{day_id}_coding':coding,
+                                        'total_practice_coding':f'{new_sec}/{new_tot}'
+                                    })
+                                if days_data == 'mcq_questions_status':
+                                    mcq = old_data[course_sub_key][week_num][days_keys][days_data]
+                                    completed_mcq = [v for  v  in old_data[course_sub_key][week_num][days_keys][days_data].values() if v == 2]
+                                    new_data.update({
+                                        f'{course_id}_{sub_id}_{week_id}_{day_id}_mcq_questions':str(len(completed_mcq))+'/'+str(len(mcq))
+                                    })
+                                if days_data == 'coding_questions_status':
+                                    coding = old_data[course_sub_key][week_num][days_keys][days_data]
+                                    completed_coding = [v for  v  in old_data[course_sub_key][week_num][days_keys][days_data].values() if v == 2]
+                                    new_data.update({
+                                        f'{course_id}_{sub_id}_{week_id}_{day_id}_coding_questions':  str(len(completed_coding))+'/'+str(len(coding))
+                                    })
+                #  print(new_data)
+                 student.student_score_details = new_data
+                 student.save(update_fields=['student_score_details'])
+
+                        
+
+                      
+
+                 
+        return JsonResponse({"message": "Successfully Logged Out",
+                             }, safe=False, status=200)
+    except Exception as e:  
+        print(e)
+        print(traceback.format_exc())
+        return JsonResponse({"message": "Failed",
+                             "error": str(e)},safe=False,status=400)    

@@ -743,6 +743,11 @@ def update_day_status(request):
                                              ).get('week_'+str(week_number)
                                                    ).get('day_'+str(day_number)
                                                          ).get('sub_topic_status').update({sub_topic: 1})
+                first_sub_topic = list_of_sub_topics[0] if list_of_sub_topics != [] else ""
+                if first_sub_topic == sub_topic:
+                    student.student_score_details.update({
+                        f'{courseID}_{subject_id}_{week_number}_{day_number}_sub_topic_status':1
+                    })
                 student.save()
         update_app_usage(student_id)
         if list_of_sub_topics != []:

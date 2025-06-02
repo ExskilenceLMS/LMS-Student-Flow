@@ -588,3 +588,20 @@ json.decoder.JSONDecodeError: Expecting property name enclosed in double quotes:
 2025-06-01 19:09:38,497 [INFO] Student_Flow_App.roadmaptesting: Student assessments, fetched in 3.025981 seconds.
 2025-06-01 19:09:38,521 [INFO] Student_Flow_App.roadmaptesting: Student roadmap, processed in 3.050128 seconds.
 2025-06-01 19:09:38,573 [INFO] Student_Flow_App.roadmaptesting: Roadmap student details API, completed in 3.102136 seconds.
+2025-06-01 19:17:53,870 [INFO] Student_Flow_App.roadmaptesting: Roadmap student details, started at 2025-06-01 13:47:53.870972+00:00
+2025-06-01 19:17:54,220 [INFO] Student_Flow_App.roadmaptesting: student details, fetched in 0.308728 seconds.
+2025-06-01 19:17:54,242 [INFO] Student_Flow_App.roadmaptesting: student subject details, fetched in 0.33009 seconds.
+2025-06-01 19:17:54,960 [INFO] Student_Flow_App.roadmaptesting: student blob days, fetched in 1.048615 seconds.
+2025-06-01 19:17:54,985 [INFO] Student_Flow_App.roadmaptesting: Student weeks details, fetched in 1.073179 seconds.
+2025-06-01 19:17:56,876 [INFO] Student_Flow_App.roadmaptesting: Student details from Mongo DB, fetched in 2.964645 seconds.
+2025-06-01 19:17:56,878 [INFO] Student_Flow_App.roadmaptesting: Student assessments, fetched in 2.966817 seconds.
+2025-06-01 19:17:56,897 [INFO] Student_Flow_App.roadmaptesting: Student roadmap, processed in 2.985334 seconds.
+2025-06-01 19:17:56,897 [INFO] Student_Flow_App.roadmaptesting: Roadmap student details API, completed in 2.985334 seconds.
+2025-06-01 19:18:50,840 [WARNING] django.request: Bad Request: /api/student/test/weekly/25EABCXIS001/1/py/
+2025-06-01 19:18:50,840 [WARNING] django.request: Bad Request: /api/student/test/weekly/25EABCXIS001/1/py/
+2025-06-01 19:18:50,842 [WARNING] django.server: "GET /api/student/test/weekly/25EABCXIS001/1/py/ HTTP/1.1" 400 31
+2025-06-01 19:18:50,842 [WARNING] django.server: "GET /api/student/test/weekly/25EABCXIS001/1/py/ HTTP/1.1" 400 31
+2025-06-01 19:19:31,133 [WARNING] django.request: Bad Request: /api/student/test/weekly/25EABCXIS001/1/py/
+2025-06-01 19:19:31,133 [WARNING] django.request: Bad Request: /api/student/test/weekly/25EABCXIS001/1/py/
+2025-06-01 19:19:31,174 [WARNING] django.server: "GET /api/student/test/weekly/25EABCXIS001/1/py/ HTTP/1.1" 400 31
+2025-06-01 19:19:31,174 [WARNING] django.server: "GET /api/student/test/weekly/25EABCXIS001/1/py/ HTTP/1.1" 400 31
