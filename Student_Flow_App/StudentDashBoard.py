@@ -169,8 +169,6 @@ def fetch_upcoming_events(request, Course_id, batch_id):
     except Exception as e:
         return JsonResponse({
             "message": "Failed",
-            "massage2": str(e),
-            "massage3": str(traceback.format_exc()),
             "error": str(encrypt_message(str({
                 "Error_msg": str(e),
                 "Stack_trace": str(traceback.format_exc()) + '\nUrl:-' + str(request.build_absolute_uri()) +
@@ -332,8 +330,6 @@ def fetch_calendar(request, student_id):
         print(e)
         return JsonResponse({
             "message": "Failed",
-            "message2": str(e),
-            "message3": str(traceback.format_exc()),
             "error": str(encrypt_message(str({
                 "Error_msg": str(e),
                 "Stack_trace": traceback.format_exc() +
