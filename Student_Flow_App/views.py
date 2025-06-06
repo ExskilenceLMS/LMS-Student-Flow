@@ -21,6 +21,31 @@ from .ErrorLog import *
 from django.core.exceptions import ObjectDoesNotExist
 from django.views.decorators.cache import cache_page
 
+keys =[
+    'SECRET_KEY',
+    'DEBUG',
+    'MONGO_DB_NAME',
+    'MONGO_USER',
+    'MONGO_PASSWORD',
+    'MONGO_HOST',
+    'MONGO_AUTH_MECHANISM',
+    'MONGO_CONNECTION_STRING',
+    'DB_NAME',
+    'DB_USER',
+    'DB_PASSWORD',
+    'DB_HOST',
+    'REDIS_HOST',
+    'REDIS_CONN_STRING_KEY',
+    'REDIS_CONNECTION_STRING',
+    'AZURE_ACCOUNT_NAME',
+    'AZURE_ACCOUNT_KEY',
+    'AZURE_CONTAINER',
+    'MSSQL_SERVER_NAME',
+    'MSSQL_DATABASE_NAME',
+    'MSSQL_USERNAME',
+    'MSSQL_PWD',
+    'MSSQL_DRIVER'
+]
 ONTIME = datetime.utcnow().__add__(timedelta(hours=5,minutes=30))
 CONTAINER ="internship"
 @api_view(['GET'])

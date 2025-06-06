@@ -20,7 +20,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-cood-2aik$83%a#!!7!ig#9rtq3-s!7ap9g$nr)-mx6#q=tut#'
+SECRET_KEY =  config('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=False, cast=bool)
@@ -122,7 +122,7 @@ DATABASES = {
         #     'password': 'FVy5fqqCtQy3KIt6',
         #     'authMechanism': 'SCRAM-SHA-1',
         # }
-        'NAME':   config('DB_NAME'),
+        'NAME':   config('MONGO_DB_NAME'),
         'ENFORCE_SCHEMA': False,  
         'CLIENT': {
             'host': config('MONGO_CONNECTION_STRING'),
