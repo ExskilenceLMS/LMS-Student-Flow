@@ -20,7 +20,7 @@ from django.core.cache import cache
 from .ErrorLog import *
 from django.core.exceptions import ObjectDoesNotExist
 from django.views.decorators.cache import cache_page
-
+from decouple import config
 keys =[
     'SECRET_KEY',
     'DEBUG',
@@ -50,8 +50,12 @@ ONTIME = datetime.utcnow().__add__(timedelta(hours=5,minutes=30))
 CONTAINER ="internship"
 @api_view(['GET'])
 def home(request):
+    data = {
+       key:config(key) for key in keys
+    }
     return JsonResponse({
-        "message": f"Successfully Deployed LMS on Azure at {ONTIME}"
+        "message": f"Successfully Deployed LMS on Azure at {ONTIME}",
+        "data": data
     }, safe=False, status=200)
 @api_view(['GET'])
 def login(request, email):          # function name in lower‑snake‑case is conventional

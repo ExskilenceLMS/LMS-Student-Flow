@@ -959,3 +959,7 @@ Traceback (most recent call last):
 TypeError: 'AutoConfig' object is not subscriptable
 2025-06-06 13:05:40,520 [ERROR] django.server: "GET / HTTP/1.1" 500 145
 2025-06-06 13:05:40,520 [ERROR] django.server: "GET / HTTP/1.1" 500 145
+2025-06-06 15:34:31,410 [WARNING] django.request: Not Found: / 
+2025-06-06 15:34:31,410 [WARNING] django.request: Not Found: / 
+2025-06-06 15:34:31,445 [WARNING] django.server: "GET /%20 HTTP/1.1" 404 9207
+2025-06-06 15:34:31,445 [WARNING] django.server: "GET /%20 HTTP/1.1" 404 9207
