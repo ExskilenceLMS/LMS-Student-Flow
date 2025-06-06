@@ -667,3 +667,7 @@ Traceback (most recent call last):
 TypeError: get_mcqs() missing 1 required positional argument: 'subject_id'
 2025-06-02 13:32:12,121 [ERROR] django.server: "GET /mcqtesting/ HTTP/1.1" 500 145
 2025-06-02 13:32:12,121 [ERROR] django.server: "GET /mcqtesting/ HTTP/1.1" 500 145
+2025-06-06 12:24:03,856 [WARNING] django.request: Not Found: /only/blobhit/
+2025-06-06 12:24:03,856 [WARNING] django.request: Not Found: /only/blobhit/
+2025-06-06 12:24:03,902 [WARNING] django.server: "GET /only/blobhit/ HTTP/1.1" 404 9241
+2025-06-06 12:24:03,902 [WARNING] django.server: "GET /only/blobhit/ HTTP/1.1" 404 9241

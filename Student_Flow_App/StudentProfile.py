@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 from django.core.serializers import serialize
 from .AppUsage import update_app_usage
 from .ErrorLog import *
+from django.views.decorators.cache import cache_page
 
 @api_view(['GET'])
 def fetch_student_Profile(request,student_id):
@@ -113,6 +114,7 @@ def update_profile(request):
                                     })))},safe=False,status=400)
     
 @api_view(['GET'])
+@cache_page(60 * 60 * 24)
 def college_and_branch_list(request):
     try:
         branches = branch_details.objects.filter(del_row =False)

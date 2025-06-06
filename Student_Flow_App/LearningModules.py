@@ -16,6 +16,8 @@ from django.core.cache import cache
 from .sqlrun import get_all_tables
 from .ErrorLog import *
 from .roadmaptesting import _parse_blob_date
+from django.views.decorators.cache import cache_page
+
 # FETCH STUDENT LEARNING MODULEs
 import logging 
 logger = logging.getLogger(__name__)
@@ -649,6 +651,7 @@ def submition_coding_question(request):
                                     "Stack_trace":str(traceback.format_exc())+'\nUrl:-'+str(request.build_absolute_uri())+'\nBody:-' + (str(json.loads(request.body)) if request.body else "{}")
                                     })))},safe=False,status=400)
 @api_view(['GET'])
+@cache_page(60 * 60 * 24)
 def get_SQL_tables (request):
     try:
         return JsonResponse(get_all_tables(),safe=False,status=200)

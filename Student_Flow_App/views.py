@@ -19,6 +19,8 @@ from .AppUsage import update_app_usage, create_app_usage
 from django.core.cache import cache
 from .ErrorLog import *
 from django.core.exceptions import ObjectDoesNotExist
+from django.views.decorators.cache import cache_page
+
 ONTIME = datetime.utcnow().__add__(timedelta(hours=5,minutes=30))
 CONTAINER ="internship"
 @api_view(['GET'])
@@ -96,6 +98,7 @@ def logout(request, student_id):  # lowercase function name for consistency
         )
     
 @api_view(['GET'])
+@cache_page(60 * 60 * 24)
 def fetch_FAQ(request):
     try: 
         return JsonResponse(json.loads(get_blob('faq/faq.json')),safe=False,status=200)

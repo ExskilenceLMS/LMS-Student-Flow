@@ -16,6 +16,7 @@ from django.core.cache import cache
 from LMS_Project.Blobstorage import *
 from .sqlrun import get_all_tables
 from .ErrorLog import *
+from django.views.decorators.cache import cache_page
 
 
 @api_view(['GET'])
@@ -584,6 +585,7 @@ def format_time_with_zone(date):
     date = datetime.strptime(str(date).split('.')[0].split('+')[0], "%Y-%m-%d %H:%M:%S")
     return (f"{calendar.month_abbr[int(date.strftime("%m"))]} {int(date.strftime("%d"))} {date.strftime('%Y')} {date.strftime('%H:%M:%S')} IST")
 @api_view(['GET'])
+@cache_page(60 * 60 * 24)
 def student_test_report(request,student_id,test_id):
     try: 
         student_assessment = students_assessments.objects.get(student_id = student_id,test_id = test_id,del_row = False)

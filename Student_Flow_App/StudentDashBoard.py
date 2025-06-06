@@ -15,6 +15,8 @@ from .AppUsage import update_app_usage
 from django.core.cache import cache
 from .ErrorLog import *
 import logging
+from django.views.decorators.cache import cache_page
+
 logger = logging.getLogger(__name__)
 # FETCH STUDENT ENROLLED SUBJECTS
 @api_view(['GET'])
@@ -151,6 +153,7 @@ def fetch_live_session(request, student_id):
         }, safe=False, status=400)
     
 @api_view(['GET'])
+@cache_page(60 * 60 * 24)
 def fetch_upcoming_events(request, Course_id, batch_id):
     try:
         current_time = timezone.now() + timedelta(hours=5, minutes=30)
@@ -302,6 +305,7 @@ def fetch_study_hours(request, student_id, week):
 #    FETCH CALENDAR
       
 @api_view(['GET'])
+@cache_page(60 * 60 * 24)
 def fetch_calendar(request, student_id):
     try:
         current_time = timezone.now() + timedelta(hours=5, minutes=30)

@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
 from pathlib import Path
-
+from decouple import config
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -23,7 +23,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-cood-2aik$83%a#!!7!ig#9rtq3-s!7ap9g$nr)-mx6#q=tut#'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = config('DEBUG', default=False, cast=bool)
 
 ALLOWED_HOSTS = ['*']
 
@@ -99,12 +99,18 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsMiddleware',
 ]
-from urllib.parse import quote_plus
-uname = 'lmsuser'
-pwd = 'EuUpskil@25'
-escaped_username = quote_plus(uname)
-escaped_password = quote_plus(pwd)
-uri = f"mongodb+srv://{escaped_username}:{escaped_password}@lmsmongo.mongocluster.cosmos.azure.com/?tls=true&authMechanism=SCRAM-SHA-256&retrywrites=false&maxIdleTimeMS=120000"
+# from urllib.parse import quote_plus
+# uname = config('MONGO_USER')
+# pwd =  config('MONGO_PASSWORD')
+# host = config('MONGO_HOST')
+# Db = config('MONGO_DB_NAME')
+# authMechanism = config('MONGO_AUTH_MECHANISM')
+# escaped_username = quote_plus(uname)
+# escaped_password = quote_plus(pwd)
+# print('escaped_username',escaped_username)
+# print('escaped_password',escaped_password)
+
+# uri = config('MONGO_CONNECTION_STRING')
 DATABASES = {
     'mongodb': {
         'ENGINE': 'djongo',
@@ -116,22 +122,22 @@ DATABASES = {
         #     'password': 'FVy5fqqCtQy3KIt6',
         #     'authMechanism': 'SCRAM-SHA-1',
         # }
-        'NAME': 'eumodb',
+        'NAME':   config('DB_NAME'),
         'ENFORCE_SCHEMA': False,  
         'CLIENT': {
-            'host': uri,
-            'username': uname,
-            'password': pwd,
-            'authMechanism': 'SCRAM-SHA-256',
+            'host': config('MONGO_CONNECTION_STRING'),
+            'username':  config('MONGO_USER'),
+            'password':  config('MONGO_PASSWORD'),
+            'authMechanism':  config('MONGO_AUTH_MECHANISM'),
         }
     },
     'default': {
         'ENGINE': 'mssql',
-        'NAME': 'eussdb',
+        'NAME': config('DB_NAME'),
         # 'NAME': 'staging',
-        'USER': 'euserblr', 
-        'PASSWORD': '6han4Sy5#', 
-        'HOST': 'slnsgdhutmtbs.database.windows.net', 
+        'USER':  config('DB_USER'), 
+        'PASSWORD':  config('DB_PASSWORD'), 
+        'HOST':  config('DB_HOST'), 
         'PORT': '1433',
         'OPTIONS': {
             'driver': 'ODBC Driver 17 for SQL Server',
@@ -153,6 +159,15 @@ CSRF_TRUSTED_ORIGINS=[
      'https://live-exskilence.azurewebsites.net',
     ]
 
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": config('REDIS_CONNECTION_STRING'),
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
+    }
+}
 ROOT_URLCONF = 'LMS_Project.urls'
 
 TEMPLATES = [
@@ -173,19 +188,19 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'LMS_Project.wsgi.application'
 
-AZURE_ACCOUNT_NAME = 'eustoreholder'
-AZURE_ACCOUNT_KEY = 'C2+T9kL7MgZbmODARQYK/HjWSxZy2o1+IqQifEhqPAxhs/ul4pPPisrWFN50yXSBWUHy5ShSPV1B+ASthIYLYw=='
-AZURE_CONTAINER = 'lmsdata'
+AZURE_ACCOUNT_NAME = config('AZURE_ACCOUNT_NAME')
+AZURE_ACCOUNT_KEY = config('AZURE_ACCOUNT_KEY')
+AZURE_CONTAINER =  config('AZURE_CONTAINER')
 
 MIGRATION_MODULES = {
     'LMS_Mongodb_App': None,
     'LMS_MSSQLdb_App': None
 }
-MSSQL_SERVER_NAME = 'slnkshmtbsil.database.windows.net'
-MSSQL_DATABASE_NAME = 'exe_test'
-MSSQL_USERNAME = 'tpssa'
-MSSQL_PWD = 'TPSuser@sa123'
-MSSQL_DRIVER =  'ODBC Driver 17 for SQL Server'
+MSSQL_SERVER_NAME =  config('MSSQL_SERVER_NAME')
+MSSQL_DATABASE_NAME =  config('MSSQL_DATABASE_NAME')
+MSSQL_USERNAME =  config('MSSQL_USERNAME')
+MSSQL_PWD =  config('MSSQL_PWD')
+MSSQL_DRIVER =      config('MSSQL_DRIVER')
 
 
 # Password validation
